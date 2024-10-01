@@ -2,9 +2,10 @@
   "name": "cacd-api",
   "version": "1.0.0",
   "description": "",
-  "main": "App.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon App.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,11 @@
   },
   "homepage": "https://github.com/neeeal/CACD-API#readme",
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
