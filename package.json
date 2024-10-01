@@ -1,0 +1,22 @@
+{
+  "name": "cacd-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neeeal/CACD-API.git"
+  },
+  "author": "neeeal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neeeal/CACD-API/issues"
+  },
+  "homepage": "https://github.com/neeeal/CACD-API#readme",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
