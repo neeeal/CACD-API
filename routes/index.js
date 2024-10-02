@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Use the routes
 const initRoutes = (app) => {
-  router.use("/user", require("./user"));
+  router.use("/user", require("./user.js"));
   return app.use("/api", router);
 };
 
