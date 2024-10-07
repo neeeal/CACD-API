@@ -8,21 +8,23 @@ const userSchema = new mongoose.Schema(
       // unique: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
     },
-    username: {
-      type: String,
-      required: true,
-      // unique: true,
-      match: /^[a-zA-Z0-9]+$/, 
-      minlength: 4,
-      maxlength: 20,
-    },
+    // username: {
+    //   type: String,
+    //   required: true,
+    //   // unique: true,
+    //   match: /^[a-zA-Z0-9]+$/, 
+    //   minlength: 4,
+    //   maxlength: 20,
+    // },
     firstName: {
       type: String,
       required: true,
+      minlength: 1,
     },
     lastName: {
       type: String,
       required: true,
+      minlength: 2,
     },
     password: {
       type: String,
