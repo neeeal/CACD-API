@@ -18,16 +18,16 @@ exports.get = async (req, res) => {
 }
 
 exports.getOne = async (req, res) => {
-  const {name, oid} = req.query;
+  const {name, OID} = req.query;
 
   const query = {deletedAt: null};
   // TODO: Add name query
 
-  if (oid) {
-    if (!utils.isOID(oid)) {
+  if (OID) {
+    if (!utils.isOID(OID)) {
       return res.status(400).send({ message: "Invalid ObjectId" });
     }
-    query._id = oid;
+    query._id = OID;
   }
 
   const data = await UserCol.findOne(query)
@@ -86,7 +86,7 @@ exports.put = async (req, res) => {
   try {
 
     await userHelper.checkPassword({
-      oid: newUser.oid,
+      OID: newUser.OID,
       oldPassword: newUser.oldPassword
     })
 
@@ -95,7 +95,7 @@ exports.put = async (req, res) => {
       throw new Error (`${duplicate} already taken`);
 
     data = await UserCol.findOneAndUpdate(
-      { _id: newUser.oid },
+      { _id: newUser.OID },
       {
         email: newUser.email,
         password: newUser.password,
@@ -103,7 +103,7 @@ exports.put = async (req, res) => {
         lastName: newUser.lastName,
         updatedAt: moment().toISOString()
       },
-      { new: false}
+      { new: true }
     );
 
   }
@@ -136,13 +136,13 @@ exports.put = async (req, res) => {
 }
 
 exports.delete = async (req, res) => {
-  const { oid } = req.params; 
+  const { OID } = req.params; 
 
   let userDoc;
   try {
     userDoc = await UserCol.findOneAndUpdate(
       { 
-        _id: oid, 
+        _id: OID, 
         deletedAt: null
       },
       {
@@ -163,7 +163,7 @@ exports.delete = async (req, res) => {
   res.status(200).send({
     message: "User deleted",
     data: {
-      oid: oid
+      OID: OID
     }
   })
 }

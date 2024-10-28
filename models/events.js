@@ -12,14 +12,14 @@ const eventSchema = mongoose.Schema(
       required: true,
     },
     start: {
-      type: String,
+      type: Date,
       required: true,
     },
     end: {
-      type: String,
+      type: Date,
       required: true,
     },
-    hostChurch: {
+    hostChurchOID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "churches",
       required: true,

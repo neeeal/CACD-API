@@ -15,7 +15,7 @@ exports.passwordConfirmation = async (req, res, next) => {
 }
 
 exports.userRegisterAndUpdate = async (req, res, next) => {
-  const { oid, email, password, firstName, lastName } = req.body;
+  const { OID, email, password, firstName, lastName } = req.body;
   if (!email ||!password |!firstName |!lastName) {
     return res.status(400).send({ message: "All fields are required" });
   }

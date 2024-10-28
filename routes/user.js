@@ -8,6 +8,6 @@ router.get("/", controller.get)
 router.get("/getOne", controller.getOne)
 router.post("/", validation.userRegisterAndUpdate, validation.passwordConfirmation, controller.post)
 router.put("/", validation.userRegisterAndUpdate, validation.passwordConfirmation, controller.put)
-router.delete("/:oid", controller.delete)
+router.delete("/:OID", controller.delete)
 
 module.exports = router;  

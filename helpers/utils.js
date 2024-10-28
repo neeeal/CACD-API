@@ -6,8 +6,8 @@ exports.isDuplicateKeyError = (errorMessage) => {
   return match[1] || false;
 }
 
-exports.isOID = (oid) => {
-  return mongoose.isValidObjectId(oid) ? oid : false;
+exports.isOID = (OID) => {
+  return mongoose.isValidObjectId(OID) ? OID : false;
 }
 
 // exports.stringToOID = (string) => {

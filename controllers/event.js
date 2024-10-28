@@ -65,7 +65,7 @@ exports.put = async (req, res) => {
   };
 
   const query = {
-    _id: newEvent.oid,
+    _id: newEvent.OID,
     deletedAt: null
   }
 
@@ -101,13 +101,13 @@ exports.put = async (req, res) => {
 }
 
 exports.delete = async (req, res) => {
-  const { oid } = req.params; 
+  const { OID } = req.params; 
 
   let eventDoc;
   try {
     eventDoc = await EventsCol.findOneAndUpdate(
       { 
-        _id: oid, 
+        _id: OID, 
         deletedAt: null
       },
       {
@@ -128,22 +128,22 @@ exports.delete = async (req, res) => {
   res.status(200).send({
     message: "Event deleted",
     data: {
-      oid: oid
+      OID: OID
     }
   })
 }
 
 exports.getOne = async (req, res) => {
-  const {name, oid} = req.query;
+  const {name, OID} = req.query;
 
   const query = {deletedAt: null};
   // TODO: Add name query
 
-  if (oid) {
-    if (!utils.isOID(oid)) {
+  if (OID) {
+    if (!utils.isOID(OID)) {
       return res.status(400).send({ message: "Invalid ObjectId" });
     }
-    query._id = oid;
+    query._id = OID;
   }
 
   const data = await EventsCol.findOne(query)

@@ -3,12 +3,12 @@ const bcrypt = require("bcrypt");
 
 exports.checkDuplicates = async function (newUser) {
   const email = newUser.email;
-  const oid = newUser._id || newUser.oid;
+  const OID = newUser._id || newUser.OID;
 
   const duplicate = await UserCol.findOne(
     { 
       email: email, 
-      _id: { $ne: oid},
+      _id: { $ne: OID},
       deletedAt: null
     },
   )
@@ -30,8 +30,8 @@ exports.checkUserExists = async (data) => {
 
   if(data.email) 
     query.email = data.email;
-  if(data.oid)
-    query._id = data.oid;
+  if(data.OID)
+    query._id = data.OID;
   
   const user = await UserCol.findOne(query)
   .lean();
