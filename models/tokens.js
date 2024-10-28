@@ -13,7 +13,8 @@ const tokenSchema = mongoose.Schema(
       required: true,
     },
     deletedAt: {
-      type: date
+      type: Date,
+      default: null
     }
   },
   {
@@ -21,5 +22,5 @@ const tokenSchema = mongoose.Schema(
   }
 );
 
-const user = mongoose.model("tokens", tokenSchema);
+const token = mongoose.model("tokens", tokenSchema);
 module.exports = token;

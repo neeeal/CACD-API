@@ -1,7 +1,7 @@
 // user.js
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/events.js");
+const controller = require("../controllers/event.js");
 const validation = require("../middlewares/validation.js");
 
 router.get("/", controller.get)

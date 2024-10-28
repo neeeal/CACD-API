@@ -21,7 +21,8 @@ const photoSchema = mongoose.Schema(
       default: null,
     },
     deletedAt: {
-      type: date
+      type: Date,
+      default: null
     }
   },
   {
@@ -29,5 +30,5 @@ const photoSchema = mongoose.Schema(
   }
 );
 
-const user = mongoose.model("photos", photoSchema);
+const photo = mongoose.model("photos", photoSchema);
 module.exports = photo;

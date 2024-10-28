@@ -11,17 +11,17 @@ const eventSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    dateTimeStart: {
+    start: {
       type: String,
       required: true,
     },
-    dateTimeEnd: {
+    end: {
       type: String,
       required: true,
     },
-    host: {
+    hostChurch: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "church",
+      ref: "churches",
       required: true,
     },
     status: {
@@ -39,7 +39,8 @@ const eventSchema = mongoose.Schema(
       required: true,
     },
     deletedAt: {
-      type: date
+      type: Date,
+      default: null
     }
   },
   {
@@ -47,5 +48,5 @@ const eventSchema = mongoose.Schema(
   }
 );
 
-const user = mongoose.model("events", eventSchema);
+const event = mongoose.model("events", eventSchema);
 module.exports = event;

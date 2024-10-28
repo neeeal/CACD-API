@@ -9,3 +9,7 @@ exports.isDuplicateKeyError = (errorMessage) => {
 exports.isOID = (oid) => {
   return mongoose.isValidObjectId(oid) ? oid : false;
 }
+
+// exports.stringToOID = (string) => {
+//   return mongoose.Types.ObjectId.createFromHexString(string);
+// }

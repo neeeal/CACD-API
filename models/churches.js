@@ -1,22 +1,26 @@
 const mongoose = require("mongoose");
 // const { Schema } = require("mongoose");
 
-const teamSchema = mongoose.Schema(
+const churchSchema = mongoose.Schema(
   {
-    firstName: {
+    name: {
       type: String,
       required: true,
     },
-    lastName: {
+    location: {
       type: String,
       required: true,
     },
-    position: {
-      type: String,
+    elders: {
+      type: [String],
       required: true,
     },
-    description: {
-      type: String,
+    ministers: {
+      type: [String],
+      required: true,
+    },
+    contacts: {
+      type: Object,
       required: true,
     },
     image: {
@@ -33,5 +37,5 @@ const teamSchema = mongoose.Schema(
   }
 );
 
-const team = mongoose.model("teams", teamSchema);
-module.exports = team;
+const church = mongoose.model("churches", churchSchema);
+module.exports = church;

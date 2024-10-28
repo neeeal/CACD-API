@@ -2,7 +2,6 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/church.js");
-const validation = require("../middlewares/validation.js");
 
 router.get("/", controller.get)
 router.get("/getOne", controller.getOne)
