@@ -24,6 +24,12 @@ const eventSchema = mongoose.Schema(
       ref: "church",
       required: true,
     },
+    status: {
+      type: String,
+      required: true,
+      default: "Active",
+      enum: ["Active", "TBA", "Cancelled"]
+    },
     location: {
       type: String,
       required: true,
