@@ -13,3 +13,23 @@ exports.isOID = (oid) => {
 // exports.stringToOID = (string) => {
 //   return mongoose.Types.ObjectId.createFromHexString(string);
 // }
+
+exports.pathToURL = (path) => {
+  return process.env.IMAGE_DEVURI + path.split('\\').pop() // Adjust the path accordingly
+}
+
+exports.removeExtension = (filename) => {
+  const parts = filename.split(".");
+
+  parts.pop();
+
+  return parts.join(".");
+}
+
+exports.deleteImage = async (path) => {
+  const imagePath = path.join(__dirname, "..", path);
+  console.log(imagePath)
+  await fs.promises.unlink(imagePath);
+  console.log("image deleted successfully.");
+  return;
+}

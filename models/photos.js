@@ -5,11 +5,11 @@ const photoSchema = mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      default: null
     },
     caption: {
       type: String,
-      required: true,
+      default: null
     },
     image: {
       type: Object,

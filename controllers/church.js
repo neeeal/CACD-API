@@ -64,7 +64,7 @@ exports.put = async (req, res) => {
   }
 
   const options = { 
-    new: true 
+    new: false
   }
 
   let data;

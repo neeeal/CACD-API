@@ -103,7 +103,7 @@ exports.put = async (req, res) => {
         lastName: newUser.lastName,
         updatedAt: moment().toISOString()
       },
-      { new: true }
+      { new: false}
     );
 
   }
