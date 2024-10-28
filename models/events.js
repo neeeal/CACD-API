@@ -41,6 +41,11 @@ const eventSchema = mongoose.Schema(
     deletedAt: {
       type: Date,
       default: null
+    },
+    featuredPhoto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
     }
   },
   {

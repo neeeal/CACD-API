@@ -19,25 +19,39 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newEvent = req.body;
+  const uploadedPhoto = req.file;
 
   const values = {
     title: newEvent.title,
     description: newEvent.description,
-    start: newEvent.start,
-    end: newEvent.end,
+    start: utils.ISOToDate(newEvent.start),
+    end: utils.ISOToDate(newEvent.end),
     hostChurchOID: newEvent.hostChurchOID,
     status: newEvent.status,
     location: newEvent.location,
-    registerLink: newEvent.registerLink
+    registerLink: newEvent.registerLink,
   }
   
   let data;
   try{
+    let photo;
+    if(uploadedPhoto) 
+      photo = await utils.savePhoto({uploadedPhoto: uploadedPhoto, details: newEvent});
+
+    if (photo)
+      values.featuredPhoto = photo._id;
+
     const newEventDoc = new EventsCol(values);
     data = await newEventDoc.save();
+
+    await utils.updatePhotoEvent({photo: photo, event: newEventDoc})
   }
   catch (err){
     console.error(err.stack);
+
+    if (err.message.includes("not found"))
+      return res.status(404).send({ message: err.message });
+
     return res.status(500).send({ message: "Server error" });
   }
 
@@ -49,6 +63,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newEvent = req.body;
+  const uploadedPhoto = req.file;
 
   const values = {
     $set: {
@@ -60,7 +75,6 @@ exports.put = async (req, res) => {
       status: newEvent.status,
       location: newEvent.location,
       registerLink: newEvent.registerLink,
-      image: newEvent.image || null,
     }
   };
 
@@ -76,6 +90,10 @@ exports.put = async (req, res) => {
   let data;
   try{
     data = await EventsCol.findOneAndUpdate(query, values, options)
+
+    let photo;
+    if(uploadedPhoto) 
+      photo = await utils.updatePhoto({uploadedPhoto: uploadedPhoto, details: data});
     
     if (!data) 
       throw new Error("Event not found");

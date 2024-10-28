@@ -23,10 +23,12 @@ const churchSchema = mongoose.Schema(
       type: Object,
       required: true,
     },
-    image: {
-      type: String,
-      default: null
-    },
+    photos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "photos",
+      }
+    ],
     deletedAt: {
       type: Date,
       default: null

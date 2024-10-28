@@ -13,11 +13,11 @@ exports.get = async (req, res) => {
     // Fetch all photos
     const data = await PhotosCol.find(query).lean();
 
-    // Map over the data to include the image URL for each photo
+    // Map over the data to include the photo URL for each photo
     const responseData = data.map(item => {
       return {
         ...item,
-        imageUrl: utils.pathToURL(item.image.path) // Adjust path as necessary
+        photoUrl: utils.pathToURL(item.path) // Adjust path as necessary
       };
     });
 
@@ -32,25 +32,16 @@ exports.get = async (req, res) => {
 };
 
 exports.post = async (req, res) => {
-  const newPhoto = req.body;
-  const image = req.file;
+  const details = req.body;
+  const uploadedPhoto = req.file;
   
-  if (!image) {
+  if (!uploadedPhoto) {
     return res.status(404).json({ message: 'No file uploaded' });
   }
 
-  const values = {
-    title: newPhoto.title || utils.removeExtension(image.originalname),
-    caption: newPhoto.caption,
-    image: image,
-    eventOID: newPhoto.eventOID || null,
-    // imageInfo: image,
-  }
-  
-  let data;
+  let data; 
   try{
-    const newPhotoDoc = new PhotosCol(values);
-    data = await newPhotoDoc.save();
+    data = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:details});
   }
   catch (err){
     console.error(err.stack);
@@ -63,39 +54,12 @@ exports.post = async (req, res) => {
   })
 } 
 exports.put = async (req, res) => {
-  const newPhoto = req.body;
-  const image = req.file;
-
-  const values = {
-    $set: {
-      title: newPhoto.title || utils.removeExtension(image.originalname),
-      caption: newPhoto.caption,
-      image: image,
-      eventOID: newPhoto.eventOID || null
-    }
-  }
-
-  const query = {
-    _id: newPhoto.OID,
-    deletedAt: null
-  }
-
-  const options = { 
-    new: true
-  }
+  const details = req.body;
+  const uploadedPhoto = req.file;
 
   let data;
   try{
-    const oldData = await PhotosCol.findOne(query);
-    data = await PhotosCol.findOneAndUpdate(query, values, options)
-    if (!data) 
-      throw new Error("Photo not found");
-    if (oldData.image.originalname != data.image.originalname) {
-      await utils.deleteImage(oldData.image.path);
-      }
-      else{
-        await utils.deleteImage(data.image.path);
-      }
+    data = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:details});
 
   } catch (err){
     console.error(err.stack);
@@ -164,28 +128,29 @@ exports.getOne = async (req, res) => {
 
   try {
     const data = await PhotosCol.findOne(query).lean();
+    console.log(data)
 
     if (!data) {
       return res.status(404).send({ message: "Photo not found" });
     }
 
-    // Assuming `data.image.path` contains the relative path to the image
-    const absolutePath = path.join(__dirname, '..', data.image.path); // Adjust path as necessary
-    // const absolutePath = path.join(process.env.IMAGEBASE_URI, data.image.path); // Adjust path as necessary
+    // Assuming `data.Photo.path` contains the relative path to the Photo
+    const absolutePath = path.join(__dirname, '..', data.path); // Adjust path as necessary
+    // const absolutePath = path.join(process.env.IMAGEBASE_URI, data.photo.path); // Adjust path as necessary
     // console.log(absolutePath);
 
     // Check if the file exists
     fs.access(absolutePath, fs.constants.F_OK, (err) => {
       if (err) {
-        return res.status(404).send({ message: "Image file not found" });
+        return res.status(404).send({ message: "Photo file not found" });
       }
 
-      // Send data and image path in the response
+      // Send data and Photo path in the response
       res.status(200).send({
         message: "Photo retrieved successfully",
         data: {
           ...data, // Include all fields of the data
-          imageUrl: utils.pathToURL(absolutePath)
+          photoUrl: utils.pathToURL(absolutePath)
         }
       });
     });

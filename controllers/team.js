@@ -25,7 +25,7 @@ exports.post = async (req, res) => {
     lastName: newTeam.lastName,
     position: newTeam.position,
     description: newTeam.description,
-    image: newTeam.image || null,
+    photo: newTeam.photo || null,
   }
   
   let data;
@@ -54,7 +54,7 @@ exports.put = async (req, res) => {
       lastName: newTeam.lastName,
       position: newTeam.position,
       description: newTeam.description,
-      image: newTeam.image || null,
+      photo: newTeam.photo || null,
     }
   }
 

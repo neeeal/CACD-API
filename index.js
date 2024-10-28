@@ -20,7 +20,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Serve static files from the "public" directory
-app.use('/uploads/images',express.static(path.join(__dirname, 'public/uploads/images')));
+app.use('/uploads/photos',express.static(path.join(__dirname, 'public/uploads/photos')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

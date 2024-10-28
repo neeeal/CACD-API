@@ -19,9 +19,10 @@ const teamSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String,
-      default: null
+    photo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
     },
     deletedAt: {
       type: Date,
