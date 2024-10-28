@@ -51,12 +51,12 @@ exports.post = async (req, res) => {
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(password, salt);
 
-  let result;
+  let data;
   try {
     const duplicate = await userHelper.checkDuplicates(newUser);
     if (duplicate) 
       throw new Error (`${duplicate} already taken`);
-    result = await newUser.save();
+    data = await newUser.save();
   }
   catch (err) {
     console.error(err.stack);
@@ -68,39 +68,39 @@ exports.post = async (req, res) => {
 
   res.status(200).send({
     message: "User post",
-    data: result
+    data: data
   })
 }
 
 exports.put = async (req, res) => {
-  const data = req.body;
+  const newUser = req.body;
 
-  if (data.password === data.oldPassword) 
+  if (newUser.password === newUser.oldPassword) 
     return res.status(400).send({ message: "New password cannot be same as old password." });
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
-  data.password = await bcrypt.hash(data.password, salt);
+  newUser.password = await bcrypt.hash(newUser.password, salt);
 
-  let result;
+  let data;
   try {
 
     await userHelper.checkPassword({
-      oid: data.oid,
-      oldPassword: data.oldPassword
+      oid: newUser.oid,
+      oldPassword: newUser.oldPassword
     })
 
-    const duplicate = await userHelper.checkDuplicates(data);
+    const duplicate = await userHelper.checkDuplicates(newUser);
     if (duplicate) 
       throw new Error (`${duplicate} already taken`);
 
-    result = await UserCol.findOneAndUpdate(
-      { _id: data.oid },
+    data = await UserCol.findOneAndUpdate(
+      { _id: newUser.oid },
       {
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        email: newUser.email,
+        password: newUser.password,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         updatedAt: moment().toISOString()
       },
       { new: true }
@@ -126,7 +126,7 @@ exports.put = async (req, res) => {
 
   res.status(200).send({
     message: "User put",
-    data: result
+    data: data
   })
 }
 
