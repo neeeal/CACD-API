@@ -121,6 +121,11 @@ exports.put = async (req, res) => {
     if (err.message.includes("not found"))
       return res.status(404).send({ message: err.message });
 
+    if (err.message.includes("Cast to ObjectId failed"))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
     return res.status(500).send({ message: "Server error" });
   }
 
