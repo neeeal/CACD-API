@@ -12,14 +12,15 @@ const photoSchema = mongoose.Schema(
       required: true,
     },
     image: {
-      type: String,
+      type: Object,
       required: true,
     },
-    event: {
+    eventOID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "events",
       default: null,
     },
+    // imageInfo: {},
     deletedAt: {
       type: Date,
       default: null

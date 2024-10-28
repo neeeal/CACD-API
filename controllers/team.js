@@ -49,11 +49,13 @@ exports.put = async (req, res) => {
   const newTeam = req.body;
 
   const values = {
-    firstName: newTeam.firstName,
-    lastName: newTeam.lastName,
-    position: newTeam.position,
-    description: newTeam.description,
-    image: newTeam.image || null,
+    $set: {
+      firstName: newTeam.firstName,
+      lastName: newTeam.lastName,
+      position: newTeam.position,
+      description: newTeam.description,
+      image: newTeam.image || null,
+    }
   }
 
   const query = {
