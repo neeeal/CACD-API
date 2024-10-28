@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       // match: /^(?=.*[!@#$%^_-&*])[a-zA-Z0-9!@#$%^_-&*]+$/, 
     },
+    accessLevel: {
+      type: String,
+      default: 'Admin',
+      enum: ['Admin', 'Super Admin'],
+    },
     deletedAt: {
       type: Date,
       default: null,
