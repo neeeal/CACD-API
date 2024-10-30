@@ -18,6 +18,31 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newChurch = req.body;
+  const photoFields = req.files; // multiple photos object of array of objects
+  const uploadedPhoto = photoFields.featuredPhoto[0];
+  const uploadedPhotos = photoFields.photos;
+
+  if (uploadedPhoto) {
+    try{
+      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
+      newChurch.photo = savedPhoto._id;
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
+
+  if (uploadedPhotos) {
+    try{
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+      newChurch.photos = savedPhotos.map((photo) => photo._id);
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   const values = {
     name: newChurch.name,
@@ -25,7 +50,8 @@ exports.post = async (req, res) => {
     location: newChurch.location,
     ministers: newChurch.ministers,
     contacts: newChurch.contacts,
-    photo: newChurch.photo || null,
+    featuredPhoto: newChurch.photo || null,
+    photos: newChurch.photos || null,
   };
 
   let data;
@@ -46,6 +72,31 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newChurch = req.body;
+  const photoFields = req.files; // multiple photos object of array of objects
+  const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
+  const uploadedPhotos = photoFields.photos;
+
+  if (uploadedPhoto) {
+    try{
+      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
+      newChurch.photo = savedPhoto._id;
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
+
+  if (uploadedPhotos) {
+    try{
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+      newChurch.photos = savedPhotos.map((photo) => photo._id);
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   const values = {
     $set: {
@@ -54,9 +105,12 @@ exports.put = async (req, res) => {
       location: newChurch.location,
       ministers: newChurch.ministers,
       contacts: newChurch.contacts,
-      photo: newChurch.photo || null,
+      featuredPhoto: newChurch.featuredPhoto || null,
+      photos: newChurch.photos || null,
     }
   };
+
+  console.log(values)
 
   const query = {
     _id: newChurch.OID,

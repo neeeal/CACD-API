@@ -5,6 +5,7 @@ const Connection=require("./config/db.js");
 Connection();
 const cors = require('cors');
 const initRoutes = require("./routes");
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,16 @@ app.use((err, req, res, next) => {
 // // Catch-all route for handling 404 errors
 // app.use((req, res, next) => {
 //   res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+// });
+
+// app.use((err, req, res, next) => {
+//   if (err instanceof multer.MulterError) {
+//       // A Multer error occurred when uploading.
+//       console.log("Multer upload error.")
+//       console.error(err.stack);
+//       return res.status(400).send(err.message);
+//   }
+//   next();
 // });
 
 app.listen(PORT, () => {

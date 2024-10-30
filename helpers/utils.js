@@ -49,6 +49,7 @@ exports.dateToISO = (date) => {
 }
 
 exports.savePhoto = async ({uploadedPhoto, details}) => {
+  console.log(uploadedPhoto)
   const values = {
     ...uploadedPhoto,
     title: details.title || exports.removeExtension(uploadedPhoto.originalname),
@@ -61,6 +62,38 @@ exports.savePhoto = async ({uploadedPhoto, details}) => {
   const data = await newPhotoDoc.save();
 
   return newPhotoDoc;
+}
+
+
+exports.savePhotos = async ({uploadedPhotos, details}) => {
+  if (!uploadedPhotos || uploadedPhotos.length === 0) {
+    throw new Error("No photos to upload");
+  }
+
+  // Map over uploadedPhotos to create an array of photo documents
+  const photoDocuments = uploadedPhotos.map((uploadedPhoto,idx) => {
+    const values = {
+      ...uploadedPhoto,
+      title: exports.removeExtension(uploadedPhoto.originalname),
+      // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+      // caption: details[idx].caption,
+      // eventOID: details[idx].eventOID || null,
+      // photoInfo: photo,
+    }
+    
+    const newPhotoDoc = new PhotosCol(values);
+    return newPhotoDoc;
+  });
+
+  // const values = {
+  //   ...uploadedPhotos,
+  //   title: exports.removeExtension(uploadedPhotos.originalname),
+  //   eventOID: details.eventOID || null,
+  //   // photoInfo: photo,
+  // }
+  
+  const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+  return photoDocuments; // Return saved documents
 }
 
 exports.updatePhoto = async ({uploadedPhoto, details}) => {

@@ -23,6 +23,10 @@ const churchSchema = mongoose.Schema(
       type: Object,
       required: true,
     },
+    featuredPhoto:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+    },
     photos: [
       {
         type: mongoose.Schema.Types.ObjectId,
