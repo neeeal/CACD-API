@@ -91,6 +91,9 @@ exports.put = async (req, res) => {
   try{
     data = await EventsCol.findOneAndUpdate(query, values, options)
 
+    console.log(query)
+    console.log(values)
+    console.log(data)
     let photo;
     if(uploadedPhoto) 
       photo = await utils.updatePhoto({uploadedPhoto: uploadedPhoto, details: data});

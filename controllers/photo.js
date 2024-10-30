@@ -11,19 +11,19 @@ exports.get = async (req, res) => {
     };
 
     // Fetch all photos
-    const data = await PhotosCol.find(query).lean();
+    const data = await PhotosCol.find(query);
 
-    // Map over the data to include the photo URL for each photo
-    const responseData = data.map(item => {
-      return {
-        ...item,
-        photoUrl: utils.pathToURL(item.path) // Adjust path as necessary
-      };
-    });
+    // // Map over the data to include the photo URL for each photo
+    // const responseData = data.map(item => {
+    //   return {
+    //     ...item,
+    //     photoUrl: utils.pathToURL(item.path) // Adjust path as necessary
+    //   };
+    // });
 
     res.status(200).send({
       message: "Photos retrieved successfully",
-      data: responseData
+      data: data
     });
   } catch (error) {
     console.error(error);
@@ -127,7 +127,7 @@ exports.getOne = async (req, res) => {
   }
 
   try {
-    const data = await PhotosCol.findOne(query).lean();
+    const data = await PhotosCol.findOne(query);
     console.log(data)
 
     if (!data) {
@@ -148,10 +148,11 @@ exports.getOne = async (req, res) => {
       // Send data and Photo path in the response
       res.status(200).send({
         message: "Photo retrieved successfully",
-        data: {
-          ...data, // Include all fields of the data
-          photoUrl: utils.pathToURL(absolutePath)
-        }
+        data: data
+        // {
+        //   ...data, // Include all fields of the data
+        //   photoUrl: utils.pathToURL(absolutePath)
+        // }
       });
     });
   } catch (error) {

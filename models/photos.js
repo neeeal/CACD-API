@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-// const { Schema } = require("mongoose");
+const utils = require("../helpers/utils.js");
 
 const photoSchema = mongoose.Schema(
   {
@@ -48,7 +48,6 @@ const photoSchema = mongoose.Schema(
       ref: "events",
       default: null,
     },
-    // photoInfo: {},
     deletedAt: {
       type: Date,
       default: null
@@ -56,8 +55,15 @@ const photoSchema = mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 
-const photo = mongoose.model("photos", photoSchema);
-module.exports = photo;
+// Virtual for photo URL
+photoSchema.virtual("photoUrl").get(function () {
+  return utils.pathToURL(this.path);
+});
+
+const Photo = mongoose.model("photos", photoSchema);
+module.exports = Photo;
