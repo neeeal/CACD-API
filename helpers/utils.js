@@ -31,7 +31,8 @@ exports.removeExtension = (filename) => {
 }
 
 exports.deletePhoto = async (originalPath) => {
-  const photoPath = path.join(__dirname, "..", originalPath);
+  // const photoPath = path.join(__dirname, "..", originalPath);
+  const photoPath = originalPath;
   console.log(photoPath)
   await fs.promises.unlink(photoPath);
   console.log("photo deleted successfully.");
@@ -75,7 +76,9 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   }
 
   const query = {
-    _id: details.OID || details.featuredPhoto,
+    _id: details.OID || // Photo route update
+    details.featuredPhoto || // event route update
+    details.photo, // team route update
     deletedAt: null
   }
 
@@ -85,6 +88,9 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
 
   const oldData = await PhotosCol.findOne(query);
   const data = await PhotosCol.findOneAndUpdate(query, values, options)
+  console.log(query)
+  console.log(oldData)
+  console.log(data)
 
   if (!data) 
     throw new Error("Photo not found");

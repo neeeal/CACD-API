@@ -19,13 +19,24 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newTeam = req.body;
+  const uploadedPhoto = req.file;
+
+  if (uploadedPhoto) {
+    try{
+      newTeam.photo = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newTeam});
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   const values = {
     firstName: newTeam.firstName,
     lastName: newTeam.lastName,
     position: newTeam.position,
     description: newTeam.description,
-    photo: newTeam.photo || null,
+    photo: newTeam.photo._id || null,
   }
   
   let data;
@@ -47,6 +58,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newTeam = req.body;
+  const uploadedPhoto = req.file;
 
   const values = {
     $set: {
@@ -54,7 +66,6 @@ exports.put = async (req, res) => {
       lastName: newTeam.lastName,
       position: newTeam.position,
       description: newTeam.description,
-      photo: newTeam.photo || null,
     }
   }
 
@@ -69,10 +80,16 @@ exports.put = async (req, res) => {
 
   let data;
   try{
-    data = await TeamsCol.findOneAndUpdate(query, values, options)
+    data = await TeamsCol.findOneAndUpdate(query, values, options);
     
     if (!data) 
       throw new Error("Team not found");
+
+    if (uploadedPhoto) {
+      newTeam.photo = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:data});
+      const photoOID = { teamPhoto: newTeam.photo._id }
+      data = await TeamsCol.findOneAndUpdate(query, photoOID, options)
+  }
 
   } catch (err){
     console.error(err.stack);
