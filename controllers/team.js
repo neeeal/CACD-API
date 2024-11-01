@@ -21,9 +21,12 @@ exports.post = async (req, res) => {
   const newTeam = req.body;
   const uploadedPhoto = req.file;
 
+  console.log(uploadedPhoto)
+
   if (uploadedPhoto) {
     try{
-      newTeam.photo = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newTeam});
+      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newTeam});
+      newTeam.photos = savedPhoto._id;
     }
     catch (err){
       console.error(err.stack);
@@ -36,7 +39,7 @@ exports.post = async (req, res) => {
     lastName: newTeam.lastName,
     position: newTeam.position,
     description: newTeam.description,
-    photo: newTeam.photo._id || null,
+    photos: newTeam.photos || null,
   }
   
   let data;
@@ -69,6 +72,23 @@ exports.put = async (req, res) => {
     }
   }
 
+  if (uploadedPhoto) {
+    try{
+      const oldPhotoOID = await TeamsCol
+      .findOne(query)
+      .select("photos")
+      .populate("photos")
+      .lean();
+      newTeam.photos = oldPhotoOID.photos._id;
+      const savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
+      values.$set.photos = savedPhoto._id;
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
+
   const query = {
     _id: newTeam.OID,
     deletedAt: null
@@ -85,17 +105,11 @@ exports.put = async (req, res) => {
     if (!data) 
       throw new Error("Team not found");
 
-    if (uploadedPhoto) {
-      newTeam.photo = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:data});
-      const photoOID = { teamPhoto: newTeam.photo._id }
-      data = await TeamsCol.findOneAndUpdate(query, photoOID, options)
-  }
-
   } catch (err){
     console.error(err.stack);
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -133,7 +147,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!teamDoc) {
-    return res.status(404).send({ message: "Team not found" });
+    return res.status(404).send({ error: "Team not found" });
   }
   
   res.status(200).send({
@@ -152,7 +166,7 @@ exports.getOne = async (req, res) => {
 
   if (OID) {
     if (!utils.isOID(OID)) {
-      return res.status(400).send({ message: "Invalid ObjectId" });
+      return res.status(400).send({ error: "Invalid ObjectId" });
     }
     query._id = OID;
   }
@@ -161,7 +175,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ message: "Team not found" });
+    return res.status(404).send({ error: "Team not found" });
   }
 
   res.status(200).send({

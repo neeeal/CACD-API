@@ -19,19 +19,19 @@ exports.get = async (req, res) => {
 exports.post = async (req, res) => {
   const newChurch = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
-  const uploadedPhoto = photoFields.featuredPhoto[0];
+  // const uploadedPhoto = photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields.photos;
 
-  if (uploadedPhoto) {
-    try{
-      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
-      newChurch.photo = savedPhoto._id;
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
-    }
-  }
+  // if (uploadedPhoto) {
+  //   try{
+  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
+  //     newChurch.photo = savedPhoto._id;
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ message: "Server error" });
+  //   }
+  // }
 
   if (uploadedPhotos) {
     try{
@@ -50,7 +50,7 @@ exports.post = async (req, res) => {
     location: newChurch.location,
     ministers: newChurch.ministers,
     contacts: newChurch.contacts,
-    featuredPhoto: newChurch.photo || null,
+    // featuredPhoto: newChurch.photo || null,
     photos: newChurch.photos || null,
   };
 
@@ -73,24 +73,27 @@ exports.post = async (req, res) => {
 exports.put = async (req, res) => {
   const newChurch = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
-  const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
+  // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields.photos;
+  
+  // initialize photos
+  newChurch.photos = !newChurch.photos || [] ? [] : newChurch.photos;
 
-  if (uploadedPhoto) {
-    try{
-      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
-      newChurch.photo = savedPhoto._id;
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
-    }
-  }
+  // if (uploadedPhoto) {
+  //   try{
+  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
+  //     newChurch.photo = savedPhoto._id;
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ message: "Server error" });
+  //   }
+  // }
 
   if (uploadedPhotos) {
     try{
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
-      newChurch.photos = savedPhotos.map((photo) => photo._id);
+      const savedPhotos = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:newChurch});
+      newChurch.photos = newChurch.photossavedPhotos.map((photo) => photo._id);
     }
     catch (err){
       console.error(err.stack);
@@ -105,7 +108,7 @@ exports.put = async (req, res) => {
       location: newChurch.location,
       ministers: newChurch.ministers,
       contacts: newChurch.contacts,
-      featuredPhoto: newChurch.featuredPhoto || null,
+      // featuredPhoto: newChurch.featuredPhoto || null,
       photos: newChurch.photos || null,
     }
   };
@@ -132,7 +135,7 @@ exports.put = async (req, res) => {
     console.error(err.stack);
     
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -170,7 +173,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!churchDoc) {
-    return res.status(404).send({ message: "Church not found" });
+    return res.status(404).send({ error: "Church not found" });
   }
   
   res.status(200).send({
@@ -189,7 +192,7 @@ exports.getOne = async (req, res) => {
 
   if (OID) {
     if (!utils.isOID(OID)) {
-      return res.status(400).send({ message: "Invalid ObjectId" });
+      return res.status(400).send({ error: "Invalid ObjectId" });
     }
     query._id = OID;
   }
@@ -198,7 +201,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ message: "Church not found" });
+    return res.status(404).send({ error: "Church not found" });
   }
 
   res.status(200).send({

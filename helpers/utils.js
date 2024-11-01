@@ -109,9 +109,9 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   }
 
   const query = {
-    _id: details.OID || // Photo route update
+    _id: details.photoOID || // Photo route update
     details.featuredPhoto || // event route update
-    details.photo, // team route update
+    details.photos, // team route update
     deletedAt: null
   }
 
@@ -128,11 +128,13 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   if (!data) 
     throw new Error("Photo not found");
 
-  if (oldData.originalname != data.originalname) {
-    await exports.deletePhoto(oldData.path);
-  }
-  else{
-    await exports.deletePhoto(data.path);
+  if(oldData && data) {
+    if (oldData.originalname != data.originalname) {
+      await exports.deletePhoto(oldData.path);
+    }
+    else{
+      await exports.deletePhoto(data.path);
+    }
   }
 
   return data;

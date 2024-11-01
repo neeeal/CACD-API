@@ -13,7 +13,9 @@ const photoSchema = mongoose.Schema(
     },
     fieldname: {
       type: String,
-      required: true
+      // required: true
+      default: "default",
+      enum: ["default", "featuredPhoto", "userPhoto", "teamPhoto"]
     },
     originalname: {
       type: String,
@@ -39,15 +41,20 @@ const photoSchema = mongoose.Schema(
       type: String,
       required: true
     },
+    // type:{
+    //   type: String,
+    //   default: "Default",
+    //   enum: ["Default", "Featured", "User", "Team"]
+    // },
     size: {
       type: Number,
       required: true
     },
-    eventOID: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "events",
-      default: null,
-    },
+    // eventOID: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "events",
+    //   default: null,
+    // },
     deletedAt: {
       type: Date,
       default: null

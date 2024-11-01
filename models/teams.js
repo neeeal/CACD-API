@@ -19,7 +19,7 @@ const teamSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    photo: {
+    photos: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "photos",
       default: null,

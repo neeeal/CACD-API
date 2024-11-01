@@ -7,8 +7,14 @@ const fileUpload = require("../middlewares/fileUpload.js");
 
 router.get("/", controller.get)
 router.get("/getOne", controller.getOne)
-router.post("/", fileUpload.single("teamPhoto"), controller.post)
-router.put("/", fileUpload.single("teamPhoto"), controller.put)
+router.post("/", 
+  fileUpload.single("teamPhoto"), 
+  controller.post
+)
+router.put("/", 
+  fileUpload.single("teamPhoto"), 
+  controller.put
+)
 router.delete("/:OID", controller.delete)
 
 module.exports = router;  

@@ -19,8 +19,32 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newEvent = req.body;
-  const uploadedPhoto = req.file;
+  const photoFields = req.files; // multiple photos object of array of objects
+  // const uploadedPhoto = photoFields.featuredPhoto[0];
+  const uploadedPhotos = photoFields.photos;
 
+  // if (uploadedPhoto) {
+  //   try{
+  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newEvent});
+  //     newEvent.featuredPhoto = savedPhoto._id;
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ message: "Server error" });
+  //   }
+  // }
+
+  if (uploadedPhotos) {
+    try{
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+      newEvent.photos = savedPhotos.map((photo) => photo._id);
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
+  
   const values = {
     title: newEvent.title,
     description: newEvent.description,
@@ -30,27 +54,27 @@ exports.post = async (req, res) => {
     status: newEvent.status,
     location: newEvent.location,
     registerLink: newEvent.registerLink,
+    // featuredPhoto: newEvent.featuredPhoto || null,
+    photos: newEvent.photos || null
   }
-  
+
   let data;
   try{
-    let photo;
-    if(uploadedPhoto) 
-      photo = await utils.savePhoto({uploadedPhoto: uploadedPhoto, details: newEvent});
+    // let photo;
+    // if(uploadedPhoto) 
+    //   photo = await utils.savePhoto({uploadedPhoto: uploadedPhoto, details: newEvent});
 
-    if (photo)
-      values.featuredPhoto = photo._id;
+    // if (photo)
+    //   values.featuredPhoto = photo._id;
 
     const newEventDoc = new EventsCol(values);
     data = await newEventDoc.save();
-
-    await utils.updatePhotoEvent({photo: photo, event: newEventDoc})
   }
   catch (err){
     console.error(err.stack);
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     return res.status(500).send({ message: "Server error" });
   }
@@ -63,7 +87,32 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newEvent = req.body;
-  const uploadedPhoto = req.file;
+  const photoFields = req.files; // multiple photos object of array of objects
+  // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
+  const uploadedPhotos = photoFields.photos;
+  newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
+
+  // if (uploadedPhoto) {
+  //   try{
+  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newEvent});
+  //     newEvent.featuredPhoto = savedPhoto._id;
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ message: "Server error" });
+  //   }
+  // }
+
+  if (uploadedPhotos) {
+    try{
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+      newEvent.photos = savedPhotos.map((photo) => photo._id);
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   const values = {
     $set: {
@@ -75,6 +124,8 @@ exports.put = async (req, res) => {
       status: newEvent.status,
       location: newEvent.location,
       registerLink: newEvent.registerLink,
+      // featuredPhoto: newEvent.featuredPhoto || null,
+      photos: newEvent.photos || null
     }
   };
 
@@ -91,12 +142,12 @@ exports.put = async (req, res) => {
   try{
     data = await EventsCol.findOneAndUpdate(query, values, options)
 
-    console.log(query)
-    console.log(values)
-    console.log(data)
-    let photo;
-    if(uploadedPhoto) 
-      photo = await utils.updatePhoto({uploadedPhoto: uploadedPhoto, details: data});
+    // console.log(query)
+    // console.log(values)
+    // console.log(data)
+    // let photo;
+    // if(uploadedPhoto) 
+    //   photo = await utils.updatePhoto({uploadedPhoto: uploadedPhoto, details: data});
     
     if (!data) 
       throw new Error("Event not found");
@@ -105,7 +156,7 @@ exports.put = async (req, res) => {
     console.error(err.stack);
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -143,7 +194,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!eventDoc) {
-    return res.status(404).send({ message: "Event not found" });
+    return res.status(404).send({ error: "Event not found" });
   }
   
   res.status(200).send({
@@ -162,7 +213,7 @@ exports.getOne = async (req, res) => {
 
   if (OID) {
     if (!utils.isOID(OID)) {
-      return res.status(400).send({ message: "Invalid ObjectId" });
+      return res.status(400).send({ error: "Invalid ObjectId" });
     }
     query._id = OID;
   }
@@ -171,7 +222,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ message: "Event not found" });
+    return res.status(404).send({ error: "Event not found" });
   }
 
   res.status(200).send({

@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       // match: /^(?=.*[!@#$%^_-&*])[a-zA-Z0-9!@#$%^_-&*]+$/, 
     },
+    photos: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
     accessLevel: {
       type: String,
       default: 'Admin',

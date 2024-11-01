@@ -25,7 +25,7 @@ exports.getOne = async (req, res) => {
 
   if (OID) {
     if (!utils.isOID(OID)) {
-      return res.status(400).send({ message: "Invalid ObjectId" });
+      return res.status(400).send({ error: "Invalid ObjectId" });
     }
     query._id = OID;
   }
@@ -34,7 +34,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ message: "User not found" });
+    return res.status(404).send({ error: "User not found" });
   }
 
   res.status(200).send({
@@ -44,12 +44,25 @@ exports.getOne = async (req, res) => {
 }
 
 exports.post = async (req, res) => {
+  console.log("here")
   const { email, password, firstName, lastName } = req.body;
   const newUser = new UserCol({email, password, firstName, lastName});
+  const uploadedPhoto = req.file;
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(password, salt);
+
+  if (uploadedPhoto) {
+    try{
+      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
+      newUser.photos = savedPhoto._id;
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   let data;
   try {
@@ -74,13 +87,40 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newUser = req.body;
+  const uploadedPhoto = req.file;
+
+  const query = { _id: newUser.OID, deletedAt: null }
 
   if (newUser.password === newUser.oldPassword) 
-    return res.status(400).send({ message: "New password cannot be same as old password." });
+    return res.status(400).send({ error: "New password cannot be same as old password." });
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(newUser.password, salt);
+
+
+  if (uploadedPhoto) {
+    try{
+      const oldPhotoOID = await UserCol
+      .findOne(query)
+      .select("photos")
+      .populate("photos")
+      .lean();
+      let savedPhoto;
+      if (oldPhotoOID){
+        newUser.photos = oldPhotoOID.photos._id;
+        savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
+      } else {
+        savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
+    }
+      console.log(oldPhotoOID)
+      newUser.photos = savedPhoto._id;
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ message: "Server error" });
+    }
+  }
 
   let data;
   try {
@@ -95,13 +135,14 @@ exports.put = async (req, res) => {
       throw new Error (`${duplicate} already taken`);
 
     data = await UserCol.findOneAndUpdate(
-      { _id: newUser.OID },
+      query,
       {
         email: newUser.email,
         password: newUser.password,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
-        updatedAt: moment().toISOString()
+        updatedAt: moment().toISOString(),
+        photos: newUser.photos || null,
       },
       { new: true }
     );
@@ -119,7 +160,7 @@ exports.put = async (req, res) => {
     }
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -157,7 +198,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!userDoc) {
-    return res.status(404).send({ message: "User not found" });
+    return res.status(404).send({ error: "User not found" });
   }
   
   res.status(200).send({

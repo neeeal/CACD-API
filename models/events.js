@@ -42,8 +42,13 @@ const eventSchema = mongoose.Schema(
       type: Date,
       default: null
     },
-    featuredPhoto: {
-      type: mongoose.Schema.Types.ObjectId,
+    // featuredPhoto: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "photos",
+    //   default: null,
+    // },
+    photos: {
+    type: [mongoose.Schema.Types.ObjectId],
       ref: "photos",
       default: null,
     }
