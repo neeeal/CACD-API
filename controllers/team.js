@@ -63,6 +63,11 @@ exports.put = async (req, res) => {
   const newTeam = req.body;
   const uploadedPhoto = req.file;
 
+  const query = {
+    _id: newTeam.OID,
+    deletedAt: null
+  }
+
   const values = {
     $set: {
       firstName: newTeam.firstName,
@@ -89,11 +94,6 @@ exports.put = async (req, res) => {
     }
   }
 
-  const query = {
-    _id: newTeam.OID,
-    deletedAt: null
-  }
-
   const options = { 
     new: false
   }
@@ -109,7 +109,7 @@ exports.put = async (req, res) => {
     console.error(err.stack);
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ error: err.message });
+      return res.status(404).send({ message: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -147,7 +147,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!teamDoc) {
-    return res.status(404).send({ error: "Team not found" });
+    return res.status(404).send({ message: "Team not found" });
   }
   
   res.status(200).send({
@@ -175,7 +175,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ error: "Team not found" });
+    return res.status(404).send({ message: "Team not found" });
   }
 
   res.status(200).send({

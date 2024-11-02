@@ -30,11 +30,28 @@ exports.removeExtension = (filename) => {
   return parts.join(".");
 }
 
-exports.deletePhoto = async (originalPath) => {
+exports.deletePhoto = async (photoOID) => {
   // const photoPath = path.join(__dirname, "..", originalPath);
-  const photoPath = originalPath;
-  console.log(photoPath)
-  await fs.promises.unlink(photoPath);
+  // const photoPath = originalPath;
+  console.log("photoOID")
+  console.log(photoOID)
+
+  // // Hard Delete (delete file from storage)
+  // await fs.promises.unlink(photoPath);
+
+  // Soft Delete (Update the deletedAt field)
+  const photoDoc = await PhotosCol.findOneAndUpdate(
+    {
+      _id: photoOID,
+      deletedAt: null
+    }, 
+    {
+      deletedAt: moment().toISOString()
+    },
+    {
+      new: true
+    }
+  )
   console.log("photo deleted successfully.");
   return;
 }
@@ -120,22 +137,26 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   }
 
   const oldData = await PhotosCol.findOne(query);
-  const data = await PhotosCol.findOneAndUpdate(query, values, options)
+  let data = await PhotosCol.findOneAndUpdate(query, values, options)
   console.log(query)
   console.log(oldData)
   console.log(data)
 
-  if (!data) 
-    throw new Error("Photo not found");
-
-  if(oldData && data) {
-    if (oldData.originalname != data.originalname) {
-      await exports.deletePhoto(oldData.path);
-    }
-    else{
-      await exports.deletePhoto(data.path);
-    }
+  if (!data) {
+    data = await exports.savePhoto({uploadedPhoto:uploadedPhoto, details:details})
+    // throw new Error("Photo not found");
+    console.log("No Existing Photo")
   }
+
+  // TODO: Handle photo deletion on update
+  // if(oldData && data) {
+  //   if (oldData.originalname != data.originalname) {
+  //     await exports.deletePhoto(oldData._id);
+  //   }
+  //   else{
+  //     await exports.deletePhoto(data._id);
+  //   }
+  // }
 
   return data;
 }

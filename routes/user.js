@@ -13,7 +13,7 @@ router.post("/",
   validation.passwordConfirmation, 
   controller.post)
 router.put("/", 
-  fileUpload.single("userPhoto"), 
+  fileUpload.single("newUserPhoto"), 
   validation.userRegisterAndUpdate, 
   validation.passwordConfirmation, 
   controller.put)

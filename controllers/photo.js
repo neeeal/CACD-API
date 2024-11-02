@@ -65,7 +65,7 @@ exports.put = async (req, res) => {
     console.error(err.stack);
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ error: err.message });
+      return res.status(404).send({ message: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -103,7 +103,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!photoDoc) {
-    return res.status(404).send({ error: "Photo not found" });
+    return res.status(404).send({ message: "Photo not found" });
   }
   
   res.status(200).send({
@@ -131,7 +131,7 @@ exports.getOne = async (req, res) => {
     console.log(data)
 
     if (!data) {
-      return res.status(404).send({ error: "Photo not found" });
+      return res.status(404).send({ message: "Photo not found" });
     }
 
     // Assuming `data.Photo.path` contains the relative path to the Photo
@@ -142,7 +142,7 @@ exports.getOne = async (req, res) => {
     // Check if the file exists
     fs.access(absolutePath, fs.constants.F_OK, (err) => {
       if (err) {
-        return res.status(404).send({ error: "Photo file not found" });
+        return res.status(404).send({ message: "Photo file not found" });
       }
 
       // Send data and Photo path in the response

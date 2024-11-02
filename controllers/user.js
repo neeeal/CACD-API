@@ -34,7 +34,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ error: "User not found" });
+    return res.status(404).send({ message: "User not found" });
   }
 
   res.status(200).send({
@@ -98,28 +98,49 @@ exports.put = async (req, res) => {
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
+  let oldPhotos;
+  try{
+    oldPhotos = await UserCol
+    .findOne(query)
+    .select("photos")
+    .populate("photos")
+    .lean();
+    // .photos;
+    console.log("OLD")
+    console.log(oldPhotos)
+  }
+  catch (err){
+    console.log("Old Photo Retrieval")
+    console.error(err.stack);
+    return res.status(500).send({ message: "Server error" });
+  }
 
   if (uploadedPhoto) {
     try{
-      const oldPhotoOID = await UserCol
-      .findOne(query)
-      .select("photos")
-      .populate("photos")
-      .lean();
+
+      uploadedPhoto.fieldname = 
+      uploadedPhoto.fieldname.includes("new") ?
+        uploadedPhoto.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+        uploadedPhoto.fieldname;
+
       let savedPhoto;
-      if (oldPhotoOID){
-        newUser.photos = oldPhotoOID.photos._id;
+      if (oldPhotos){
+        newUser.photos = oldPhotos.photos && oldPhotos.photos._id;
         savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
       } else {
         savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
     }
-      console.log(oldPhotoOID)
+      console.log(oldPhotos)
       newUser.photos = savedPhoto._id;
     }
     catch (err){
       console.error(err.stack);
       return res.status(500).send({ message: "Server error" });
     }
+  } else if (!uploadedPhoto && oldPhotos.photos){
+    console.log("tyet");
+    console.log(oldPhotos.photos._id)
+    await utils.deletePhoto(oldPhotos.photos._id);
   }
 
   let data;
@@ -160,7 +181,7 @@ exports.put = async (req, res) => {
     }
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ error: err.message });
+      return res.status(404).send({ message: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
@@ -192,13 +213,14 @@ exports.delete = async (req, res) => {
         }
     }
   );
-  } catch (err){
+  await utils.deletePhoto(userDoc.photos)
+} catch (err){
     console.error(err.stack);
     return res.status(500).send({ message: "Server error" });
   }
 
   if (!userDoc) {
-    return res.status(404).send({ error: "User not found" });
+    return res.status(404).send({ message: "User not found" });
   }
   
   res.status(200).send({

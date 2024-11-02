@@ -12,7 +12,7 @@ router.post("/",
   controller.post
 )
 router.put("/", 
-  fileUpload.single("teamPhoto"), 
+  fileUpload.single("newTeamPhoto"), 
   controller.put
 )
 router.delete("/:OID", controller.delete)
