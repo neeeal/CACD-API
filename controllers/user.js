@@ -34,7 +34,7 @@ exports.getOne = async (req, res) => {
   .lean();
 
   if (!data) {
-    return res.status(404).send({ message: "User not found" });
+    return res.status(404).send({ error: "User not found" });
   }
 
   res.status(200).send({
@@ -60,7 +60,7 @@ exports.post = async (req, res) => {
     }
     catch (err){
       console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
+      return res.status(500).send({ error: "Server error" });
     }
   }
 
@@ -76,7 +76,7 @@ exports.post = async (req, res) => {
     if (err.message.includes('already taken')){
       return res.status(409).send({ message: err.message });
     }
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
@@ -105,7 +105,7 @@ exports.put = async (req, res) => {
   catch (err){
     console.log("Old Photo Retrieval")
     console.error(err.stack);
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   if (uploadedPhoto) {
@@ -127,7 +127,7 @@ exports.put = async (req, res) => {
     }
     catch (err){
       console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
+      return res.status(500).send({ error: "Server error" });
     }
   } else if (!uploadedPhoto && oldPhotos.photos){
     console.log("tyet");
@@ -174,14 +174,14 @@ exports.put = async (req, res) => {
     }
 
     if (err.message.includes("not found"))
-      return res.status(404).send({ message: err.message });
+      return res.status(404).send({ error: err.message });
 
     if (err.message.includes("Cast to ObjectId failed"))
       return res.status(404).send({
       message: "Invalid Object ID"
     });
     
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
@@ -209,11 +209,11 @@ exports.delete = async (req, res) => {
   await utils.deletePhoto(userDoc.photos)
 } catch (err){
     console.error(err.stack);
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   if (!userDoc) {
-    return res.status(404).send({ message: "User not found" });
+    return res.status(404).send({ error: "User not found" });
   }
   
   res.status(200).send({

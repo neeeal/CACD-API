@@ -29,7 +29,7 @@ exports.post = async (req, res) => {
   //   }
   //   catch (err){
   //     console.error(err.stack);
-  //     return res.status(500).send({ message: "Server error" });
+  //     return res.status(500).send({ error: "Server error" });
   //   }
   // }
 
@@ -40,7 +40,7 @@ exports.post = async (req, res) => {
     }
     catch (err){
       console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
+      return res.status(500).send({ error: "Server error" });
     }
   }
 
@@ -61,7 +61,7 @@ exports.post = async (req, res) => {
   }
   catch (err){
     console.error(err.stack);
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
@@ -86,7 +86,7 @@ exports.put = async (req, res) => {
   //   }
   //   catch (err){
   //     console.error(err.stack);
-  //     return res.status(500).send({ message: "Server error" });
+  //     return res.status(500).send({ error: "Server error" });
   //   }
   // }
 
@@ -97,7 +97,7 @@ exports.put = async (req, res) => {
     }
     catch (err){
       console.error(err.stack);
-      return res.status(500).send({ message: "Server error" });
+      return res.status(500).send({ error: "Server error" });
     }
   }
 
@@ -142,7 +142,7 @@ exports.put = async (req, res) => {
       message: "Invalid Object ID"
     });
 
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
@@ -169,7 +169,7 @@ exports.delete = async (req, res) => {
   );
   } catch (err){
     console.error(err.stack);
-    return res.status(500).send({ message: "Server error" });
+    return res.status(500).send({ error: "Server error" });
   }
 
   if (!churchDoc) {
