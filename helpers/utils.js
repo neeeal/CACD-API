@@ -30,14 +30,28 @@ exports.removeExtension = (filename) => {
   return parts.join(".");
 }
 
-exports.hardDeletePhoto = async (photoPath) => {
+exports.hardDeletePhoto = async ({photos, col}) => {
   // const photoPath = path.join(__dirname, "..", originalPath);
   // const photoPath = originalPath;
   // console.log("photoOID")
-  console.log(photoPath)
+  console.log("hard delte utils")
+  console.log(photos)
 
   // // Hard Delete (delete file from storage)
-  await fs.promises.unlink(photoPath);
+  await fs.promises.unlink(photos.path);
+
+  const doc = await col.findOneAndUpdate(
+    {
+      photos: photos._id,
+      deletedAt: null
+    }, 
+    {
+      photos: null
+    },
+    {
+      new: true
+    }
+  )
 
   // Soft Delete (Update the deletedAt field)
   // const photoDoc = await PhotosCol.findOneAndUpdate(
@@ -56,7 +70,7 @@ exports.hardDeletePhoto = async (photoPath) => {
   return;
 }
 
-exports.softDeletePhoto = async (photoOID) => {
+exports.softDeletePhoto = async ({photos, col}) => {
   // const photoPath = path.join(__dirname, "..", originalPath);
   // const photoPath = originalPath;
   console.log("photoOID")
@@ -68,11 +82,24 @@ exports.softDeletePhoto = async (photoOID) => {
   // Soft Delete (Update the deletedAt field)
   const photoDoc = await PhotosCol.findOneAndUpdate(
     {
-      _id: photoOID,
+      _id: photos._id,
       deletedAt: null
     }, 
     {
       deletedAt: moment().toISOString()
+    },
+    {
+      new: true
+    }
+  )
+
+  const doc = await col.findOneAndUpdate(
+    {
+      photos: photos._id,
+      deletedAt: null
+    }, 
+    {
+      photos: null
     },
     {
       new: true
@@ -175,14 +202,14 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   }
 
   // TODO: Handle photo deletion on update
-  if(oldData && data) {
-    if (oldData.originalname != data.originalname) {
-      await exports.hardDeletePhoto(oldData.path);
-    }
-    else{
-      await exports.hardDeletePhoto(data.path);
-    }
-  }
+  // if(oldData && data) {
+  //   if (oldData.originalname != data.originalname) {
+  //     await exports.hardDeletePhoto(oldData.path);
+  //   }
+  //   else{
+  //     await exports.hardDeletePhoto(data.path);
+  //   }
+  // }
 
   return data;
 }
@@ -220,7 +247,8 @@ exports.getOldPhotos = async ({col, query}) => {
     .lean();
     // .photos;
     console.log("OLD")
-    console.log(oldPhotos)
+    console.log(query)
+    console.log("OLD")
 
-    return oldPhotos;
+    return oldPhotos.photos;
 }

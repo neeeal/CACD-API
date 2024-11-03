@@ -87,7 +87,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   const newUser = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhoto = req.file || newUser.newUserPhoto;
 
   const query = { _id: newUser.OID, deletedAt: null }
 
@@ -101,6 +101,7 @@ exports.put = async (req, res) => {
   let oldPhotos;
   try{
     oldPhotos = await utils.getOldPhotos({ col: UserCol, query: query });
+    console.log(oldPhotos)
   }
   catch (err){
     console.log("Old Photo Retrieval")
@@ -117,32 +118,36 @@ exports.put = async (req, res) => {
     try{
       let savedPhoto;
       if (oldPhotos){
-        newUser.photos = oldPhotos.photos && oldPhotos.photos._id;
+    console.log("update")
+        newUser.photos = oldPhotos._id;
         savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
-      } else {
+    } else {
+    console.log("savew")
         savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
+        console.log(oldPhotos)
+        newUser.photos = savedPhoto._id;
     }
-      console.log(oldPhotos)
-      newUser.photos = savedPhoto._id;
+
     }
     catch (err){
       console.error(err.stack);
       return res.status(500).send({ error: "Server error" });
     }
-  } else if (!uploadedPhoto && oldPhotos.photos){
-    console.log("tyet");
-    console.log(oldPhotos.photos._id)
-    await utils.softDeletePhoto(oldPhotos.photos._id);
+  } else if (!uploadedPhoto && newUser.deletePhoto && oldPhotos){
+    // hard delete
+    console.log("hard");
+    await utils.hardDeletePhoto({photos: oldPhotos, col: UserCol});
+  }
+  else if (uploadedPhoto === null && oldPhotos){
+    // soft delete
+    console.log("soft");
+    console.log(oldPhotos._id)
+    await utils.softDeletePhoto({photos: oldPhotos, col: UserCol});
   }
 
   const values = {
     $set: {
-      email: newUser.email,
-      password: newUser.password,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      updatedAt: moment().toISOString(),
-      photos: newUser.photos || null,
+      ...newUser
     }
   }
 
