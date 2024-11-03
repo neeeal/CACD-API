@@ -30,7 +30,33 @@ exports.removeExtension = (filename) => {
   return parts.join(".");
 }
 
-exports.deletePhoto = async (photoOID) => {
+exports.hardDeletePhoto = async (photoPath) => {
+  // const photoPath = path.join(__dirname, "..", originalPath);
+  // const photoPath = originalPath;
+  // console.log("photoOID")
+  console.log(photoPath)
+
+  // // Hard Delete (delete file from storage)
+  await fs.promises.unlink(photoPath);
+
+  // Soft Delete (Update the deletedAt field)
+  // const photoDoc = await PhotosCol.findOneAndUpdate(
+  //   {
+  //     _id: photoOID,
+  //     deletedAt: null
+  //   }, 
+  //   {
+  //     deletedAt: moment().toISOString()
+  //   },
+  //   {
+  //     new: true
+  //   }
+  // )
+  console.log("photo hard deleted successfully.");
+  return;
+}
+
+exports.softDeletePhoto = async (photoOID) => {
   // const photoPath = path.join(__dirname, "..", originalPath);
   // const photoPath = originalPath;
   console.log("photoOID")
@@ -52,7 +78,7 @@ exports.deletePhoto = async (photoOID) => {
       new: true
     }
   )
-  console.log("photo deleted successfully.");
+  console.log("photo soft deleted successfully.");
   return;
 }
 
@@ -149,14 +175,14 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   }
 
   // TODO: Handle photo deletion on update
-  // if(oldData && data) {
-  //   if (oldData.originalname != data.originalname) {
-  //     await exports.deletePhoto(oldData._id);
-  //   }
-  //   else{
-  //     await exports.deletePhoto(data._id);
-  //   }
-  // }
+  if(oldData && data) {
+    if (oldData.originalname != data.originalname) {
+      await exports.hardDeletePhoto(oldData.path);
+    }
+    else{
+      await exports.hardDeletePhoto(data.path);
+    }
+  }
 
   return data;
 }
@@ -183,4 +209,18 @@ exports.updatePhotoEvent = async ({photo, event}) => {
     throw new Error("Photo not found");
 
   return data;
+}
+
+exports.getOldPhotos = async ({col, query}) => {
+  let oldPhotos;
+    oldPhotos = await col
+    .findOne(query)
+    .select("photos")
+    .populate("photos")
+    .lean();
+    // .photos;
+    console.log("OLD")
+    console.log(oldPhotos)
+
+    return oldPhotos;
 }

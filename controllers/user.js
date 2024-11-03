@@ -100,14 +100,7 @@ exports.put = async (req, res) => {
 
   let oldPhotos;
   try{
-    oldPhotos = await UserCol
-    .findOne(query)
-    .select("photos")
-    .populate("photos")
-    .lean();
-    // .photos;
-    console.log("OLD")
-    console.log(oldPhotos)
+    oldPhotos = await utils.getOldPhotos({ col: UserCol, query: query });
   }
   catch (err){
     console.log("Old Photo Retrieval")
@@ -116,13 +109,12 @@ exports.put = async (req, res) => {
   }
 
   if (uploadedPhoto) {
+    uploadedPhoto.fieldname = 
+    uploadedPhoto.fieldname.includes("new") ?
+      uploadedPhoto.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+      uploadedPhoto.fieldname;
+    
     try{
-
-      uploadedPhoto.fieldname = 
-      uploadedPhoto.fieldname.includes("new") ?
-        uploadedPhoto.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-        uploadedPhoto.fieldname;
-
       let savedPhoto;
       if (oldPhotos){
         newUser.photos = oldPhotos.photos && oldPhotos.photos._id;
@@ -140,9 +132,21 @@ exports.put = async (req, res) => {
   } else if (!uploadedPhoto && oldPhotos.photos){
     console.log("tyet");
     console.log(oldPhotos.photos._id)
-    await utils.deletePhoto(oldPhotos.photos._id);
+    await utils.softDeletePhoto(oldPhotos.photos._id);
   }
 
+  const values = {
+    $set: {
+      email: newUser.email,
+      password: newUser.password,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      updatedAt: moment().toISOString(),
+      photos: newUser.photos || null,
+    }
+  }
+
+  const options = { new: true };
   let data;
   try {
 
@@ -155,18 +159,7 @@ exports.put = async (req, res) => {
     if (duplicate) 
       throw new Error (`${duplicate} already taken`);
 
-    data = await UserCol.findOneAndUpdate(
-      query,
-      {
-        email: newUser.email,
-        password: newUser.password,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        updatedAt: moment().toISOString(),
-        photos: newUser.photos || null,
-      },
-      { new: true }
-    );
+    data = await UserCol.findOneAndUpdate(query, values, options);
 
   }
   catch (err) {
