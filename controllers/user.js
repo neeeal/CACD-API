@@ -86,7 +86,7 @@ exports.post = async (req, res) => {
 }
 
 exports.put = async (req, res) => {
-  const newUser = req.body;
+  let newUser = req.body;
   const uploadedPhoto = req.file || newUser.newUserPhoto;
 
   const query = { _id: newUser.OID, deletedAt: null }
@@ -98,51 +98,16 @@ exports.put = async (req, res) => {
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
-  let oldPhotos;
   try{
-    oldPhotos = await utils.getOldPhotos({ col: UserCol, query: query });
-    console.log(oldPhotos)
-  }
-  catch (err){
-    console.log("Old Photo Retrieval")
+    newUser = await utils.managePhotoUpdate({
+      col: UserCol,
+      query: query,
+      uploadedPhoto: uploadedPhoto,
+      newDoc: newUser
+    });
+  } catch(err){
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });
-  }
-
-  if (uploadedPhoto) {
-    uploadedPhoto.fieldname = 
-    uploadedPhoto.fieldname.includes("new") ?
-      uploadedPhoto.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-      uploadedPhoto.fieldname;
-    
-    try{
-      let savedPhoto;
-      if (oldPhotos){
-    console.log("update")
-        newUser.photos = oldPhotos._id;
-        savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
-    } else {
-    console.log("savew")
-        savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
-        console.log(oldPhotos)
-        newUser.photos = savedPhoto._id;
-    }
-
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ error: "Server error" });
-    }
-  } else if (!uploadedPhoto && newUser.deletePhoto && oldPhotos){
-    // hard delete
-    console.log("hard");
-    await utils.hardDeletePhoto({photos: oldPhotos, col: UserCol});
-  }
-  else if (uploadedPhoto === null && oldPhotos){
-    // soft delete
-    console.log("soft");
-    console.log(oldPhotos._id)
-    await utils.softDeletePhoto({photos: oldPhotos, col: UserCol});
   }
 
   const values = {
@@ -154,7 +119,6 @@ exports.put = async (req, res) => {
   const options = { new: true };
   let data;
   try {
-
     await userHelper.checkPassword({
       OID: newUser.OID,
       oldPassword: newUser.oldPassword
