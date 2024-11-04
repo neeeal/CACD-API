@@ -87,7 +87,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newUser = req.body;
-  const uploadedPhoto = req.file || newUser.newUserPhoto;
+  const uploadedPhoto = req.file;
 
   const query = { _id: newUser.OID, deletedAt: null }
 
