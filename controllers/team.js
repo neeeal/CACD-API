@@ -60,7 +60,7 @@ exports.post = async (req, res) => {
 
 
 exports.put = async (req, res) => {
-  const newTeam = req.body;
+  let newTeam = req.body;
   const uploadedPhoto = req.file;
 
   const query = {
@@ -68,29 +68,21 @@ exports.put = async (req, res) => {
     deletedAt: null
   }
 
-  const values = {
-    $set: {
-      firstName: newTeam.firstName,
-      lastName: newTeam.lastName,
-      position: newTeam.position,
-      description: newTeam.description,
-    }
+  try{
+    newTeam = await utils.managePhotoUpdate({
+      col: TeamsCol,
+      query: query,
+      uploadedPhoto: uploadedPhoto,
+      newDoc: newTeam
+    });
+  } catch(err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
   }
 
-  if (uploadedPhoto) {
-    try{
-      const oldPhotoOID = await TeamsCol
-      .findOne(query)
-      .select("photos")
-      .populate("photos")
-      .lean();
-      newTeam.photos = oldPhotoOID.photos._id;
-      const savedPhoto = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
-      values.$set.photos = savedPhoto._id;
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ error: "Server error" });
+  const values = {
+    $set: {
+      ...newTeam
     }
   }
 

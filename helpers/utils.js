@@ -255,10 +255,6 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
     return res.status(500).send({ error: "Server error" });
   }
 
-  console.log( oldPhotos)
-  console.log(uploadedPhoto)
-  console.log(!uploadedPhoto && oldPhotos)
-
   if (uploadedPhoto) {
   // If has uploadedPhoto
     uploadedPhoto.fieldname = 
@@ -279,12 +275,6 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
       console.log(oldPhotos)
       newDoc.photos = savedPhoto._id;
     }
-  // } else if (uploadedPhoto && oldPhotos){
-  //   // has uploaded photo and has old photo
-  //   // soft delete
-  //   console.log("soft");
-  //   console.log(oldPhotos._id)
-  //   await exports.softDeletePhoto({photos: oldPhotos, col: col});
   } else if (!uploadedPhoto && newDoc.deletePhoto && oldPhotos){
     // no new uploaded photo and deletePhoto is true and has old photo
     // hard delete
