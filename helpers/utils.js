@@ -292,6 +292,7 @@ exports.getOldPhotos = async ({col, query}) => {
     // .photos;
     console.log("OLD")
     console.log(query)
+    console.log(oldPhotos)
     console.log("OLD")
 
     return oldPhotos.photos;
@@ -338,3 +339,56 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
 
   return newDoc;
 }
+
+exports.manageMultiplePhotoUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
+  console.log("manageMultiplePhotoUpdate")
+
+  let oldPhotos;
+  try{
+    oldPhotos = await exports.getOldPhotos({ col: col, query: query });
+  }
+  catch (err){
+    console.log("Old Photo Retrieval")
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  if (newDoc.deletePhotos && !newDoc.deletePhotos.length){
+    // delete old photos from given oid
+    console.log("manageMultiplePhotoUpdate hard delete");
+    const results = newDoc.deletePhotos.map( oid => {
+      return exports.hardDeletePhoto({ photos: {_id: oid}, col: col });
+    })
+  }
+
+  // await Promise.all(
+  //   Object.keys(uploadedPhotos).map( async(fieldname) => {
+  //     const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhoto, idx) => {
+  //       const values = {
+  //           ...uploadedPhoto,
+  //           title: exports.removeExtension(uploadedPhoto.originalname),
+  //           // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+  //           // caption: details[idx].caption,
+  //           // eventOID: details[idx].eventOID || null,
+  //           // photoInfo: photo,
+  //         }
+  
+  //         return new PhotosCol(values);
+  //       });
+  
+  //       const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+  //       return savedPhotos.map((doc) => doc._id);
+  //   })
+  // )
+
+  return newDoc;
+}
+
+// exports.formatMulPhotosField = ({ mulPhotos }) => {
+
+//   const uniqueFieldnames = [...new Set(mulPhotos.map(photo => photo.fieldname))];
+
+//   const formattedMulPhotos = {...uniqueFieldnames.map()}
+
+//   return formattedMulPhotos;
+// }

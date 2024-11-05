@@ -88,8 +88,10 @@ exports.post = async (req, res) => {
 }
 
 exports.put = async (req, res) => {
-  const newEvent = req.body;
+  let newEvent = req.body;
   const uploadedPhotos = req.files; // multiple photos object of array of objects
+  console.log("uploadedPhotos")
+  console.log(uploadedPhotos)
   // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
   // const uploadedPhotos = photoFields.photos;
   // newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
@@ -122,7 +124,7 @@ exports.put = async (req, res) => {
   }
 
   try{
-    newEvent = await utils.managePhotoUpdate({
+    newEvent = await utils.manageMultiplePhotoUpdate({
       col: EventsCol,
       query: query,
       uploadedPhotos: uploadedPhotos,
@@ -135,16 +137,7 @@ exports.put = async (req, res) => {
 
   const values = {
     $set: {
-      title: newEvent.title,
-      description: newEvent.description,
-      start: newEvent.start,
-      end: newEvent.end,
-      hostChurchOID: newEvent.hostChurchOID,
-      status: newEvent.status,
-      location: newEvent.location,
-      registerLink: newEvent.registerLink,
-      // featuredPhoto: newEvent.featuredPhoto || null,
-      photos: newEvent.photos || null
+      ...newEvent
     }
   };
 
