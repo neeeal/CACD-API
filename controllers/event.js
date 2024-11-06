@@ -21,7 +21,7 @@ exports.post = async (req, res) => {
   const newEvent = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
   // const uploadedPhoto = photoFields.featuredPhoto[0];
-  const uploadedPhotos = photoFields.photos;
+  const uploadedPhotos = photoFields;
 
   // if (uploadedPhoto) {
   //   try{
@@ -36,8 +36,10 @@ exports.post = async (req, res) => {
 
   if (uploadedPhotos) {
     try{
+      console.log("events post save")
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
-      newEvent.photos = savedPhotos.map((photo) => photo._id);
+      console.log(savedPhotos)
+      newEvent.photos = savedPhotos; //savedPhotos.map((photo) => photo._id);
     }
     catch (err){
       console.error(err.stack);
@@ -86,11 +88,13 @@ exports.post = async (req, res) => {
 }
 
 exports.put = async (req, res) => {
-  const newEvent = req.body;
-  const photoFields = req.files; // multiple photos object of array of objects
+  let newEvent = req.body;
+  const uploadedPhotos = req.files; // multiple photos object of array of objects
+  console.log("uploadedPhotos")
+  console.log(uploadedPhotos)
   // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
-  const uploadedPhotos = photoFields.photos;
-  newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
+  // const uploadedPhotos = photoFields.photos;
+  // newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
 
   // if (uploadedPhoto) {
   //   try{
@@ -103,36 +107,41 @@ exports.put = async (req, res) => {
   //   }
   // }
 
-  if (uploadedPhotos) {
-    try{
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
-      newEvent.photos = savedPhotos.map((photo) => photo._id);
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ error: "Server error" });
-    }
-  }
-
-  const values = {
-    $set: {
-      title: newEvent.title,
-      description: newEvent.description,
-      start: newEvent.start,
-      end: newEvent.end,
-      hostChurchOID: newEvent.hostChurchOID,
-      status: newEvent.status,
-      location: newEvent.location,
-      registerLink: newEvent.registerLink,
-      // featuredPhoto: newEvent.featuredPhoto || null,
-      photos: newEvent.photos || null
-    }
-  };
+  // if (uploadedPhotos) {
+  //   try{
+  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+  //     newEvent.photos = savedPhotos.map((photo) => photo._id);
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ error: "Server error" });
+  //   }
+  // }
 
   const query = {
     _id: newEvent.OID,
     deletedAt: null
   }
+
+  try{
+    newEvent = await utils.manageMultiplePhotoUpdate({
+      col: EventsCol,
+      query: query,
+      uploadedPhotos: uploadedPhotos,
+      newDoc: newEvent
+    });
+  } catch(err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  const values = {
+    $set: {
+      ...newEvent
+    }
+  };
+
+
 
   const options = { 
     new: false

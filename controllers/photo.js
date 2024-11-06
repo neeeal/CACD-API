@@ -135,8 +135,9 @@ exports.getOne = async (req, res) => {
     }
 
     // Assuming `data.Photo.path` contains the relative path to the Photo
-    const absolutePath = path.join(__dirname, '..', data.path); // Adjust path as necessary
+    // const absolutePath = path.join(__dirname, '..', data.path); // Adjust path as necessary
     // const absolutePath = path.join(process.env.IMAGEBASE_URI, data.photo.path); // Adjust path as necessary
+    const absolutePath = data.path; // Adjust path as necessary
     // console.log(absolutePath);
 
     // Check if the file exists

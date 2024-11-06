@@ -130,37 +130,91 @@ exports.savePhoto = async ({uploadedPhoto, details}) => {
   return newPhotoDoc;
 }
 
-
-exports.savePhotos = async ({uploadedPhotos, details}) => {
-  if (!uploadedPhotos || uploadedPhotos.length === 0) {
-    throw new Error("No photos to upload");
+exports.savePhotos = async({uploadedPhotos, details}) => {
+  if (!uploadedPhotos || Object.keys(uploadedPhotos).length === 0) {
+    console.log("No photos to upload");
+    return null;
   }
 
-  // Map over uploadedPhotos to create an array of photo documents
-  const photoDocuments = uploadedPhotos.map((uploadedPhoto,idx) => {
-    const values = {
-      ...uploadedPhoto,
-      title: exports.removeExtension(uploadedPhoto.originalname),
-      // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
-      // caption: details[idx].caption,
-      // eventOID: details[idx].eventOID || null,
-      // photoInfo: photo,
-    }
-    
-    const newPhotoDoc = new PhotosCol(values);
-    return newPhotoDoc;
-  });
+  const allOIDS = await Promise.all(
+    Object.keys(uploadedPhotos).map(async (fieldname) => {
+      const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhoto, idx) => {
+      const values = {
+          ...uploadedPhoto,
+          title: exports.removeExtension(uploadedPhoto.originalname),
+          // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+          // caption: details[idx].caption,
+          // eventOID: details[idx].eventOID || null,
+          // photoInfo: photo,
+        }
 
-  // const values = {
-  //   ...uploadedPhotos,
-  //   title: exports.removeExtension(uploadedPhotos.originalname),
-  //   eventOID: details.eventOID || null,
-  //   // photoInfo: photo,
-  // }
+        return new PhotosCol(values);
+      });
+
+      const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+      return savedPhotos.map((doc) => doc._id);
+    })
+  )
+
+  const insertedOIDS = allOIDS.flat();
+
+  console.log("insertedOIDS");
+  console.log(insertedOIDS)
+
+  return insertedOIDS;
+
+  // await Promise.all(
+  //   Object.keys(uploadedPhotos).forEach(async (fieldname) => {
+  //     const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhoto,idx) => {
+  //       const values = {
+  //         ...uploadedPhoto,
+  //         title: exports.removeExtension(uploadedPhoto.originalname),
+  //         // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+  //         // caption: details[idx].caption,
+  //         // eventOID: details[idx].eventOID || null,
+  //         // photoInfo: photo,
+  //       }
+        
+  //       const newPhotoDoc = new PhotosCol(values);
+  //       return newPhotoDoc;
+  //     });
   
-  const savedPhotos = await PhotosCol.insertMany(photoDocuments);
-  return photoDocuments; // Return saved documents
+  //     const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+  //   })
+  // )
 }
+
+
+// exports.savePhotos = async ({uploadedPhotos, details}) => {
+//   if (!uploadedPhotos || Object.keys(uploadedPhotos).length === 0) {
+//     throw new Error("No photos to upload");
+//   }
+
+//   // Map over uploadedPhotos to create an array of photo documents
+//   const photoDocuments = uploadedPhotos.map((uploadedPhoto,idx) => {
+//     const values = {
+//       ...uploadedPhoto,
+//       title: exports.removeExtension(uploadedPhoto.originalname),
+//       // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+//       // caption: details[idx].caption,
+//       // eventOID: details[idx].eventOID || null,
+//       // photoInfo: photo,
+//     }
+    
+//     const newPhotoDoc = new PhotosCol(values);
+//     return newPhotoDoc;
+//   });
+
+//   // const values = {
+//   //   ...uploadedPhotos,
+//   //   title: exports.removeExtension(uploadedPhotos.originalname),
+//   //   eventOID: details.eventOID || null,
+//   //   // photoInfo: photo,
+//   // }
+  
+//   const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+//   return photoDocuments; // Return saved documents
+// }
 
 exports.updatePhoto = async ({uploadedPhoto, details}) => {
   console.log(details)
@@ -238,6 +292,7 @@ exports.getOldPhotos = async ({col, query}) => {
     // .photos;
     console.log("OLD")
     console.log(query)
+    console.log(oldPhotos)
     console.log("OLD")
 
     return oldPhotos.photos;
@@ -254,10 +309,6 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });
   }
-
-  console.log( oldPhotos)
-  console.log(uploadedPhoto)
-  console.log(!uploadedPhoto && oldPhotos)
 
   if (uploadedPhoto) {
   // If has uploadedPhoto
@@ -279,12 +330,6 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
       console.log(oldPhotos)
       newDoc.photos = savedPhoto._id;
     }
-  // } else if (uploadedPhoto && oldPhotos){
-  //   // has uploaded photo and has old photo
-  //   // soft delete
-  //   console.log("soft");
-  //   console.log(oldPhotos._id)
-  //   await exports.softDeletePhoto({photos: oldPhotos, col: col});
   } else if (!uploadedPhoto && newDoc.deletePhoto && oldPhotos){
     // no new uploaded photo and deletePhoto is true and has old photo
     // hard delete
@@ -294,3 +339,56 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
 
   return newDoc;
 }
+
+exports.manageMultiplePhotoUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
+  console.log("manageMultiplePhotoUpdate")
+
+  let oldPhotos;
+  try{
+    oldPhotos = await exports.getOldPhotos({ col: col, query: query });
+  }
+  catch (err){
+    console.log("Old Photo Retrieval")
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  if (newDoc.deletePhotos && !newDoc.deletePhotos.length){
+    // delete old photos from given oid
+    console.log("manageMultiplePhotoUpdate hard delete");
+    const results = newDoc.deletePhotos.map( oid => {
+      return exports.hardDeletePhoto({ photos: {_id: oid}, col: col });
+    })
+  }
+
+  // await Promise.all(
+  //   Object.keys(uploadedPhotos).map( async(fieldname) => {
+  //     const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhoto, idx) => {
+  //       const values = {
+  //           ...uploadedPhoto,
+  //           title: exports.removeExtension(uploadedPhoto.originalname),
+  //           // title: details[idx].title || exports.removeExtension(uploadedPhoto.originalname),
+  //           // caption: details[idx].caption,
+  //           // eventOID: details[idx].eventOID || null,
+  //           // photoInfo: photo,
+  //         }
+  
+  //         return new PhotosCol(values);
+  //       });
+  
+  //       const savedPhotos = await PhotosCol.insertMany(photoDocuments);
+  //       return savedPhotos.map((doc) => doc._id);
+  //   })
+  // )
+
+  return newDoc;
+}
+
+// exports.formatMulPhotosField = ({ mulPhotos }) => {
+
+//   const uniqueFieldnames = [...new Set(mulPhotos.map(photo => photo.fieldname))];
+
+//   const formattedMulPhotos = {...uniqueFieldnames.map()}
+
+//   return formattedMulPhotos;
+// }
