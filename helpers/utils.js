@@ -74,33 +74,40 @@ exports.hardDeletePhoto = async ({photos, col}) => {
   return;
 }
 
-exports.softDeletePhoto = async ({photos, col}) => {
-  // const photoPath = path.join(__dirname, "..", originalPath);
-  // const photoPath = originalPath;
-  console.log("photos")
-  console.log(photos)
-
-  // // Hard Delete (delete file from storage)
-  // await fs.promises.unlink(photoPath);
-
+exports.softDeletePhoto = async ({photos, doc, col}) => {
   // Soft Delete (Update the deletedAt field)
-  const photoDoc = await PhotosCol.findOneAndUpdate(
-    {
-      _id: photos._id,
-      deletedAt: null
-    }, 
-    {
-      deletedAt: moment().toISOString()
-    },
-    {
-      new: true
-    }
-  )
-
-  let doc;
-  if (col)
-    doc = exports.updateDocPhotos({photos: photos, col: col});
+  if (!Array.isArray(photos)){
+    // Soft delete one photo
+    const photoDoc = await PhotosCol.findOneAndUpdate(
+      {
+        _id: photos._id,
+        deletedAt: null
+      }, 
+      {
+        deletedAt: moment().toISOString()
+      },
+      {
+        new: true
+      }
+    )
+  } else {
+    console.log("HERE")
+    // Soft delete multiple photos
+    const photoDocs = await PhotosCol.updateMany(
+      {
+        _id: { $in: photos },
+        deletedAt: null
+      }, 
+      {
+        deletedAt: moment().toISOString()
+      }
+    )
+  }
   
+  let newDoc;
+  if (col)
+    newDoc = exports.updateDocPhotos({photos: photos, col: col, doc: doc});
+
   console.log("photo soft deleted successfully.");
   return;
 }
@@ -266,20 +273,42 @@ exports.updatePhoto = async ({uploadedPhoto, details}) => {
   return data;
 }
 
-exports.updateDocPhotos = async ({photos, col}) => {
-  const doc = await col.findOneAndUpdate(
-    {
-      photos: photos._id,
-      deletedAt: null
-    }, 
-    {
-      photos: null
-    },
-    {
-      new: true
-    }
-  );
-  return doc;
+exports.updateDocPhotos = async ({photos, doc, col}) => {
+  let newDoc;
+  if (!Array.isArray(photos)) {
+    // If only one photo
+    newDoc = await col.findOneAndUpdate(
+      {
+        _id: doc.OID || doc._id,
+        deletedAt: null
+      }, 
+      {
+        photos: null
+      },
+      {
+        new: true
+      }
+    );
+  } else {
+    // If accepting multiple photos
+    newDoc = await col.findOneAndUpdate(
+      {
+        // photos: photos._id,
+        _id: doc.OID || doc._id,
+        deletedAt: null
+      }, 
+      {
+        $pullAll: { photos: [...photos]}
+      },
+      {
+        new: true
+      }
+    );
+  }
+  console.log("updateDocPhotos")
+  console.log(newDoc)
+  console.log("updateDocPhotos")
+  return newDoc;
 }
 
 exports.getOldPhotos = async ({col, query}) => {
@@ -290,10 +319,10 @@ exports.getOldPhotos = async ({col, query}) => {
     .populate("photos")
     .lean();
     // .photos;
-    console.log("OLD")
-    console.log(query)
-    console.log(oldPhotos)
-    console.log("OLD")
+    // console.log("OLD")
+    // console.log(query)
+    // console.log(oldPhotos)
+    // console.log("OLD")
 
     return oldPhotos.photos;
 }
@@ -342,6 +371,8 @@ exports.managePhotoUpdate = async ({col, query, uploadedPhoto, newDoc}) => {
 
 exports.manageMultiplePhotoUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   console.log("manageMultiplePhotoUpdate")
+  console.log(newDoc)
+  console.log("manageMultiplePhotoUpdate")
 
   let oldPhotos;
   try{
@@ -353,12 +384,13 @@ exports.manageMultiplePhotoUpdate = async ({col, query, uploadedPhotos, newDoc})
     return res.status(500).send({ error: "Server error" });
   }
 
-  if (newDoc.deletePhotos && !newDoc.deletePhotos.length){
+  if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
     // delete old photos from given oid
-    console.log("manageMultiplePhotoUpdate hard delete");
-    const results = newDoc.deletePhotos.map( oid => {
-      return exports.hardDeletePhoto({ photos: {_id: oid}, col: col });
-    })
+    console.log("manageMultiplePhotoUpdate soft delete");
+    // const results = newDoc.deleteMulPhotos.map( oid => {
+    //   return exports.hardDeletePhoto({ photos: {_id: oid}, col: col });
+      // })
+      exports.softDeletePhoto({ photos: newDoc.deleteMulPhotos, col: col, doc: newDoc });
   }
 
   // await Promise.all(
