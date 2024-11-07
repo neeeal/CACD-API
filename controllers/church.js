@@ -51,7 +51,7 @@ exports.post = async (req, res) => {
     ministers: newChurch.ministers,
     contacts: newChurch.contacts,
     // featuredPhoto: newChurch.photo || null,
-    photos: newChurch.photos || null,
+    photos: newChurch.photos || [],
   };
 
   let data;
@@ -109,7 +109,7 @@ exports.put = async (req, res) => {
       ministers: newChurch.ministers,
       contacts: newChurch.contacts,
       // featuredPhoto: newChurch.featuredPhoto || null,
-      photos: newChurch.photos || null,
+      photos: newChurch.photos || [],
     }
   };
 

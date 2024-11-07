@@ -39,7 +39,7 @@ exports.post = async (req, res) => {
     lastName: newTeam.lastName,
     position: newTeam.position,
     description: newTeam.description,
-    photos: newTeam.photos || null,
+    photos: newTeam.photos || [],
   }
   
   let data;

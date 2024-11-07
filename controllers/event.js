@@ -57,7 +57,7 @@ exports.post = async (req, res) => {
     location: newEvent.location,
     registerLink: newEvent.registerLink,
     // featuredPhoto: newEvent.featuredPhoto || null,
-    photos: newEvent.photos || null
+    photos: newEvent.photos || []
   }
 
   let data;

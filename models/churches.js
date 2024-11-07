@@ -31,6 +31,7 @@ const churchSchema = mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "photos",
+        default: [],
       }
     ],
     deletedAt: {

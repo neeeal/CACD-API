@@ -127,7 +127,7 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
     ...uploadedPhotos,
     title: details.title || exports.removeExtension(uploadedPhotos.originalname),
     caption: details.caption,
-    eventOID: details.eventOID || null,
+    eventOID: details.eventOID || [],
     // photoInfo: photo,
   }
   
@@ -275,36 +275,38 @@ exports.updatePhoto = async ({uploadedPhotos, details}) => {
 
 exports.updateDocPhotos = async ({photos, doc, col}) => {
   let newDoc;
-  if (!Array.isArray(photos)) {
-    // If only one photo
-    newDoc = await col.findOneAndUpdate(
-      {
-        _id: doc.OID || doc._id,
-        deletedAt: null
-      }, 
-      {
-        photos: null
-      },
-      {
-        new: true
-      }
-    );
-  } else {
+
+  const query = {
+    // photos: photos._id,
+    _id: doc.OID || doc._id,
+    deletedAt: null
+  };
+
+  const values = {
+    $pull: { photos: {
+      $in: 
+      !Array.isArray(photos) 
+        ? [photos]
+        : [...photos]
+    }
+    }
+  };
+
+  const options = { new: true };
+
+  console.log("photos")
+  console.log(query)
+  console.log(values)
+  console.log("photos")
     // If accepting multiple photos
-    newDoc = await col.findOneAndUpdate(
-      {
-        // photos: photos._id,
-        _id: doc.OID || doc._id,
-        deletedAt: null
-      }, 
-      {
-        $pullAll: { photos: [...photos]}
-      },
-      {
-        new: true
+    newDoc = await col.findOneAndUpdate(query, values,options);
+    console.log(      {
+      $pull: { photos: 
+        !Array.isArray(photos) 
+          ? [photos]
+          : [...photos]
       }
-    );
-  }
+    })
   console.log("updateDocPhotos")
   console.log(newDoc)
   console.log("updateDocPhotos")

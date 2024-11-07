@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     photos: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "photos",
-      default: null,
+      default: [],
     },
     accessLevel: {
       type: String,
