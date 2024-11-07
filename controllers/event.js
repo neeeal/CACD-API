@@ -20,13 +20,13 @@ exports.get = async (req, res) => {
 exports.post = async (req, res) => {
   const newEvent = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
-  // const uploadedPhoto = photoFields.featuredPhoto[0];
+  // const uploadedPhotos = photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields;
 
-  // if (uploadedPhoto) {
+  // if (uploadedPhotos) {
   //   try{
-  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newEvent});
-  //     newEvent.featuredPhoto = savedPhoto._id;
+  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+  //     newEvent.featuredPhoto = savedPhotos._id;
   //   }
   //   catch (err){
   //     console.error(err.stack);
@@ -37,7 +37,7 @@ exports.post = async (req, res) => {
   if (uploadedPhotos) {
     try{
       console.log("events post save")
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newEvent});
       console.log(savedPhotos)
       newEvent.photos = savedPhotos; //savedPhotos.map((photo) => photo._id);
     }
@@ -63,8 +63,8 @@ exports.post = async (req, res) => {
   let data;
   try{
     // let photo;
-    // if(uploadedPhoto) 
-    //   photo = await utils.savePhoto({uploadedPhoto: uploadedPhoto, details: newEvent});
+    // if(uploadedPhotos) 
+    //   photo = await utils.savePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
 
     // if (photo)
     //   values.featuredPhoto = photo._id;
@@ -92,31 +92,6 @@ exports.put = async (req, res) => {
   const uploadedPhotos = req.files; // multiple photos object of array of objects
   console.log("uploadedPhotos")
   console.log(uploadedPhotos)
-  // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
-  // const uploadedPhotos = photoFields.photos;
-  // newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
-
-  // if (uploadedPhoto) {
-  //   try{
-  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newEvent});
-  //     newEvent.featuredPhoto = savedPhoto._id;
-  //   }
-  //   catch (err){
-  //     console.error(err.stack);
-  //     return res.status(500).send({ error: "Server error" });
-  //   }
-  // }
-
-  // if (uploadedPhotos) {
-  //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
-  //     newEvent.photos = savedPhotos.map((photo) => photo._id);
-  //   }
-  //   catch (err){
-  //     console.error(err.stack);
-  //     return res.status(500).send({ error: "Server error" });
-  //   }
-  // }
 
   const query = {
     _id: newEvent.OID,
@@ -124,7 +99,12 @@ exports.put = async (req, res) => {
   }
 
   try{
-    newEvent = await utils.manageMultiplePhotoUpdate({
+    // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
+    //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
+    // } else if (uploadedPhotos) {
+    //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
+    // }
+    newEvent = await utils.manageMultiplePhotosUpdate({
       col: EventsCol,
       query: query,
       uploadedPhotos: uploadedPhotos,
@@ -155,8 +135,8 @@ exports.put = async (req, res) => {
     // console.log(values)
     // console.log(data)
     // let photo;
-    // if(uploadedPhoto) 
-    //   photo = await utils.updatePhoto({uploadedPhoto: uploadedPhoto, details: data});
+    // if(uploadedPhotos) 
+    //   photo = await utils.updatePhoto({uploadedPhotos: uploadedPhotos, details: data});
     
     if (!data) 
       throw new Error("Event not found");

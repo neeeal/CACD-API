@@ -47,16 +47,16 @@ exports.post = async (req, res) => {
   console.log("here")
   const { email, password, firstName, lastName } = req.body;
   const newUser = new UserCol({email, password, firstName, lastName});
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
   newUser.password = await bcrypt.hash(password, salt);
 
-  if (uploadedPhoto) {
+  if (uploadedPhotos) {
     try{
-      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newUser});
-      newUser.photos = savedPhoto._id;
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newUser});
+      newUser.photos = savedPhotos._id;
     }
     catch (err){
       console.error(err.stack);
@@ -87,7 +87,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newUser = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
 
   const query = { _id: newUser.OID, deletedAt: null }
 
@@ -99,10 +99,10 @@ exports.put = async (req, res) => {
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
   try{
-    newUser = await utils.managePhotoUpdate({
+    newUser = await utils.managePhotosUpdate({
       col: UserCol,
       query: query,
-      uploadedPhoto: uploadedPhoto,
+      uploadedPhotos: uploadedPhotos,
       newDoc: newUser
     });
   } catch(err){

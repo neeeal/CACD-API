@@ -19,13 +19,13 @@ exports.get = async (req, res) => {
 exports.post = async (req, res) => {
   const newChurch = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
-  // const uploadedPhoto = photoFields.featuredPhoto[0];
+  // const uploadedPhotos = photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields.photos;
 
-  // if (uploadedPhoto) {
+  // if (uploadedPhotos) {
   //   try{
-  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
-  //     newChurch.photo = savedPhoto._id;
+  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+  //     newChurch.photo = savedPhotos._id;
   //   }
   //   catch (err){
   //     console.error(err.stack);
@@ -35,7 +35,7 @@ exports.post = async (req, res) => {
 
   if (uploadedPhotos) {
     try{
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newChurch});
       newChurch.photos = savedPhotos.map((photo) => photo._id);
     }
     catch (err){
@@ -73,16 +73,16 @@ exports.post = async (req, res) => {
 exports.put = async (req, res) => {
   const newChurch = req.body;
   const photoFields = req.files; // multiple photos object of array of objects
-  // const uploadedPhoto = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
+  // const uploadedPhotos = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields.photos;
   
   // initialize photos
   newChurch.photos = !newChurch.photos || [] ? [] : newChurch.photos;
 
-  // if (uploadedPhoto) {
+  // if (uploadedPhotos) {
   //   try{
-  //     const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newChurch});
-  //     newChurch.photo = savedPhoto._id;
+  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+  //     newChurch.photo = savedPhotos._id;
   //   }
   //   catch (err){
   //     console.error(err.stack);
