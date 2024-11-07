@@ -37,7 +37,7 @@ exports.post = async (req, res) => {
   if (uploadedPhotos) {
     try{
       console.log("events post save")
-      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newEvent});
       console.log(savedPhotos)
       newEvent.photos = savedPhotos; //savedPhotos.map((photo) => photo._id);
     }
@@ -92,31 +92,6 @@ exports.put = async (req, res) => {
   const uploadedPhotos = req.files; // multiple photos object of array of objects
   console.log("uploadedPhotos")
   console.log(uploadedPhotos)
-  // const uploadedPhotos = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
-  // const uploadedPhotos = photoFields.photos;
-  // newEvent.photos = !newEvent.photos || [] ? [] : newEvent.photos;
-
-  // if (uploadedPhotos) {
-  //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
-  //     newEvent.featuredPhoto = savedPhotos._id;
-  //   }
-  //   catch (err){
-  //     console.error(err.stack);
-  //     return res.status(500).send({ error: "Server error" });
-  //   }
-  // }
-
-  // if (uploadedPhotos) {
-  //   try{
-  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
-  //     newEvent.photos = savedPhotos.map((photo) => photo._id);
-  //   }
-  //   catch (err){
-  //     console.error(err.stack);
-  //     return res.status(500).send({ error: "Server error" });
-  //   }
-  // }
 
   const query = {
     _id: newEvent.OID,
@@ -124,6 +99,11 @@ exports.put = async (req, res) => {
   }
 
   try{
+    // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
+    //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
+    // } else if (uploadedPhotos) {
+    //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
+    // }
     newEvent = await utils.manageMultiplePhotosUpdate({
       col: EventsCol,
       query: query,

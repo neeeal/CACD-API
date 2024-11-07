@@ -109,7 +109,7 @@ exports.softDeletePhotos = async ({photos, doc, col}) => {
     newDoc = exports.updateDocPhotos({photos: photos, col: col, doc: doc});
 
   console.log("photo soft deleted successfully.");
-  return;
+  return newDoc;
 }
 
 exports.ISOToDate = (iso) => {
@@ -137,7 +137,7 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
   return newPhotoDoc;
 }
 
-exports.saveMultiplePhotos = async({uploadedPhotos, details}) => {
+exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
   if (!uploadedPhotos || Object.keys(uploadedPhotos).length === 0) {
     console.log("No photos to upload");
     return null;
@@ -328,6 +328,7 @@ exports.getOldPhotos = async ({col, query}) => {
 }
 
 exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
+  // Ca
   let oldPhotos;
   try{
     oldPhotos = await exports.getOldPhotos({ col: col, query: query });
@@ -369,10 +370,44 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   return newDoc;
 }
 
+exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
+  const savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:doc});
+
+  const query = {
+    _id: doc.OID,
+    deletedAt: null
+  };
+
+  console.log("savedPhotos")
+  console.log(savedPhotos)
+  console.log("savedPhotos")
+
+  const values = {
+      $push: { photos: [...savedPhotos] }
+  };
+
+  const options = { 
+    new: true
+  };
+
+  // console.log("TESTING")
+  // console.log(query)
+  // console.log(values)
+  // console.log("TESTING")
+
+  const newDoc = await col.findOneAndUpdate(query, values, options);
+
+  // console.log("updateMultiplePhotos");
+  // console.log(newDoc);
+  // console.log("updateMultiplePhotos");
+
+  return newDoc;
+}
+
 exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
-  console.log("manageMultiplePhotosUpdate")
-  console.log(newDoc)
-  console.log("manageMultiplePhotosUpdate")
+  // console.log("manageMultiplePhotosUpdate")
+  // console.log(newDoc)
+  // console.log("manageMultiplePhotosUpdate")
 
   let oldPhotos;
   try{
@@ -384,60 +419,50 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
     return res.status(500).send({ error: "Server error" });
   }
 
-  // if (uploadedPhotos) {
-  //   uploadedPhotos.map(photo => {
-  //     photo.fieldname = 
-  //     uploadedPhotos.fieldname.includes("new") ?
-  //       uploadedPhotos.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-  //       uploadedPhotos.fieldname;
-  //     return photo;
-  //   })
+  if (uploadedPhotos && Object.keys(uploadedPhotos).length) {
+      Object.keys(uploadedPhotos).forEach(fieldName => {
+        uploadedPhotos[fieldName].map(photo => {
+          photo[fieldName] = 
+          photo.fieldname.includes("new") ?
+            photo.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+            photo.fieldname;
 
-  //     let savedPhotos;
-  //     if (oldPhotos){
-  //       // Update existing photo doc
-  //       console.log("manageMultiplePhotosUpdate update")
-  //       newDoc.photos = oldPhotos._id;
-  //       savedPhotos = await exports.updatePhoto({uploadedPhotos:uploadedPhotos, details:newDoc});
-  //     } else {
-  //       // create new photo doc
-  //       console.log("manageMultiplePhotosUpdate save")
-  //       savedPhotos = await exports.savePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-  //       console.log(oldPhotos)
-  //       newDoc.photos = savedPhotos._id;
-  //     }
-  // } else 
-  if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
+            return photo;
+        })
+      });
+
+      let savedPhotos;
+      if (oldPhotos){
+        // Update existing photo doc
+        console.log("manageMultiplePhotosUpdate update")
+        newDoc.photos = oldPhotos._id;
+        savedPhotos = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
+      } else {
+        // create new photo doc
+        console.log("manageMultiplePhotosUpdate save")
+        savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc});
+        console.log(oldPhotos)
+        newDoc.photos = savedPhotos._id;
+      }
+  } else if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
     // delete old photos from given oid
     console.log("manageMultiplePhotosUpdate soft delete");
     // const results = newDoc.deleteMulPhotos.map( oid => {
     //   return exports.hardDeletePhotos({ photos: {_id: oid}, col: col });
       // })
-      exports.softDeletePhotos({ photos: newDoc.deleteMulPhotos, col: col, doc: newDoc });
+      newDoc = exports.softDeletePhotos({ photos: newDoc.deleteMulPhotos, col: col, doc: newDoc });
   }
-
-  // await Promise.all(
-  //   Object.keys(uploadedPhotos).map( async(fieldname) => {
-  //     const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhotos, idx) => {
-  //       const values = {
-  //           ...uploadedPhotos,
-  //           title: exports.removeExtension(uploadedPhotos.originalname),
-  //           // title: details[idx].title || exports.removeExtension(uploadedPhotos.originalname),
-  //           // caption: details[idx].caption,
-  //           // eventOID: details[idx].eventOID || null,
-  //           // photoInfo: photo,
-  //         }
-  
-  //         return new PhotosCol(values);
-  //       });
-  
-  //       const savedPhotos = await PhotosCol.insertMany(photoDocuments);
-  //       return savedPhotos.map((doc) => doc._id);
-  //   })
-  // )
 
   return newDoc;
 }
+
+// exports.SoftDeleteMultiplePhotos = async ({doc, col}) => {
+//   const photos = doc.deleteMulPhotos;
+
+//   const newDoc = exports.softDeletePhotos({ photos: photos, col: col, doc: doc });
+  
+//   return newDoc;
+// }
 
 // exports.formatMulPhotosField = ({ mulPhotos }) => {
 

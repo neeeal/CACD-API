@@ -35,7 +35,7 @@ exports.post = async (req, res) => {
 
   if (uploadedPhotos) {
     try{
-      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newChurch});
       newChurch.photos = savedPhotos.map((photo) => photo._id);
     }
     catch (err){
