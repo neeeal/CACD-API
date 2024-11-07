@@ -33,15 +33,15 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const details = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
   
-  if (!uploadedPhoto) {
+  if (!uploadedPhotos) {
     return res.status(404).json({ message: 'No file uploaded' });
   }
 
   let data; 
   try{
-    data = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:details});
+    data = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:details});
   }
   catch (err){
     console.error(err.stack);
@@ -55,11 +55,11 @@ exports.post = async (req, res) => {
 } 
 exports.put = async (req, res) => {
   const details = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
 
   let data;
   try{
-    data = await utils.updatePhoto({uploadedPhoto:uploadedPhoto, details:details});
+    data = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:details});
 
   } catch (err){
     console.error(err.stack);

@@ -19,14 +19,14 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newTeam = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
 
-  console.log(uploadedPhoto)
+  console.log(uploadedPhotos)
 
-  if (uploadedPhoto) {
+  if (uploadedPhotos) {
     try{
-      const savedPhoto = await utils.savePhoto({uploadedPhoto:uploadedPhoto, details:newTeam});
-      newTeam.photos = savedPhoto._id;
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newTeam});
+      newTeam.photos = savedPhotos._id;
     }
     catch (err){
       console.error(err.stack);
@@ -61,7 +61,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newTeam = req.body;
-  const uploadedPhoto = req.file;
+  const uploadedPhotos = req.file;
 
   const query = {
     _id: newTeam.OID,
@@ -69,10 +69,10 @@ exports.put = async (req, res) => {
   }
 
   try{
-    newTeam = await utils.managePhotoUpdate({
+    newTeam = await utils.managePhotosUpdate({
       col: TeamsCol,
       query: query,
-      uploadedPhoto: uploadedPhoto,
+      uploadedPhotos: uploadedPhotos,
       newDoc: newTeam
     });
   } catch(err){
