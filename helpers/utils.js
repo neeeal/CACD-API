@@ -80,9 +80,10 @@ exports.hardDeletePhotos = async ({photos, col, doc}) => {
 
 exports.softDeletePhotos = async ({photos, doc, col}) => {
   // Soft Delete (Update the deletedAt field)
+  let photoDocs;
   if (!Array.isArray(photos)){
     // Soft delete one photo
-    const photoDoc = await PhotosCol.findOneAndUpdate(
+    photoDocs = await PhotosCol.findOneAndUpdate(
       {
         _id: photos._id,
         deletedAt: null
@@ -97,7 +98,7 @@ exports.softDeletePhotos = async ({photos, doc, col}) => {
   } else {
     console.log("HERE")
     // Soft delete multiple photos
-    const photoDocs = await PhotosCol.updateMany(
+    photoDocs = await PhotosCol.updateMany(
       {
         _id: { $in: photos },
         deletedAt: null
@@ -113,7 +114,7 @@ exports.softDeletePhotos = async ({photos, doc, col}) => {
     newDoc = exports.updateDocPhotos({photos: photos, col: col, doc: doc});
 
   console.log("photo soft deleted successfully.");
-  return newDoc;
+  return newDoc || photoDocs;
 }
 
 exports.ISOToDate = (iso) => {
@@ -418,7 +419,8 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
 
   let oldPhotos;
   try{
-    oldPhotos = await exports.getOldPhotos({ col: col, query: query });
+    if (col)
+      oldPhotos = await exports.getOldPhotos({ col: col, query: query });
   }
   catch (err){
     console.log("Old Photo Retrieval")
@@ -426,6 +428,7 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
     return res.status(500).send({ error: "Server error" });
   }
 
+  let savedPhotos;
   if (uploadedPhotos && Object.keys(uploadedPhotos).length) {
       Object.keys(uploadedPhotos).forEach(fieldName => {
         uploadedPhotos[fieldName].map(photo => {
@@ -438,7 +441,6 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
         })
       });
 
-      let savedPhotos;
       if (oldPhotos && oldPhotos.length) {
         // Update existing photo doc
         console.log("manageMultiplePhotosUpdate update")
@@ -449,7 +451,8 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
         console.log("manageMultiplePhotosUpdate save")
         savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc});
         console.log(oldPhotos)
-        newDoc.photos = savedPhotos._id;
+        if (newDoc) 
+          newDoc.photos = savedPhotos._id;
       }
   } else if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
     // delete old photos from given oid
@@ -460,7 +463,7 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
       newDoc = exports.softDeletePhotos({ photos: newDoc.deleteMulPhotos, col: col, doc: newDoc });
   }
 
-  return newDoc;
+  return newDoc || savedPhotos;
 }
 
 // exports.SoftDeleteMultiplePhotos = async ({doc, col}) => {

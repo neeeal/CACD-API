@@ -55,11 +55,18 @@ exports.post = async (req, res) => {
 } 
 exports.put = async (req, res) => {
   const details = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
+  console.log(uploadedPhotos)
 
   let data;
   try{
-    data = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:details});
+    // data = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:details});
+    data = await utils.manageMultiplePhotosUpdate({
+      // col: EventsCol,
+      // query: query,
+      uploadedPhotos: uploadedPhotos,
+      newDoc: details
+    });
 
   } catch (err){
     console.error(err.stack);
