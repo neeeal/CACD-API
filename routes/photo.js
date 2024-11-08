@@ -8,11 +8,11 @@ const validation = require("../middlewares/validation.js");
 router.get("/", controller.get)
 router.get("/getOne", controller.getOne)
 router.post("/", 
-  fileUpload.single("photo"), 
+  fileUpload.single("default"), 
   controller.post
 )
 router.put("/", 
-  fileUpload.single("photo"), 
+  fileUpload.single("default"), 
   controller.put
 )
 router.delete("/:OID", controller.delete)

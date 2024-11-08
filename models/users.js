@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
       // match: /^(?=.*[!@#$%^_-&*])[a-zA-Z0-9!@#$%^_-&*]+$/, 
     },
     photos: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "photos",
       default: [],
     },

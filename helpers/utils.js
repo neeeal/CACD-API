@@ -30,7 +30,7 @@ exports.removeExtension = (filename) => {
   return parts.join(".");
 }
 
-exports.hardDeletePhotos = async ({photos, col}) => {
+exports.hardDeletePhotos = async ({photos, col, doc}) => {
   // const photoPath = path.join(__dirname, "..", originalPath);
   // const photoPath = originalPath;
   // console.log("photoOID")
@@ -38,11 +38,15 @@ exports.hardDeletePhotos = async ({photos, col}) => {
   console.log(photos)
 
   // // Hard Delete (delete file from storage)
-  await fs.promises.unlink(photos.path);
+  await Promise.all(
+    photos.map(async (photo) => {
+        await fs.promises.unlink(photo.path);
+    })
+  )
 
-  let doc;
+  let newDoc;
   if (col)
-    doc = exports.updateDocPhotos({photos: photos, col: col});
+    newDoc = exports.updateDocPhotos({photos: photos, col: col, doc: doc});
   
   // const doc = await col.findOneAndUpdate(
   //   {
@@ -258,17 +262,17 @@ exports.updatePhoto = async ({uploadedPhotos, details}) => {
     console.log("No Existing Photo")
   }
 
-  // TODO: Handle photo deletion on update
-  if(oldData && data) {
-    if (oldData.originalname != data.originalname) {
-      console.log("updatePhoto soft delete")
-      await exports.softDeletePhotos({photos: oldData});
-    }
-    else{
-      console.log("updatePhoto hard delete")
-      await exports.hardDeletePhotos({photos: data});
-    }
-  }
+  // // TODO: Handle photo deletion on update
+  // if(oldData && data) {
+  //   if (oldData.originalname != data.originalname) {
+  //     console.log("updatePhoto soft delete")
+  //     await exports.softDeletePhotos({photos: oldData});
+  //   }
+  //   // else{
+  //   //   console.log("updatePhoto hard delete")
+  //   //   await exports.hardDeletePhotos({photos: data});
+  //   // }
+  // }
 
   return data;
 }
@@ -334,6 +338,7 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   let oldPhotos;
   try{
     oldPhotos = await exports.getOldPhotos({ col: col, query: query });
+    console.log("oldPhotos")
     console.log(oldPhotos)
   }
   catch (err){
@@ -350,7 +355,7 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
       uploadedPhotos.fieldname;
     
     let savedPhotos;
-    if (oldPhotos){
+    if (oldPhotos && oldPhotos.length){
       // Update existing photo doc
       console.log("managePhotosUpdate update")
       newDoc.photos = oldPhotos._id;
@@ -359,14 +364,14 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
       // create new photo doc
       console.log("managePhotosUpdate save")
       savedPhotos = await exports.savePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-      console.log(oldPhotos)
-      newDoc.photos = savedPhotos._id;
+      console.log(savedPhotos)
+      newDoc.photos = [savedPhotos._id];
     }
   } else if (!uploadedPhotos && newDoc.deletePhoto && oldPhotos){
     // no new uploaded photo and deletePhoto is true and has old photo
     // hard delete
     console.log("managePhotosUpdate hard delete");
-    await exports.hardDeletePhotos({photos: oldPhotos, col: col});
+    await exports.softDeletePhotos({photos: oldPhotos, col: col, doc: newDoc});
   }
 
   return newDoc;
@@ -434,7 +439,7 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
       });
 
       let savedPhotos;
-      if (oldPhotos){
+      if (oldPhotos && oldPhotos.length) {
         // Update existing photo doc
         console.log("manageMultiplePhotosUpdate update")
         newDoc.photos = oldPhotos._id;

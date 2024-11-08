@@ -18,9 +18,9 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newChurch = req.body;
-  const photoFields = req.files; // multiple photos object of array of objects
+  // const photoFields = req.files; // multiple photos object of array of objects
   // const uploadedPhotos = photoFields.featuredPhoto[0];
-  const uploadedPhotos = photoFields.photos;
+  const uploadedPhotos = req.files;
 
   // if (uploadedPhotos) {
   //   try{
@@ -71,13 +71,19 @@ exports.post = async (req, res) => {
 }
 
 exports.put = async (req, res) => {
-  const newChurch = req.body;
-  const photoFields = req.files; // multiple photos object of array of objects
+  let newChurch = req.body;
+  const uploadedPhotos = req.files; // multiple photos object of array of objects
   // const uploadedPhotos = photoFields.featuredPhoto && photoFields.featuredPhoto[0];
-  const uploadedPhotos = photoFields.photos;
+  // const uploadedPhotos = photoFields.photos;
   
   // initialize photos
-  newChurch.photos = !newChurch.photos || [] ? [] : newChurch.photos;
+  // newChurch.photos = !newChurch.photos || [] ? [] : newChurch.photos;
+
+  const query = {
+    _id: newChurch.OID,
+    deletedAt: null
+  }
+
 
   // if (uploadedPhotos) {
   //   try{
@@ -90,38 +96,56 @@ exports.put = async (req, res) => {
   //   }
   // }
 
-  if (uploadedPhotos) {
-    try{
-      const savedPhotos = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:newChurch});
-      newChurch.photos = newChurch.photossavedPhotos.map((photo) => photo._id);
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ error: "Server error" });
-    }
+  // if (uploadedPhotos) {
+  //   try{
+  //     const savedPhotos = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:newChurch});
+  //     newChurch.photos = newChurch.photossavedPhotos.map((photo) => photo._id);
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ error: "Server error" });
+  //   }
+  // }
+
+  try{
+    // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
+    //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
+    // } else if (uploadedPhotos) {
+    //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
+    // }
+    newChurch = await utils.manageMultiplePhotosUpdate({
+      col: ChurchesCol,
+      query: query,
+      uploadedPhotos: uploadedPhotos,
+      newDoc: newChurch
+    });
+  } catch(err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
   }
 
   const values = {
     $set: {
-      name: newChurch.name,
-      elders: newChurch.elders,
-      location: newChurch.location,
-      ministers: newChurch.ministers,
-      contacts: newChurch.contacts,
-      // featuredPhoto: newChurch.featuredPhoto || null,
-      photos: newChurch.photos || [],
+      ...newChurch
     }
   };
 
+  // const values = {
+  //   $set: {
+  //     name: newChurch.name,
+  //     elders: newChurch.elders,
+  //     location: newChurch.location,
+  //     ministers: newChurch.ministers,
+  //     contacts: newChurch.contacts,
+  //     // featuredPhoto: newChurch.featuredPhoto || null,
+  //     photos: newChurch.photos || [],
+  //   }
+  // };
+
   console.log(values)
 
-  const query = {
-    _id: newChurch.OID,
-    deletedAt: null
-  }
-
   const options = { 
-    new: false
+    new: true
   }
 
   let data;

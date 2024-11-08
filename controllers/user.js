@@ -56,7 +56,9 @@ exports.post = async (req, res) => {
   if (uploadedPhotos) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newUser});
-      newUser.photos = savedPhotos._id;
+      newUser.photos = [savedPhotos._id];
+      console.log("IM HERE")
+      console.log([savedPhotos._id])
     }
     catch (err){
       console.error(err.stack);
@@ -69,6 +71,9 @@ exports.post = async (req, res) => {
     const duplicate = await userHelper.checkDuplicates(newUser);
     if (duplicate) 
       throw new Error (`${duplicate} already taken`);
+    console.log("DATA")
+    console.log(newUser)
+    console.log("DATA")
     data = await newUser.save();
   }
   catch (err) {
