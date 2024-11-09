@@ -70,7 +70,7 @@ exports.post = async (req, res) => {
     //   values.featuredPhoto = photo._id;
 
     const newEventDoc = new EventsCol(values);
-    data = await newEventDoc.save();
+    data = await utils.saveAndPopulate(newEventDoc);
   }
   catch (err){
     console.error(err.stack);
@@ -104,14 +104,22 @@ exports.put = async (req, res) => {
     // } else if (uploadedPhotos) {
     //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
     // }
-    newEvent = await utils.manageMultiplePhotosUpdate({
-      col: EventsCol,
-      query: query,
-      uploadedPhotos: uploadedPhotos,
-      newDoc: newEvent
-    });
+    newEvent = await utils.updateAndPopulate({ query: query, values: values, options: options, col: EventsCol });
+
+    if (!newEvent) 
+      throw new Error("Event not found");
+
   } catch(err){
     console.error(err.stack);
+
+    if (err.message.includes("not found"))
+      return res.status(404).send({ error: err.message });
+
+    if (err.message.includes("Cast to ObjectId failed"))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -127,7 +135,12 @@ exports.put = async (req, res) => {
 
   let data;
   try{
-    data = await EventsCol.findOneAndUpdate(query, values, options)
+    data = await utils.manageMultiplePhotosUpdate({
+      col: EventsCol,
+      query: query,
+      uploadedPhotos: uploadedPhotos,
+      newDoc: newEvent
+    });
 
     // console.log(query)
     // console.log(values)

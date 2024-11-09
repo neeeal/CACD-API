@@ -229,8 +229,10 @@ exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
 // }
 
 exports.updatePhoto = async ({uploadedPhotos, details}) => {
+  console.log("updatePhoto")
   console.log(details)
   console.log(uploadedPhotos)
+  console.log("updatePhoto")
   const values = {
     $set: {
       ...uploadedPhotos,
@@ -359,8 +361,9 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
     if (oldPhotos && oldPhotos.length){
       // Update existing photo doc
       console.log("managePhotosUpdate update")
-      newDoc.photos = oldPhotos._id;
+      newDoc.photos = oldPhotos;
       savedPhotos = await exports.updatePhoto({uploadedPhotos:uploadedPhotos, details:newDoc});
+      console.log(savedPhotos)
     } else {
       // create new photo doc
       console.log("managePhotosUpdate save")
@@ -452,7 +455,7 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
         savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc});
         console.log(oldPhotos)
         if (newDoc) 
-          newDoc.photos = savedPhotos._id;
+          newDoc.photos = savedPhotos;
       }
   } else if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
     // delete old photos from given oid
@@ -481,4 +484,30 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
 //   const formattedMulPhotos = {...uniqueFieldnames.map()}
 
 //   return formattedMulPhotos;
+// }
+
+exports.saveAndPopulate = async (doc) => {
+  const data = await doc.save()
+  await data.populate({
+    path: "photos",
+    match: { deletedAt: null },
+    select: "-__v -id"
+  });
+
+  return data;
+}
+
+exports.updateAndPopulate = async ({query, values, options, col}) => {
+  const data = await col.findOneAndUpdate(query, values, options);
+  await data.populate({
+    path: "photos",
+    match: { deletedAt: null },
+    select: "-__v -id"
+  });
+
+  return data;
+}
+
+// exports.getAndPopulate = async ({query, col, offset, limit}) => {
+//   const data = await col.find(query)
 // }

@@ -7,8 +7,7 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
   
-  const data = await ChurchesCol.find(query)
-  .lean();
+  const data = await ChurchesCol.find(query);
 
   res.status(200).send({
     message: "church get",
@@ -57,12 +56,14 @@ exports.post = async (req, res) => {
   let data;
   try{
     const newChurchDoc = new ChurchesCol(values);
-    data = await newChurchDoc.save();
+    data = await utils.saveAndPopulate(newChurchDoc);
   }
   catch (err){
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });
   }
+
+  console.log(data)
 
   res.status(200).send({
     message: "church post",
@@ -84,7 +85,9 @@ exports.put = async (req, res) => {
     deletedAt: null
   }
 
-
+console.log("async")
+console.log(uploadedPhotos)
+console.log("async")
   // if (uploadedPhotos) {
   //   try{
   //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
@@ -119,8 +122,21 @@ exports.put = async (req, res) => {
       uploadedPhotos: uploadedPhotos,
       newDoc: newChurch
     });
+
+    if (!newChurch) 
+      throw new Error("Church not found");
+
   } catch(err){
     console.error(err.stack);
+
+    if (err.message.includes("not found"))
+      return res.status(404).send({ error: err.message });
+
+    if (err.message.includes("Cast to ObjectId failed"))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -150,7 +166,7 @@ exports.put = async (req, res) => {
 
   let data;
   try{
-    data = await ChurchesCol.findOneAndUpdate(query, values, options)
+    data = await utils.updateAndPopulate({ query: query, values: values, options: options, col: ChurchesCol });
     
     if (!data) 
       throw new Error("Event not found");

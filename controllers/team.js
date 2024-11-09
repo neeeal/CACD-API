@@ -45,7 +45,7 @@ exports.post = async (req, res) => {
   let data;
   try{
     const newTeamDoc = new TeamsCol(values);
-    data = await newTeamDoc.save();
+    data = await utils.saveAndPopulate(newTeamDoc);
   }
   catch (err){
     console.error(err.stack);
@@ -90,11 +90,10 @@ exports.put = async (req, res) => {
     new: true
   }
 
-  let data;
   try{
-    data = await TeamsCol.findOneAndUpdate(query, values, options);
+    newTeam = await utils.updateAndPopulate({ query: query, values: values, options: options, col: TeamsCol });
     
-    if (!data) 
+    if (!newTeam) 
       throw new Error("Team not found");
 
   } catch (err){
@@ -113,7 +112,7 @@ exports.put = async (req, res) => {
 
   res.status(200).send({
     message: "team put",
-    data: data
+    data: newTeam
   })
 }
 

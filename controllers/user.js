@@ -74,7 +74,7 @@ exports.post = async (req, res) => {
     console.log("DATA")
     console.log(newUser)
     console.log("DATA")
-    data = await newUser.save();
+    data = await utils.saveAndPopulate(newUser);
   }
   catch (err) {
     console.error(err.stack);
@@ -122,7 +122,6 @@ exports.put = async (req, res) => {
   }
 
   const options = { new: true };
-  let data;
   try {
     await userHelper.checkPassword({
       OID: newUser.OID,
@@ -133,7 +132,10 @@ exports.put = async (req, res) => {
     if (duplicate) 
       throw new Error (`${duplicate} already taken`);
 
-    data = await UserCol.findOneAndUpdate(query, values, options);
+    newUser = await utils.updateAndPopulate({ query: query, values: values, options: options, col: UserCol });
+
+    if (!newUser) 
+      throw new Error("Team not found");
 
   }
   catch (err) {
@@ -160,7 +162,7 @@ exports.put = async (req, res) => {
 
   res.status(200).send({
     message: "User put",
-    data: data
+    data: newUser
   })
 }
 
