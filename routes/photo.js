@@ -6,7 +6,7 @@ const controller = require("../controllers/photo.js");
 const validation = require("../middlewares/validation.js");
 
 router.get("/", controller.get)
-router.get("/getOne", controller.getOne)
+// router.get("/getOne", controller.getOne)
 router.post("/", 
   fileUpload.single("default"), 
   controller.post

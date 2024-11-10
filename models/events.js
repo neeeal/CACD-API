@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const eventSchema = mongoose.Schema(
   {
-    title: {
+    name: {
       type: String,
       required: true,
     },
@@ -17,7 +17,7 @@ const eventSchema = mongoose.Schema(
     },
     dateEnd: {
       type: Date,
-      required: true,
+      // required: true,
     },
     hostChurchOID: {
       type: mongoose.Schema.Types.ObjectId,

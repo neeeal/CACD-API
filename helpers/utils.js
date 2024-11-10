@@ -508,6 +508,15 @@ exports.updateAndPopulate = async ({query, values, options, col}) => {
   return data;
 }
 
-// exports.getAndPopulate = async ({query, col, offset, limit}) => {
-//   const data = await col.find(query)
-// }
+exports.getAndPopulate = async ({query, col, offset, limit}) => {
+  const data = await col.find(query)
+  .skip(offset * limit || 0) // Apply offset here
+  .limit(limit || 0) // Apply limit here
+  .populate({
+    path: "photos",
+    match: { deletedAt: null },
+    select: "-__v -id"
+  });
+
+  return data;
+}

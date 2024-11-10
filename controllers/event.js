@@ -3,13 +3,31 @@ const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
 exports.get = async (req, res) => {
+  const queryParams = req.query || {};
 
   const query = {
     deletedAt: null
   }
   
-  const data = await EventsCol.find(query)
-  .lean();
+  if (queryParams.OID) {
+    if (!utils.isOID(queryParams.OID)) {
+      return res.status(400).send({ error: "Invalid ObjectId" });
+    }
+    query._id = queryParams.OID;
+  }
+  
+  let data;
+  try{
+    data = await utils.getAndPopulate({
+      query: query,
+      col: EventsCol,
+      offset: queryParams.offset,
+      limit: queryParams.limit
+    });
+  } catch (err) {
+  console.error(err.stack);
+  res.status(500).send({ error: "Server error" });
+  }
 
   res.status(200).send({
     message: "event get",
@@ -218,8 +236,16 @@ exports.getOne = async (req, res) => {
     query._id = OID;
   }
 
-  const data = await EventsCol.findOne(query)
-  .lean();
+  let data;
+  try{
+    data = await utils.getAndPopulate({
+    query: query,
+    col: EventsCol,
+  });
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
 
   if (!data) {
     return res.status(404).send({ error: "Event not found" });

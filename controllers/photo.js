@@ -5,30 +5,36 @@ const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
 exports.get = async (req, res) => {
+  const queryParams = req.query || {};
+
+  const query = {
+    deletedAt: null
+  }
+    
+  if (queryParams.OID) {
+    if (!utils.isOID(queryParams.OID)) {
+      return res.status(400).send({ error: "Invalid ObjectId" });
+    }
+    query._id = queryParams.OID;
+  }
+  
+  let data;
   try {
-    const query = {
-      deletedAt: null
-    };
-
-    // Fetch all photos
-    const data = await PhotosCol.find(query);
-
-    // // Map over the data to include the photo URL for each photo
-    // const responseData = data.map(item => {
-    //   return {
-    //     ...item,
-    //     photoUrl: utils.pathToURL(item.path) // Adjust path as necessary
-    //   };
-    // });
+    data = await utils.getAndPopulate({
+      query: query,
+      col: PhotosCol,
+      offset: queryParams.offset,
+      limit: queryParams.limit
+    });
+  } catch (err) {
+    console.error(err.stack);
+    res.status(500).send({ error: "Server error" });
+  }
 
     res.status(200).send({
       message: "Photos retrieved successfully",
       data: data
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Server error" });
-  }
 };
 
 exports.post = async (req, res) => {
@@ -134,7 +140,10 @@ exports.getOne = async (req, res) => {
   }
 
   try {
-    const data = await PhotosCol.findOne(query);
+    const data = await utils.getAndPopulate({
+      query: query,
+      col: PhotosCol,
+    });
     console.log(data)
 
     if (!data) {
