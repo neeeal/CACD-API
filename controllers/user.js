@@ -214,7 +214,8 @@ exports.delete = async (req, res) => {
         }
     }
   );
-  await utils.deletePhoto(userDoc.photos)
+  console.log(userDoc)
+  await utils.softDeletePhotos({photos: userDoc.photos, doc:userDoc, col:UserCol})
 } catch (err){
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });

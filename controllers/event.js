@@ -67,10 +67,10 @@ exports.post = async (req, res) => {
   }
   
   const values = {
-    title: newEvent.title,
+    name: newEvent.name,
     description: newEvent.description,
-    start: utils.ISOToDate(newEvent.start),
-    end: utils.ISOToDate(newEvent.end),
+    date: utils.ISOToDate(newEvent.date),
+    dateEnd: utils.ISOToDate(newEvent.dateEnd),
     hostChurchOID: newEvent.hostChurchOID,
     status: newEvent.status,
     location: newEvent.location,
@@ -116,6 +116,16 @@ exports.put = async (req, res) => {
     _id: newEvent.OID,
     deletedAt: null
   }
+  
+  const values = {
+    $set: {
+      ...newEvent
+    }
+  };
+
+  const options = { 
+    new: true
+  }
 
   try{
     // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
@@ -140,16 +150,6 @@ exports.put = async (req, res) => {
     });
 
     return res.status(500).send({ error: "Server error" });
-  }
-
-  const values = {
-    $set: {
-      ...newEvent
-    }
-  };
-
-  const options = { 
-    new: true
   }
 
   let data;

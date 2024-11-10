@@ -84,9 +84,10 @@ exports.softDeletePhotos = async ({photos, doc, col}) => {
   let photoDocs;
   if (!Array.isArray(photos)){
     // Soft delete one photo
+    console.log(photos)
     photoDocs = await PhotosCol.findOneAndUpdate(
       {
-        _id: photos._id,
+        _id: photos,
         deletedAt: null
       }, 
       {

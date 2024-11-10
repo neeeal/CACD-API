@@ -145,8 +145,13 @@ exports.manageAlbumPhotos = async (req, res) => {
     };
 
     try{
-      data = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-      addQuery._id.$in = [...addQuery._id.$in, ...data]
+      const data = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
+
+      if (data){
+        addQuery._id.$in = [
+          ...addQuery._id.$in, ...data
+        ]
+      }
 
       newDoc = await PhotosCol.updateMany(addQuery, addValues);
     } catch(err){

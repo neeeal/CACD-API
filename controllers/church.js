@@ -42,6 +42,7 @@ exports.post = async (req, res) => {
   // const uploadedPhotos = photoFields.featuredPhoto[0];
   const uploadedPhotos = req.files;
 
+  console.log(uploadedPhotos)
   // if (uploadedPhotos) {
   //   try{
   //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
@@ -56,7 +57,7 @@ exports.post = async (req, res) => {
   if (uploadedPhotos) {
     try{
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newChurch});
-      newChurch.photos = savedPhotos.map((photo) => photo._id);
+      newChurch.photos = savedPhotos;
     }
     catch (err){
       console.error(err.stack);

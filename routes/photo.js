@@ -14,7 +14,7 @@ router.post("/",
 router.put("/", 
   fileUpload.fields([
     // { name: "featuredPhoto", maxCount: 1 },
-    { name: "newDefault", maxCount: 99 }
+    { name: "default", maxCount: 99 }
   ]), 
   controller.put
 )
