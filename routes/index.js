@@ -9,6 +9,7 @@ const initRoutes = (app) => {
   router.use("/event", require("./event.js"));
   router.use("/photo", require("./photo.js"));
   router.use("/team", require("./team.js"));
+  router.use("/album", require("./album.js"));
   return app.use("/api", router);
 };
 

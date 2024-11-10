@@ -51,5 +51,10 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Add custom validation for only one photo
+userSchema.path('photos').validate(function (photos) {
+  return photos.length <= 1; // Limit to only one photo
+}, 'An album can only have one photo.');
+
 const user = mongoose.model("users", userSchema); 
 module.exports = user;

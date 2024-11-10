@@ -34,5 +34,10 @@ const teamSchema = mongoose.Schema(
   }
 );
 
+// Add custom validation for only one photo
+teamSchema.path('photos').validate(function (photos) {
+  return photos.length <= 1; // Limit to only one photo
+}, 'An album can only have one photo.');
+
 const team = mongoose.model("teams", teamSchema);
 module.exports = team;
