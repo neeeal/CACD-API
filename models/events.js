@@ -51,7 +51,12 @@ const eventSchema = mongoose.Schema(
     type: [mongoose.Schema.Types.ObjectId],
       ref: "photos",
       default: [],
-    }
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
   },
   {
     timestamps: true,

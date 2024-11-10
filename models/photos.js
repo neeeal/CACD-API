@@ -15,7 +15,13 @@ const photoSchema = mongoose.Schema(
       type: String,
       // required: true
       default: "default",
-      enum: ["default", "featuredPhoto", "userPhoto", "teamPhoto"]
+      enum: [
+        "default", 
+        "featuredPhoto", 
+        "userPhoto", 
+        "teamPhoto", 
+        "companyPhoto"
+      ]
     },
     originalname: {
       type: String,
@@ -63,7 +69,12 @@ const photoSchema = mongoose.Schema(
     deletedAt: {
       type: Date,
       default: null
-    }
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const PhotosCol = require("../models/photos.js");
+const CompaniesCol = require("../models/companies.js");
 const moment = require("moment");
 const path = require('path');
 const fs = require('fs');
@@ -509,17 +510,23 @@ exports.updateAndPopulate = async ({query, values, options, col}) => {
   return data;
 }
 
-exports.getAndPopulate = async ({query, col, offset, limit}) => {
-  const data = await col.find(query)
-  .skip(offset * limit || 0) // Apply offset here
-  .limit(limit || 0); // Apply limit here
+exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0 }) => {
+  // Build the query first, and only execute it later
+  let queryBuilder = col.find(query)
+    .skip(offset * limit) // Apply offset here
+    .limit(limit); // Apply limit here
 
-  if (col != PhotosCol){
-    await data.populate({
+  // Ensure population only occurs if col is not PhotosCol or CompaniesCol
+  if (![PhotosCol, CompaniesCol].includes(col)) {
+    queryBuilder = queryBuilder.populate({
       path: "photos",
       match: { deletedAt: null },
       select: "-__v -id"
     });
   }
+
+  // Execute the query and return the result
+  const data = await queryBuilder.exec();
+
   return data;
-}
+};

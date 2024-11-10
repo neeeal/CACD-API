@@ -15,8 +15,8 @@ router.post("/",
   controller.post)
 router.put("/",  
   fileUpload.fields([
-    { name: "featuredPhoto", maxCount: 1 },
-    { name: "default", maxCount: 99 }
+    { name: "newFeaturedPhoto", maxCount: 1 },
+    { name: "newDefault", maxCount: 99 }
   ]), 
   controller.put)
 router.delete("/:OID", controller.delete)

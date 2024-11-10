@@ -24,7 +24,12 @@ const albumSchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "photos"
       }
-    ]
+    ],
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
   },
   {
     timestamps: true

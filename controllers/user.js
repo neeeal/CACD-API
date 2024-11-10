@@ -34,7 +34,8 @@ exports.get = async (req, res) => {
 
   res.status(200).send({
     message: "get all active users",
-    data: data
+    data: data || [],
+    count: data.length
   })
 }
 

@@ -33,7 +33,7 @@ exports.get = async (req, res) => {
 
     res.status(200).send({
       message: "Photos retrieved successfully",
-      data: data,
+      data: data || [],
       count: data.length
     });
 };

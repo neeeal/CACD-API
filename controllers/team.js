@@ -33,7 +33,8 @@ exports.get = async (req, res) => {
 
   res.status(200).send({
     message: "team get",
-    data: data
+    data: data || [],
+    count: data.length
   })
 }
 

@@ -33,7 +33,7 @@ exports.get = async (req, res) => {
 
   res.status(200).send({
     message: "church get",
-    data: data,
+    data: data || [],
     count: data.length
   })
 }
@@ -118,7 +118,7 @@ exports.delete = async (req, res) => {
   }
 
   if (!albumDoc) {
-    return res.status(404).send({ error: "Church not found" });
+    return res.status(404).send({ error: "Album not found" });
   }
   
   res.status(200).send({

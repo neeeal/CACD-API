@@ -31,7 +31,8 @@ exports.get = async (req, res) => {
 
   res.status(200).send({
     message: "event get",
-    data: data
+    data: data || [],
+    count: data.length
   })
 }
 

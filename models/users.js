@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
   },
   {
     timestamps: true, 

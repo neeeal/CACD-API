@@ -37,7 +37,12 @@ const churchSchema = mongoose.Schema(
     deletedAt: {
       type: Date,
       default: null
-    }
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "photos",
+      default: null,
+    },
   },
   {
     timestamps: true,
