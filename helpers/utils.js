@@ -133,6 +133,7 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
     title: details.title || exports.removeExtension(uploadedPhotos.originalname),
     caption: details.caption,
     eventOID: details.eventOID || [],
+    album: details.album || null,
     // photoInfo: photo,
   }
   
@@ -511,12 +512,14 @@ exports.updateAndPopulate = async ({query, values, options, col}) => {
 exports.getAndPopulate = async ({query, col, offset, limit}) => {
   const data = await col.find(query)
   .skip(offset * limit || 0) // Apply offset here
-  .limit(limit || 0) // Apply limit here
-  .populate({
-    path: "photos",
-    match: { deletedAt: null },
-    select: "-__v -id"
-  });
+  .limit(limit || 0); // Apply limit here
 
+  if (col != PhotosCol){
+    await data.populate({
+      path: "photos",
+      match: { deletedAt: null },
+      select: "-__v -id"
+    });
+  }
   return data;
 }

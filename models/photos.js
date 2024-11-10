@@ -55,6 +55,11 @@ const photoSchema = mongoose.Schema(
     //   ref: "events",
     //   default: null,
     // },
+    album: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "albums",
+      default: null,
+    },
     deletedAt: {
       type: Date,
       default: null

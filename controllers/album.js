@@ -127,10 +127,55 @@ exports.delete = async (req, res) => {
   });
 }
 
-exports.addPhotosToAlbum = async (req, res) => {
+exports.manageAlbumPhotos = async (req, res) => {
+  let newDoc = req.body;
+  const uploadedPhotos = req.files || {};
 
-}
+  if (
+    (uploadedPhotos && Object.keys(uploadedPhotos).length) ||
+    (newDoc.add && newDoc.add)
+  ){
+    const addQuery = {
+      _id: {$in: newDoc.add || []},
+      deletedAt: null
+    };
 
-exports.removePhotosFromAlbum = async (req, res) => {
-  
+    const addValues = {
+        album: newDoc.OID
+    };
+
+    try{
+      data = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
+      addQuery._id.$in = [...addQuery._id.$in, ...data]
+
+      newDoc = await PhotosCol.updateMany(addQuery, addValues);
+    } catch(err){
+      console.error(err.stack);
+      return res.status(500).send({ error: "Server error" });
+    }
+  }
+  else if (newDoc.remove && newDoc.remove.length){
+    const removeQuery = {
+      _id: {$in: newDoc.remove},
+      deletedAt: null
+    };
+
+    const removeValues = {
+      $set: {
+        album: null
+      }
+    };
+
+    try{
+      newDoc = await PhotosCol.updateMany(removeQuery, removeValues);
+    } catch(err){
+      console.error(err.stack);
+      return res.status(500).send({ error: "Server error" });
+    }
+  }
+
+  return res.status(200).send({
+    message: "manageAlbumPhotos",
+    data: newDoc
+  });
 }
