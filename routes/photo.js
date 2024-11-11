@@ -5,6 +5,7 @@ const router = express.Router();
 const controller = require("../controllers/photo.js");
 const validation = require("../middlewares/validation.js");
 const auth = require("../middlewares/auth.js");
+const company = require("../middlewares/company.js");
 
 router.get(
   "/", 
@@ -16,6 +17,7 @@ router.post(
   "/", 
   auth.accessResource,
   fileUpload.single("default"), 
+  company.assignCompany,
   controller.post
 )
 
@@ -26,12 +28,14 @@ router.put(
     // { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
   ]), 
+  company.assignCompany,
   controller.put
 )
 
 router.delete(
   "/:OID", 
   auth.accessResource,
+  company.assignCompany,
   controller.delete
 )
 

@@ -72,7 +72,7 @@ const photoSchema = mongoose.Schema(
     },
     company: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "photos",
+      ref: "companies",
       default: null,
     },
   },

@@ -10,6 +10,10 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
   
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
   if (queryParams.OID) {
     if (!utils.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
@@ -33,7 +37,7 @@ exports.get = async (req, res) => {
   res.status(200).send({
     message: "companies get",
     data: data || [],
-    count: data.length
+    count: data && data.length
   })
 }
 
@@ -56,7 +60,7 @@ exports.post = async (req, res) => {
 
   try{
     newCompany = new CompaniesCol(newCompany);
-    await newCompany.save();
+    await utils.saveAndPopulate({doc:newCompany, col:CompaniesCol});
   } catch (err) {
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });

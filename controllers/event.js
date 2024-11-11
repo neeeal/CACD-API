@@ -9,6 +9,10 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
   
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
   if (queryParams.OID) {
     if (!utils.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
@@ -32,7 +36,7 @@ exports.get = async (req, res) => {
   res.status(200).send({
     message: "event get",
     data: data || [],
-    count: data.length
+    count: data && data.length
   })
 }
 
@@ -67,15 +71,16 @@ exports.post = async (req, res) => {
   }
   
   const values = {
-    name: newEvent.name,
-    description: newEvent.description,
-    date: utils.ISOToDate(newEvent.date),
-    dateEnd: utils.ISOToDate(newEvent.dateEnd),
-    hostChurchOID: newEvent.hostChurchOID,
-    status: newEvent.status,
-    location: newEvent.location,
-    registerLink: newEvent.registerLink,
-    // featuredPhoto: newEvent.featuredPhoto || null,
+    // name: newEvent.name,
+    // description: newEvent.description,
+    // date: utils.ISOToDate(newEvent.date),
+    // dateEnd: utils.ISOToDate(newEvent.dateEnd),
+    // hostChurchOID: newEvent.hostChurchOID,
+    // status: newEvent.status,
+    // location: newEvent.location,
+    // registerLink: newEvent.registerLink,
+    // // featuredPhoto: newEvent.featuredPhoto || null,
+    ...newEvent,
     photos: newEvent.photos || []
   }
 
@@ -89,7 +94,8 @@ exports.post = async (req, res) => {
     //   values.featuredPhoto = photo._id;
 
     const newEventDoc = new EventsCol(values);
-    data = await utils.saveAndPopulate(newEventDoc);
+    console.log("NOW")
+    data = await utils.saveAndPopulate({doc:newEventDoc, col:EventsCol});
   }
   catch (err){
     console.error(err.stack);

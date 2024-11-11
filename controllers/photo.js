@@ -11,6 +11,10 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
     
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
   if (queryParams.OID) {
     if (!utils.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
@@ -34,7 +38,7 @@ exports.get = async (req, res) => {
     res.status(200).send({
       message: "Photos retrieved successfully",
       data: data || [],
-      count: data.length
+      count: data && data.length
     });
 };
 

@@ -2,6 +2,7 @@ const AlbumsCol = require("../models/albums.js");
 const PhotosCol = require("../models/photos.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
+const Album = require("../models/albums.js");
 
 
 exports.get = async (req, res) => {
@@ -9,6 +10,10 @@ exports.get = async (req, res) => {
 
   const query = {
     deletedAt: null
+  }
+
+  if (queryParams.company) {
+    query.company = queryParams.company;
   }
   
   if (queryParams.OID) {
@@ -34,7 +39,7 @@ exports.get = async (req, res) => {
   res.status(200).send({
     message: "church get",
     data: data || [],
-    count: data.length
+    count: data && data.length 
   })
 }
 
@@ -43,7 +48,7 @@ exports.post = async (req, res) => {
 
   try{
     newAlbum = new AlbumsCol(newAlbum);
-    await newAlbum.save();
+    newAlbum = await utils.saveAndPopulate({doc:newAlbum, col:AlbumsCol});
   } catch (err) {
     console.error(err.stack);
     return res.status(500).send({ error: "Server error" });
@@ -57,6 +62,10 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newAlbum = req.body;
+
+  console.log("newAlbum");
+  console.log(newAlbum);
+  console.log("newAlbum");
 
   const query = {
     _id: newAlbum.OID,
@@ -72,7 +81,7 @@ exports.put = async (req, res) => {
   const options = { new: true };
 
   try{
-    newAlbum = await AlbumsCol.findOneAndUpdate(query, values, options);
+    newAlbum = await utils.updateAndPopulate({ query: query, values: values, options: options, col: AlbumsCol });
 
     if (!newAlbum) 
       throw new Error("Album not found");

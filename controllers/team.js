@@ -10,6 +10,10 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
   
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
   if (queryParams.OID) {
     if (!utils.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
@@ -34,7 +38,7 @@ exports.get = async (req, res) => {
   res.status(200).send({
     message: "team get",
     data: data || [],
-    count: data.length
+    count: data && data.length
   })
 }
 
@@ -56,17 +60,14 @@ exports.post = async (req, res) => {
   }
 
   const values = {
-    firstName: newTeam.firstName,
-    lastName: newTeam.lastName,
-    position: newTeam.position,
-    description: newTeam.description,
+    ...newTeam,
     photos: newTeam.photos || [],
   }
   
   let data;
   try{
     const newTeamDoc = new TeamsCol(values);
-    data = await utils.saveAndPopulate(newTeamDoc);
+    data = await utils.saveAndPopulate({doc:newTeamDoc, col:TeamsCol});
   }
   catch (err){
     console.error(err.stack);

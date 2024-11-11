@@ -12,6 +12,10 @@ exports.get = async (req, res) => {
     deletedAt: null
   }
   
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
   if (queryParams.OID) {
     if (!utils.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
@@ -35,7 +39,7 @@ exports.get = async (req, res) => {
   res.status(200).send({
     message: "get all active users",
     data: data || [],
-    count: data.length
+    count: data && data.length
   })
 }
 
@@ -77,13 +81,16 @@ exports.getOne = async (req, res) => {
 
 exports.post = async (req, res) => {
   console.log("here")
-  const { email, password, firstName, lastName } = req.body;
-  const newUser = new UserCol({email, password, firstName, lastName});
+  let newUser = req.body;
+  newUser = new UserCol({
+    ...newUser,
+    company: newUser.company
+  });
   const uploadedPhotos = req.file;
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
-  newUser.password = await bcrypt.hash(password, salt);
+  newUser.password = await bcrypt.hash(newUser.password, salt);
 
   if (uploadedPhotos) {
     try{
@@ -106,7 +113,7 @@ exports.post = async (req, res) => {
     console.log("DATA")
     console.log(newUser)
     console.log("DATA")
-    data = await utils.saveAndPopulate(newUser);
+    data = await utils.saveAndPopulate({doc:newUser, col:UserCol});
   }
   catch (err) {
     console.error(err.stack);

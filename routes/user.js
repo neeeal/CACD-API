@@ -5,6 +5,7 @@ const controller = require("../controllers/user.js");
 const validation = require("../middlewares/validation.js");
 const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
+const company = require("../middlewares/company.js");
 
 router.get(
   "/", 
@@ -17,6 +18,7 @@ router.post(
   fileUpload.single("userPhoto"), 
   validation.userRegisterAndUpdate, 
   validation.passwordConfirmation, 
+  company.assignCompany,
   controller.post
 )
 
@@ -26,12 +28,14 @@ router.put(
   fileUpload.single("newUserPhoto"), 
   validation.userRegisterAndUpdate, 
   validation.passwordConfirmation, 
+  company.assignCompany,
   controller.put
 )
 
 router.delete(
   "/:OID", 
   auth.accessResource,
+  company.assignCompany,
   controller.delete
 )
 

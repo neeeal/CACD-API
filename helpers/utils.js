@@ -132,10 +132,11 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
   console.log(uploadedPhotos)
   const values = {
     ...uploadedPhotos,
+    ...details,
     title: details.title || exports.removeExtension(uploadedPhotos.originalname),
-    caption: details.caption,
-    eventOID: details.eventOID || [],
-    album: details.album || null,
+    // caption: details.caption,
+    // eventOID: details.eventOID || [],
+    // album: details.album || null,
     // photoInfo: photo,
   }
   
@@ -489,25 +490,67 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
 //   return formattedMulPhotos;
 // }
 
-exports.saveAndPopulate = async (doc) => {
-  const data = await doc.save()
-  await data.populate({
-    path: "photos",
-    match: { deletedAt: null },
-    select: "-__v -id"
-  });
+exports.saveAndPopulate = async ({doc, col}) => {
+  console.log("saveAndPopulate");
+  console.log(doc);
+  console.log(col);
+  console.log("saveAndPopulate");
+  
+  // Save the document
+  const data = await doc.save();
+
+  // Initialize an empty array to hold populate values
+  let populateValues = [];
+
+  // Add 'photos' population if the collection is not PhotosCol
+  if (col != PhotosCol) {
+    populateValues.push({
+      path: "photos",
+      match: { deletedAt: null },
+      select: "-__v -id"
+    });
+  }
+
+  // Add 'companies' population if the collection is not CompaniesCol
+  if (col != CompaniesCol) {
+    populateValues.push({
+      path: "company",
+      match: { deletedAt: null },
+      select: "-__v"
+    });
+  }
+
+  // Populate the document with the values in populateValues array
+  await data.populate(populateValues);
 
   return data;
 }
 
 exports.updateAndPopulate = async ({query, values, options, col}) => {
   const data = await col.findOneAndUpdate(query, values, options);
-  await data.populate({
-    path: "photos",
-    match: { deletedAt: null },
-    select: "-__v -id"
-  });
+  // Initialize an empty array to hold populate values
+  let populateValues = [];
 
+  // Add 'photos' population if the collection is not PhotosCol
+  if (col != PhotosCol) {
+    populateValues.push({
+      path: "photos",
+      match: { deletedAt: null },
+      select: "-__v -id"
+    });
+  }
+
+  // Add 'companies' population if the collection is not CompaniesCol
+  if (col != CompaniesCol) {
+    populateValues.push({
+      path: "company",
+      match: { deletedAt: null },
+      select: "-__v"
+    });
+  }
+
+  // Populate the document with the values in populateValues array
+  await data.populate(populateValues);
   return data;
 }
 
@@ -517,17 +560,47 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0 }) => {
     .skip(offset * limit) // Apply offset here
     .limit(limit); // Apply limit here
 
-  // Ensure population only occurs if col is not PhotosCol or CompaniesCol
-  if (![PhotosCol, CompaniesCol].includes(col)) {
-    queryBuilder = queryBuilder.populate({
+  // Initialize an empty array to hold populate values
+  let populateValues = [];
+
+  // Conditionally add population for 'photos' if the collection is not PhotosCol
+  if (col !== PhotosCol) {
+    populateValues.push({
       path: "photos",
       match: { deletedAt: null },
-      select: "-__v -id"
+      select: "-__v -id",  // Exclude unnecessary fields
     });
   }
 
-  // Execute the query and return the result
-  const data = await queryBuilder.exec();
+  // Conditionally add population for 'company' if the collection is not CompaniesCol
+  if (col !== CompaniesCol) {
+    populateValues.push({
+      path: "company",  // Ensure it's the correct field name (singular 'company')
+      match: { deletedAt: null },
+      select: "-__v",  // Exclude unnecessary fields
+    });
+  }
+
+  // Execute the query
+  let data;
+  try {
+    // Execute the query and return the result
+    data = await queryBuilder.exec();
+    if (data && populateValues.length > 0) {
+      // If data is an array, use populate on each element
+      if (Array.isArray(data)) {
+        for (let item of data) {
+          await item.populate(populateValues);
+        }
+      } else {
+        // If data is a single document, populate it
+        await data.populate(populateValues);
+      }
+    }
+  } catch (err) {
+    console.error("Error executing query and populate:", err);
+    throw new Error("Error fetching and populating data");
+  }
 
   return data;
 };

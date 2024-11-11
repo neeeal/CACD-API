@@ -25,6 +25,8 @@ exports.accessResource = async (req, res, next) => {
       token: token
     };
 
+    req.body.company = decoded.company;
+
     // Proceed to the next middleware or controller
     next();
   } catch (err) {

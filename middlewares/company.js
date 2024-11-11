@@ -3,25 +3,14 @@ const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
 exports.assignCompany = async (req, res, next) => {
-  let id;
   try{
-    id = req.params.OID || 
-    req.query.OID ||
-    req.body.OID || 
-    req.body.user.OID;
+    req.body.company = req.user.company;
   } catch(err){
     console.error(err.stack);
-    return res.status(400).send({
-      error: "Invalid OID"
+    return res.status(500).send({
+      error: "Server error"
     })
   }
-
-  const user = await UsersCol
-  .findOne({_id: id, deletedAt: null})
-  .select("_id accessLevel company email")
-  .lean();
-
-  req.body.user = user;
 
   next();
 }
