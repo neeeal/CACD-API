@@ -111,7 +111,7 @@ exports.post = async (req, res) => {
   catch (err) {
     console.error(err.stack);
     if (err.message.includes('already taken')){
-      return res.status(409).send({ message: err.message });
+      return res.status(409).send({ error: err.message });
     }
     return res.status(500).send({ error: "Server error" });
   }
@@ -127,9 +127,6 @@ exports.put = async (req, res) => {
   const uploadedPhotos = req.file;
 
   const query = { _id: newUser.OID, deletedAt: null }
-
-  if (newUser.password === newUser.oldPassword) 
-    return res.status(400).send({ error: "New password cannot be same as old password." });
 
   // Hash the password
   const salt = await bcrypt.genSalt(saltRounds);
@@ -155,10 +152,18 @@ exports.put = async (req, res) => {
 
   const options = { new: true };
   try {
-    await userHelper.checkPassword({
-      OID: newUser.OID,
+    console.log("Sdfsdf")
+    console.log(newUser)
+    const correctPassword = await userHelper.checkPassword({
+      data: newUser,
       oldPassword: newUser.oldPassword
     })
+
+    if (!correctPassword) 
+      throw new Error ('Incorrect password');
+
+    if (newUser.password === newUser.oldPassword) 
+      throw new Error("New password cannot be same as old password.");  
 
     const duplicate = await userHelper.checkDuplicates(newUser);
     if (duplicate) 
@@ -173,12 +178,16 @@ exports.put = async (req, res) => {
   catch (err) {
     console.error(err.stack);
 
+    if (err.message.includes('cannot be same')){
+      return res.status(409).send({ error: err.message });
+    }
+
     if (err.message.includes('already taken')){
-      return res.status(409).send({ message: err.message });
+      return res.status(409).send({ error: err.message });
     }
 
     if (err.message.includes('Incorrect password')){
-      return res.status(409).send({ message: err.message });
+      return res.status(409).send({ error: err.message });
     }
 
     if (err.message.includes("not found"))

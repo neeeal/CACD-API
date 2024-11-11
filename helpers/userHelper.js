@@ -28,24 +28,28 @@ exports.checkDuplicates = async function (newUser) {
 exports.checkUserExists = async (data) => {
   const query = {deletedAt: null};
 
-  if(data.email) 
-    query.email = data.email;
   if(data.OID)
     query._id = data.OID;
-  
+  else if(data.email) 
+    query.email = data.email;
+
   const user = await UserCol.findOne(query)
   .lean();
 
   return user;
 }
 
-exports.checkPassword = async (data) => {
+exports.checkPassword = async ({data, oldPassword}) => {
   const user = await exports.checkUserExists(data);
   if (!user) 
     throw new Error("User not found");
 
-  const correctPassword = bcrypt.compare(data.oldPassword, user.password);
+  console.log(oldPassword)
+  console.log(user.password)
+  const correctPassword = await bcrypt.compare(oldPassword, user.password);
 
-  if (!correctPassword)
-    throw new Error('Incorrect password');
+  // if (!correctPassword)
+    // throw new Error('Incorrect password');
+
+  return correctPassword;
 }
