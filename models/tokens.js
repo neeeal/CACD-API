@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
-// const { Schema } = require("mongoose");
+const mongoose = require('mongoose');
 
-const tokenSchema = mongoose.Schema(
+const tokenSchema = new mongoose.Schema(
   {
     token: {
       type: String,
@@ -9,12 +8,16 @@ const tokenSchema = mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: 'users',
       required: true,
     },
     deletedAt: {
       type: Date,
-      default: null
+      default: null,
+    },
+    expiresAt: { 
+      type: Date,
+      required: true
     }
   },
   {
@@ -22,5 +25,8 @@ const tokenSchema = mongoose.Schema(
   }
 );
 
-const token = mongoose.model("tokens", tokenSchema);
-module.exports = token;
+// Create a TTL index on the `expiresAt` field. Tokens will be deleted automatically when `expiresAt` is reached.
+tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+const Token = mongoose.model('Token', tokenSchema);
+module.exports = Token;

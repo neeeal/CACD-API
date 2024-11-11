@@ -19,12 +19,11 @@ const albumSchema = mongoose.Schema(
       ref: "events",
       default: null
     },
-    photos: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "photos"
-      }
-    ],
+    photos: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "photos",
+      default: [],
+    },
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "photos",

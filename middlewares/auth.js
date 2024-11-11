@@ -1,6 +1,6 @@
 
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
+const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
 
 exports.accessResource = async (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
@@ -11,7 +11,9 @@ exports.accessResource = async (req, res, next) => {
 
   try {
     // Verify the provided token
-    const decoded = jwt.verify(token, SECRET_KEY);
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET_KEY);
+
+    console.log(decoded);
     
     // Add user information to the request for use in the next middleware or function
     req.user = {
@@ -29,7 +31,7 @@ exports.accessResource = async (req, res, next) => {
     console.error(err.stack);
     
     if (err.name === "TokenExpiredError") {
-      return res.status(401).send({ error: "Token expired, please login again" });
+      return res.status(401).send({ error: "Token expired, please refresh your session" });
     }
 
     return res.status(403).send({ error: "Invalid token" });
