@@ -102,7 +102,7 @@ exports.put = async (req, res) => {
   const options = { new: true };
 
   try{
-    newCompany = await CompaniesCol.findOneAndUpdate(query, values, options);
+    newCompany = await utils.updateAndPopulate({ query: query, values: values, options: options, col: CompaniesCol });
 
     if (!newCompany) 
       throw new Error("Company not found");

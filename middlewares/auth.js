@@ -39,3 +39,13 @@ exports.accessResource = async (req, res, next) => {
     return res.status(403).send({ error: "Invalid token" });
   }
 };
+
+exports.authorizeSuperAdmin = async (req, res, next) => {
+  const accessLevel = req.user && req.user.accessLevel;
+
+  if (accessLevel !== 'Super Admin') {
+    return res.status(403).send({ error: "Unauthorized" });
+  }
+
+  next();
+};

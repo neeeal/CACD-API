@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 
-const companySchema = mongoose.Schema(
+const companySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      default: null
+      default: null,
     },
     location: {
       type: String,
-      default: null
+      default: null,
     },
     contacts: {
       type: Object,
@@ -17,23 +17,48 @@ const companySchema = mongoose.Schema(
     photos: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "photos"
-      }
+        ref: "photos",
+      },
     ],
     deletedAt: {
       type: Date,
-      default: null
+      default: null,
+    },
+    donationChannels: {
+      bank: [
+        {
+          bankName: { type: String, default: null },
+          accountNumber: { type: String, default: null },
+          accountHolderName: { type: String, default: null },
+          address: { type: String, default: null},
+          swiftCode: { type: String, default: null},
+        },
+      ],
+      ewallet: [
+        {
+          wallet: { type: String, default: null },
+          firstName: { type: String, default: null },
+          lastName: { type: String, default: null },
+          accountNumber: { type: String, default: null },
+        },
+      ],
+      paypal: [
+        {
+          email: { type: String, required: true },
+          password: { type: String, default: null }
+        },
+      ],
     },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
 // Add custom validation for only one photo
 companySchema.path('photos').validate(function (photos) {
   return photos.length <= 1; // Limit to only one photo
-}, 'An company can only have one photo.');
+}, 'A company can only have one photo.');
 
 const Company = mongoose.model("companies", companySchema);
 module.exports = Company;

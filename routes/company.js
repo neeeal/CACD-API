@@ -8,6 +8,8 @@ const auth = require("../middlewares/auth.js");
 
 router.get(
   "/", 
+  auth.accessResource,
+  auth.authorizeSuperAdmin,
   controller.get
 )
 
@@ -15,6 +17,7 @@ router.get(
 router.post(
   "/", 
   auth.accessResource,
+  auth.authorizeSuperAdmin,
   fileUpload.single("companyPhoto"), 
   controller.post
 )
@@ -22,6 +25,7 @@ router.post(
 router.put(
   "/", 
   auth.accessResource,
+  auth.authorizeSuperAdmin,
   fileUpload.single("newCompanyPhoto"), 
   controller.put
 )
@@ -29,6 +33,7 @@ router.put(
 router.delete(
   "/:OID", 
   auth.accessResource,
+  auth.authorizeSuperAdmin,
   controller.delete
 )
 
