@@ -2,6 +2,7 @@ const TokensCol = require("../models/tokens.js");
 const UsersCol = require("../models/users.js");
 const userHelper = require("../helpers/userHelper.js");
 const moment = require("moment");
+const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
 const REFRESH_TOKEN_SECRET_KEY = process.env.REFRESH_TOKEN_SECRET_KEY;
@@ -185,4 +186,55 @@ exports.refreshToken = async (req, res) => {
       token: newAccessToken
     }
   })
+};
+
+// TODO: add node mailer and token
+exports.forgotPassword = async function(req, res) {
+  const email = req.body.email;
+
+  // check if user exists
+  const user = await UsersCol.findOne({ email: email, deletedAt: null });
+
+  if (!user) {
+    return res.status(404).send({ error: 'User not found' });
+  }
+
+  var transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: process.env.SECURE,
+    auth: {
+      user: process.env.MAIL_EMAIL,
+      pass: process.env.MAIL_APP_PASSWORD
+    }
+  });
+  
+  var mailOptions = {
+    from: process.env.MAIL_EMAIL,
+    to: user.email,
+    subject: 'Forgot Password CACD Account',
+    text: 'test'
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+
+  res.status(200).send({
+    message: "forgot password",
+    data: {}
+  });
+};
+
+// TODO: verify and delete token, reset user password
+exports.resetPassword = async function(req, res) {
+
+  res.status(200).send({
+    message: "reset password",
+    data: {}
+  });
 };

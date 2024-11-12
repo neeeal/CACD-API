@@ -25,6 +25,18 @@ router.post(
   multer().none(), 
   company.assignCompany,
   controller.refreshToken
+);
+
+router.post(
+  "/forgotPassword", 
+  multer().none(), 
+  controller.forgotPassword
+)
+
+router.put(
+  "/resetPassword", 
+  multer().none(), 
+  controller.resetPassword
 )
 
 module.exports = router;  
