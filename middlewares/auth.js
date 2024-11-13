@@ -1,6 +1,6 @@
 
 const jwt = require('jsonwebtoken');
-const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
+const SECRET_KEY_ACCESS_TOKEN = process.env.SECRET_KEY_ACCESS_TOKEN;
 
 exports.accessResource = async (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
@@ -11,7 +11,11 @@ exports.accessResource = async (req, res, next) => {
 
   try {
     // Verify the provided token
-    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET_KEY);
+    const decoded = jwt.verify(token, SECRET_KEY_ACCESS_TOKEN);
+
+    if (decoded.type !== 'login'){
+      return res.status(403).send({ error: "Invalid token type" });
+    }
 
     console.log(decoded);
     
@@ -22,7 +26,7 @@ exports.accessResource = async (req, res, next) => {
       email: decoded.email,
       accessLevel: decoded.accessLevel,
       company: decoded.company,
-      token: token
+      // token: token
     };
 
     req.body.company = decoded.company;

@@ -73,7 +73,7 @@ app.use((err, req, res, next) => {
 
 // Catch-all route for handling 404 errors
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+    res.status(404).sendFile(path.join(__dirname, 'html', '404.html'));
 });
 
 app.listen(PORT, () => {

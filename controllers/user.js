@@ -3,7 +3,6 @@ const utils = require("../helpers/utils.js");
 const userHelper = require("../helpers/userHelper.js");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
-const saltRounds = 10;
 
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
@@ -121,12 +120,16 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newUser = req.body;
+
+  if (newUser.password !== newUser.passwordConfirmation)
+    return res.status(400).send({ error: "Passwords do not match" });
+  
   const uploadedPhotos = req.file;
 
   const query = { _id: newUser.OID, deletedAt: null }
 
   // Hash the password
-  const salt = await bcrypt.genSalt(saltRounds);
+  const salt = await bcrypt.genSalt(10);
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
   try{

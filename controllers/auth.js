@@ -1,11 +1,15 @@
 const TokensCol = require("../models/tokens.js");
 const UsersCol = require("../models/users.js");
 const userHelper = require("../helpers/userHelper.js");
+const fs = require('fs');
+const path = require('path');
 const moment = require("moment");
-const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
-const REFRESH_TOKEN_SECRET_KEY = process.env.REFRESH_TOKEN_SECRET_KEY;
+const transporter = require("../config/mailer.js");
+const SECRET_KEY_REFRESH_TOKEN = process.env.SECRET_KEY_REFRESH_TOKEN;
+const SECRET_KEY_PASSWORD_RESET = process.env.SECRET_KEY_PASSWORD_RESET;
+const utils = require("../helpers/utils.js");
 
 exports.login = async (req, res) => {
   const user = req.body;
@@ -46,25 +50,14 @@ exports.login = async (req, res) => {
   let accessToken;
   let refreshToken;
   try {
-    // Generate access token
-    accessToken = jwt.sign(
-      {
-        userOid: existingUser._id,
-        email: existingUser.email,
-        name: `${existingUser.firstName} ${existingUser.lastName}`,
-        accessLevel: existingUser.accessLevel,
-        company: existingUser.company
-      },
-      ACCESS_TOKEN_SECRET_KEY,
-      { expiresIn: '1hr' }
-    );
+    accessToken = await utils.generateToken({existingUser:existingUser, type:'login'});
 
     // Generate refresh token
     refreshToken = jwt.sign(
       {
         userOid: existingUser._id,
       },
-      REFRESH_TOKEN_SECRET_KEY,
+      SECRET_KEY_REFRESH_TOKEN,
       { expiresIn: '7d' }  // Refresh token expires in 7 days
     );
 
@@ -151,7 +144,7 @@ exports.refreshToken = async (req, res) => {
 
   let newAccessToken;
   try {
-    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET_KEY);
+    const decoded = jwt.verify(refreshToken, SECRET_KEY_REFRESH_TOKEN);
     const existingUser = await UsersCol.findOne({_id: decoded.userOid, deletedAt: null}); 
     // Verify the refresh token logic (e.g., checking in database)
     const tokenDoc = await TokensCol.findOne({ token: refreshToken, deletedAt: null}).lean();
@@ -160,17 +153,8 @@ exports.refreshToken = async (req, res) => {
       throw new Error("Invalid Session");
 
     // Issue a new access token
-    newAccessToken = jwt.sign(
-      { 
-        userOid: existingUser._id,
-        email: existingUser.email,
-        name: `${existingUser.firstName} ${existingUser.lastName}`,
-        accessLevel: existingUser.accessLevel,
-        company: existingUser.company
-      },
-      ACCESS_TOKEN_SECRET_KEY,
-      { expiresIn: "1hr" }
-    );
+    newAccessToken = await utils.generateToken({existingUser:existingUser, type:'login'});
+
   } catch (err) {
     console.error(err.stack);
 
@@ -190,39 +174,59 @@ exports.refreshToken = async (req, res) => {
 
 // TODO: add node mailer and token
 exports.forgotPassword = async function(req, res) {
-  const email = req.body.email;
+  const user = req.body;
 
-  // check if user exists
-  const user = await UsersCol.findOne({ email: email, deletedAt: null });
+  let existingUser;
+  let htmlContent;
+  let token;
+  try{
+    // check if user exists
+    existingUser = await userHelper.checkUserExists(user);
 
-  if (!user) {
-    return res.status(404).send({ error: 'User not found' });
+    token = await utils.generateToken({existingUser:existingUser, type: 'passwordReset', expiresIn:'5m', secretKey: SECRET_KEY_PASSWORD_RESET});
+
+    htmlContent = await fs.promises.readFile(path.join(__dirname, '../html/forgotPassword.html'), 'utf8');
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
   }
 
-  var transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    secure: process.env.SECURE,
-    auth: {
-      user: process.env.MAIL_EMAIL,
-      pass: process.env.MAIL_APP_PASSWORD
-    }
-  });
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+  htmlContent = htmlContent
+  .replace('{{reset_link}}', resetLink)
+  .replace('{{name}}', existingUser.firstName);
   
   var mailOptions = {
     from: process.env.MAIL_EMAIL,
-    to: user.email,
+    to: existingUser.email,
     subject: 'Forgot Password CACD Account',
-    text: 'test'
+    html: htmlContent
   };
   
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
-  });
+  try{
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
+    const expiresAt = moment().add(5, 'minutes').toDate(); // Refresh token is automatically deleted in 7 days
+    const tokenDoc = new TokensCol({
+      token: token,
+      user: existingUser._id,
+      expiresAt: expiresAt,  // Save the expiration time
+      deletedAt: null  // Token is active and not expired initially
+    });
+
+    await tokenDoc.save();
+
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  };
 
   res.status(200).send({
     message: "forgot password",
@@ -230,8 +234,63 @@ exports.forgotPassword = async function(req, res) {
   });
 };
 
-// TODO: verify and delete token, reset user password
+// TODO: delete token if success
 exports.resetPassword = async function(req, res) {
+  const { token } = req.query;
+  console.log(token)
+  let newUser = req.body;
+
+  let decoded;
+  try{
+    const deletedToken = await TokensCol.findOne(
+      {
+        deletedAt: null,
+        token: token
+      }
+    );
+    if (!deletedToken) 
+      return res.status(401).send({ error: "Invalid or expired token" });
+    
+    decoded = jwt.verify(token, SECRET_KEY_PASSWORD_RESET);
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(401).send({ error: "Invalid or expired token" });
+  }
+
+  if (newUser.password !== newUser.passwordConfirmation)
+    return res.status(400).send({ error: "Passwords do not match" });
+
+  // Hash the password
+  const salt = await bcrypt.genSalt(10);
+  const password = await bcrypt.hash(newUser.password, salt);
+
+  const query = {
+    _id: decoded.userOid,
+    deletedAt: null
+  };
+
+  const values = {
+    $set: {
+      password: password
+    }
+  }
+
+  const options = { new: true };
+
+  newUser = await UsersCol.findOneAndUpdate(query, values, options);//await utils.updateAndPopulate({ query: query, values: values, options: options, col: UserCol });
+
+  console.log(newUser);
+
+  const deletedToken = await TokensCol.findOneAndUpdate(
+    {
+      deletedAt: null,
+      token: token
+    }, 
+    {
+      deletedAt: moment()
+    }, 
+    options
+  );
 
   res.status(200).send({
     message: "reset password",

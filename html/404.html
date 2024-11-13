@@ -73,10 +73,16 @@
     </div>
 
     <script>
-        // The "Back to Previous Page" button will navigate the user to the last visited page in history
         document.querySelector('a').addEventListener('click', function() {
-            window.history.back();
+            if (window.history.length > 1) {
+                // If there is history, go back
+                window.history.back();
+            } else {
+                // If there is no history, close the window
+                window.close();
+            }
         });
     </script>
+    
 </body>
 </html>

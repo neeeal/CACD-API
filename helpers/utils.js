@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const PhotosCol = require("../models/photos.js");
 const CompaniesCol = require("../models/companies.js");
 const moment = require("moment");
+const jwt = require("jsonwebtoken");
 const path = require('path');
 const fs = require('fs');
 
@@ -616,4 +617,25 @@ exports.queryBuilder = ({initialQuery, queryParams}) => {
   }
 
   return query;
+}
+
+exports.generateToken = async({existingUser, type, expiresIn='1hr', secretKey=process.env.SECRET_KEY_ACCESS_TOKEN}) => {
+  const payload = {
+    userOid: existingUser._id,
+    email: existingUser.email,
+    name: `${existingUser.firstName} ${existingUser.lastName}`,
+    accessLevel: existingUser.accessLevel,
+    company: existingUser.company,
+    payload: type
+  };
+
+  // Generate access token
+  const accessToken = jwt.sign(
+    payload,
+    secretKey,
+    { expiresIn: expiresIn }
+  );
+
+  console.log(accessToken);
+  return accessToken;
 }
