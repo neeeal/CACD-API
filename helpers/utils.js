@@ -555,52 +555,65 @@ exports.updateAndPopulate = async ({query, values, options, col}) => {
 }
 
 exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0 }) => {
-  // Build the query first, and only execute it later
   let queryBuilder = col.find(query)
-    .skip(offset * limit) // Apply offset here
-    .limit(limit); // Apply limit here
+    .skip(offset * limit) 
+    .limit(limit); 
 
-  // Initialize an empty array to hold populate values
   let populateValues = [];
 
-  // Conditionally add population for 'photos' if the collection is not PhotosCol
   if (col !== PhotosCol) {
     populateValues.push({
       path: "photos",
       match: { deletedAt: null },
-      select: "-__v -id",  // Exclude unnecessary fields
+      select: "-__v -id", 
     });
   }
 
-  // Conditionally add population for 'company' if the collection is not CompaniesCol
   if (col !== CompaniesCol) {
     populateValues.push({
-      path: "company",  // Ensure it's the correct field name (singular 'company')
+      path: "company", 
       match: { deletedAt: null },
-      select: "-__v",  // Exclude unnecessary fields
+      select: "-__v", 
     });
   }
 
-  // Execute the query
   let data;
-  try {
-    // Execute the query and return the result
+  // try {
     data = await queryBuilder.exec();
     if (data && populateValues.length > 0) {
-      // If data is an array, use populate on each element
       if (Array.isArray(data)) {
         for (let item of data) {
           await item.populate(populateValues);
         }
       } else {
-        // If data is a single document, populate it
         await data.populate(populateValues);
       }
     }
-  } catch (err) {
-    console.error("Error executing query and populate:", err);
-    throw new Error("Error fetching and populating data");
-  }
+  // } catch (err) {
+  //   console.error("Error executing query and populate:", err);
+  //   throw new Error("Error fetching and populating data");
+  // }
 
   return data;
 };
+
+exports.queryBuilder = ({initialQuery, queryParams}) => {
+  const query = initialQuery;
+  
+  if (queryParams.company) {
+    query.company = queryParams.company;
+  }
+  
+  if (queryParams.tags) {
+    query.tags = { $in: queryParams.tags};
+  }
+
+  if (queryParams.OID) {
+    if (!utils.isOID(queryParams.OID)) {
+      return res.status(400).send({ error: "Invalid ObjectId" });
+    }
+    query._id = queryParams.OID;
+  }
+
+  return query;
+}

@@ -8,20 +8,10 @@ const saltRounds = 10;
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 
-  const query = {
-    deletedAt: null
-  }
-  
-  if (queryParams.company) {
-    query.company = queryParams.company;
-  }
-  
-  if (queryParams.OID) {
-    if (!utils.isOID(queryParams.OID)) {
-      return res.status(400).send({ error: "Invalid ObjectId" });
-    }
-    query._id = queryParams.OID;
-  }
+  const query = utils.queryBuilder({
+    initialQuery: { deletedAt: null },
+    queryParams: queryParams
+  });
 
   let data;
   try{

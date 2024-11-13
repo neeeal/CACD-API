@@ -30,6 +30,12 @@ const eventSchema = mongoose.Schema(
       default: "Active",
       enum: ["Active", "TBA", "Cancelled"]
     },
+    tags: {
+      type: [String],
+      required: true,
+      // default: null,
+      enum: ["Men", "Women", "Youth", "National", "Leaders"]
+    },
     location: {
       type: String,
       required: true,
