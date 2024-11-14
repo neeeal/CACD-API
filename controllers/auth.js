@@ -7,8 +7,6 @@ const moment = require("moment");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const transporter = require("../config/mailer.js");
-const SECRET_KEY_REFRESH_TOKEN = process.env.SECRET_KEY_REFRESH_TOKEN;
-const SECRET_KEY_PASSWORD_RESET = process.env.SECRET_KEY_PASSWORD_RESET;
 const utils = require("../helpers/utils.js");
 
 exports.login = async (req, res) => {
@@ -50,16 +48,24 @@ exports.login = async (req, res) => {
   let accessToken;
   let refreshToken;
   try {
-    accessToken = await utils.generateToken({existingUser:existingUser, type:'login'});
+    accessToken = await utils.generateToken({
+      existingUser:{
+        userOid: existingUser._id,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        email: existingUser.email,
+        company: existingUser.company,
+        accessLevel: existingUser.accessLevel
+      }
+    });
 
     // Generate refresh token
-    refreshToken = jwt.sign(
-      {
-        userOid: existingUser._id,
-      },
-      SECRET_KEY_REFRESH_TOKEN,
-      { expiresIn: '7d' }  // Refresh token expires in 7 days
-    );
+    refreshToken = await utils.generateToken({
+      existingUser:existingUser, 
+      type:'refresh', 
+      expiresIn:'7d', 
+      secretKey:process.env.SECRET_KEY_REFRESH_TOKEN
+    });
 
     // Set expiration time for the refresh token 
     const expiresAt = moment().add(7, 'days').toDate(); // Refresh token is automatically deleted in 7 days
@@ -144,7 +150,7 @@ exports.refreshToken = async (req, res) => {
 
   let newAccessToken;
   try {
-    const decoded = jwt.verify(refreshToken, SECRET_KEY_REFRESH_TOKEN);
+    const decoded = jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN);
     const existingUser = await UsersCol.findOne({_id: decoded.userOid, deletedAt: null}); 
     // Verify the refresh token logic (e.g., checking in database)
     const tokenDoc = await TokensCol.findOne({ token: refreshToken, deletedAt: null}).lean();
@@ -153,7 +159,7 @@ exports.refreshToken = async (req, res) => {
       throw new Error("Invalid Session");
 
     // Issue a new access token
-    newAccessToken = await utils.generateToken({existingUser:existingUser, type:'login'});
+    newAccessToken = await utils.generateToken({existingUser:existingUser});
 
   } catch (err) {
     console.error(err.stack);
@@ -183,7 +189,12 @@ exports.forgotPassword = async function(req, res) {
     // check if user exists
     existingUser = await userHelper.checkUserExists(user);
 
-    token = await utils.generateToken({existingUser:existingUser, type: 'passwordReset', expiresIn:'5m', secretKey: SECRET_KEY_PASSWORD_RESET});
+    token = await utils.generateToken({
+      existingUser:existingUser, 
+      type: 'passwordReset', 
+      expiresIn:'5m', 
+      secretKey: process.env.SECRET_KEY_PASSWORD_RESET
+    });
 
     htmlContent = await fs.promises.readFile(path.join(__dirname, '../html/forgotPassword.html'), 'utf8');
   } catch (err) {
@@ -240,60 +251,70 @@ exports.resetPassword = async function(req, res) {
   console.log(token)
   let newUser = req.body;
 
+  if (newUser.password !== newUser.passwordConfirmation)
+    return res.status(400).send({ error: "Passwords do not match" });
+
   let decoded;
+  let existingToken = {};
   try{
-    const deletedToken = await TokensCol.findOne(
+    existingToken = await TokensCol.findOne(
       {
         deletedAt: null,
         token: token
       }
     );
-    if (!deletedToken) 
-      return res.status(401).send({ error: "Invalid or expired token" });
+    if (!existingToken) 
+      throw new Error("Invalid or Expired Token")
     
     decoded = jwt.verify(token, SECRET_KEY_PASSWORD_RESET);
+
+    if (decoded.type !== "passwordReset")
+      throw new Error("Invalid or Expired Token")
+
   } catch (err) {
     console.error(err.stack);
-    return res.status(401).send({ error: "Invalid or expired token" });
-  }
+    
+    if (err.message.includes("Invalid or Expired Token"))
+      return res.status(401).send({ error: "Invalid or expired token" });
 
-  if (newUser.password !== newUser.passwordConfirmation)
-    return res.status(400).send({ error: "Passwords do not match" });
+    return res.status(500).send({ error: "Server error" });
+  }
 
   // Hash the password
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(newUser.password, salt);
 
-  const query = {
-    _id: decoded.userOid,
-    deletedAt: null
-  };
+  try{
+    newUser = await UsersCol.findOneAndUpdate(
+      {
+        _id: decoded.userOid,
+        deletedAt: null
+      },
+      {
+        $set: {
+          password: password
+        }
+      }, 
+      { new: true }
+    );
 
-  const values = {
-    $set: {
-      password: password
-    }
+    existingToken = await TokensCol.findOneAndUpdate(
+      {
+        deletedAt: null,
+        token: token
+      }, 
+      {
+        deletedAt: moment()
+      }, 
+      { new: true }
+    );
+  } catch (err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
   }
-
-  const options = { new: true };
-
-  newUser = await UsersCol.findOneAndUpdate(query, values, options);//await utils.updateAndPopulate({ query: query, values: values, options: options, col: UserCol });
-
-  console.log(newUser);
-
-  const deletedToken = await TokensCol.findOneAndUpdate(
-    {
-      deletedAt: null,
-      token: token
-    }, 
-    {
-      deletedAt: moment()
-    }, 
-    options
-  );
 
   res.status(200).send({
     message: "reset password",
-    data: {}
+    data: token
   });
 };

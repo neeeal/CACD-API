@@ -610,7 +610,7 @@ exports.queryBuilder = ({initialQuery, queryParams}) => {
   }
 
   if (queryParams.OID) {
-    if (!utils.isOID(queryParams.OID)) {
+    if (!exports.isOID(queryParams.OID)) {
       return res.status(400).send({ error: "Invalid ObjectId" });
     }
     query._id = queryParams.OID;
@@ -619,14 +619,10 @@ exports.queryBuilder = ({initialQuery, queryParams}) => {
   return query;
 }
 
-exports.generateToken = async({existingUser, type, expiresIn='1hr', secretKey=process.env.SECRET_KEY_ACCESS_TOKEN}) => {
+exports.generateToken = async({existingUser, type="access", expiresIn='1hr', secretKey=process.env.SECRET_KEY_ACCESS_TOKEN}) => {
   const payload = {
-    userOid: existingUser._id,
-    email: existingUser.email,
-    name: `${existingUser.firstName} ${existingUser.lastName}`,
-    accessLevel: existingUser.accessLevel,
-    company: existingUser.company,
-    payload: type
+    ...existingUser,
+    type: type
   };
 
   // Generate access token

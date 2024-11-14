@@ -13,20 +13,17 @@ exports.accessResource = async (req, res, next) => {
     // Verify the provided token
     const decoded = jwt.verify(token, SECRET_KEY_ACCESS_TOKEN);
 
-    if (decoded.type !== 'login'){
+    if (decoded.type !== 'access'){
       return res.status(403).send({ error: "Invalid token type" });
     }
 
+    console.log('decoded');
     console.log(decoded);
+    console.log('decoded');
     
     // Add user information to the request for use in the next middleware or function
     req.user = {
-      userOid: decoded.userOid,
-      name: decoded.name,
-      email: decoded.email,
-      accessLevel: decoded.accessLevel,
-      company: decoded.company,
-      // token: token
+      ...decoded
     };
 
     req.body.company = decoded.company;

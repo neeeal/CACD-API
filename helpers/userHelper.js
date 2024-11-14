@@ -1,11 +1,12 @@
-const UserCol = require("../models/users.js");
+const UsersCol = require("../models/users.js");
 const bcrypt = require("bcrypt");
+const utils = require("./utils.js");
 
 exports.checkDuplicates = async function (newUser) {
   const email = newUser.email;
   const OID = newUser._id || newUser.OID;
 
-  const duplicate = await UserCol.findOne(
+  const duplicate = await UsersCol.findOne(
     { 
       email: email, 
       _id: { $ne: OID},
@@ -33,10 +34,12 @@ exports.checkUserExists = async (data) => {
   else if(data.email) 
     query.email = data.email;
 
-  const user = await UserCol.findOne(query)
-  .lean();
+  const user = await utils.getAndPopulate({
+    query: query,
+    col: UsersCol,
+  });
 
-  return user;
+  return user[0];
 }
 
 exports.checkPassword = async ({data, oldPassword}) => {
