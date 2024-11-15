@@ -20,9 +20,23 @@ exports.isOID = (OID) => {
 //   return mongoose.Types.ObjectId.createFromHexString(string);
 // }
 
-exports.pathToURL = (path) => {
-  return process.env.IMAGE_DEVURI + path.includes("\\") ? path.split('\\').pop() : path.split('/').pop(); // Adjust the path accordingly
+exports.pathToURL = ({metadata, path}) => {
+  console.log('metadata')
+  console.log(metadata)
+  console.log('metadata')
+  const extension = metadata.mimetype.split('/')[1];
+  return `${metadata.location}.${extension}`
+
+
+  // OLD LOCAL METHOD
+  // const base = process.env.IMAGE_DEVURI;
+  // return base + path.split('\\').pop() // Adjust the path accordingly
+  // return process.env.IMAGE_DEVURI + path.includes("\\") ? path.split('\\').pop() : path.split('/').pop(); // Adjust the path accordingly
 }
+
+// exports.pathToURL = (path) => {
+//   return process.env.IMAGE_DEVURI + path.split('\\').pop() // Adjust the path accordingly
+// }
 
 exports.removeExtension = (filename) => {
   const parts = filename.split(".");
@@ -132,12 +146,12 @@ exports.dateToISO = (date) => {
 exports.savePhotos = async ({uploadedPhotos, details}) => {
   console.log(uploadedPhotos)
   const values = {
-    ...uploadedPhotos,
+    metadata: {...uploadedPhotos},
     ...details,
     title: details.title || exports.removeExtension(uploadedPhotos.originalname),
-    // caption: details.caption,
+    caption: details.caption || null,
     // eventOID: details.eventOID || [],
-    // album: details.album || null,
+    album: details.album || null,
     // photoInfo: photo,
   }
   
@@ -157,10 +171,11 @@ exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
     Object.keys(uploadedPhotos).map(async (fieldname) => {
       const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhotos, idx) => {
       const values = {
-          ...uploadedPhotos,
+          metadata: {...uploadedPhotos},
           title: exports.removeExtension(uploadedPhotos.originalname),
           // title: details[idx].title || exports.removeExtension(uploadedPhotos.originalname),
-          // caption: details[idx].caption,
+          // caption: details[idx].caption|| null,
+          // album: details.album || null,
           // eventOID: details[idx].eventOID || null,
           // photoInfo: photo,
         }
@@ -179,26 +194,6 @@ exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
   console.log(insertedOIDS)
 
   return insertedOIDS;
-
-  // await Promise.all(
-  //   Object.keys(uploadedPhotos).forEach(async (fieldname) => {
-  //     const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhotos,idx) => {
-  //       const values = {
-  //         ...uploadedPhotos,
-  //         title: exports.removeExtension(uploadedPhotos.originalname),
-  //         // title: details[idx].title || exports.removeExtension(uploadedPhotos.originalname),
-  //         // caption: details[idx].caption,
-  //         // eventOID: details[idx].eventOID || null,
-  //         // photoInfo: photo,
-  //       }
-        
-  //       const newPhotoDoc = new PhotosCol(values);
-  //       return newPhotoDoc;
-  //     });
-  
-  //     const savedPhotos = await PhotosCol.insertMany(photoDocuments);
-  //   })
-  // )
 }
 
 
@@ -240,11 +235,12 @@ exports.updatePhoto = async ({uploadedPhotos, details}) => {
   console.log("updatePhoto")
   const values = {
     $set: {
-      ...uploadedPhotos,
+      metadata: {...uploadedPhotos},
       title: details.title || exports.removeExtension(uploadedPhotos.originalname),
       caption: details.caption,
-      eventOID: details.eventOID || null
-    }
+      eventOID: details.eventOID || null,
+      album: details.album || null,
+  }
   }
 
   const query = {

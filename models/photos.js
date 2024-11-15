@@ -23,37 +23,8 @@ const photoSchema = mongoose.Schema(
         "companyPhoto"
       ]
     },
-    originalname: {
-      type: String,
-      required: true
-    },
-    encoding: {
-      type: String,
-      required: true
-    },
-    mimetype: {
-      type: String,
-      required: true
-    },
-    destination: {
-      type: String,
-      required: true
-    },
-    filename: {
-      type: String,
-      required: true
-    },
-    path: {
-      type: String,
-      required: true
-    },
-    // type:{
-    //   type: String,
-    //   default: "Default",
-    //   enum: ["Default", "Featured", "User", "Team"]
-    // },
-    size: {
-      type: Number,
+    metadata: {
+      type: Object,
       required: true
     },
     // eventOID: {
@@ -84,9 +55,9 @@ const photoSchema = mongoose.Schema(
 );
 
 // Virtual for photo URL
-photoSchema.virtual("photoUrl").get(function () {
-  return utils.pathToURL(this.path);
-});
+// photoSchema.virtual("photoUrl").get(function () {
+//   return utils.pathToURL({ metadata: this.metadata, path: this.path});
+// });
 
 const Photo = mongoose.model("photos", photoSchema);
 module.exports = Photo;
