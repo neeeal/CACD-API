@@ -11,6 +11,11 @@ const initRoutes = (app) => {
   router.use("/team", require("./team.js"));
   router.use("/album", require("./album.js"));
   router.use("/company", require("./company.js"));
+  router.use("/admin", require("./admin.js"));
+  router.use("/eventRegistration", require("./eventRegistration.js"));
+  router.use("/role", require("./role.js"));
+  router.use("/permission", require("./permission.js"));
+  router.use("/rolePermission", require("./rolePermission.js"));
   return app.use("/api", router);
 };
 
