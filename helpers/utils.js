@@ -21,7 +21,7 @@ exports.isOID = (OID) => {
 // }
 
 exports.pathToURL = (path) => {
-  return process.env.IMAGE_DEVURI + path.split('\\').pop() // Adjust the path accordingly
+  return process.env.IMAGE_DEVURI + path.includes("\\") ? path.split('\\').pop() : path.split('/').pop(); // Adjust the path accordingly
 }
 
 exports.removeExtension = (filename) => {
