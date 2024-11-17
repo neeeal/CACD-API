@@ -38,8 +38,8 @@ const userSchema = new mongoose.Schema(
     },
     accessLevel: {
       type: String,
-      default: 'Admin',
-      enum: ['Admin', 'SuperAdmin'],
+      default: 'User',
+      enum: ['User' ,'Admin', 'SuperAdmin'],
     },
     deletedAt: {
       type: Date,

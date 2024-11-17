@@ -15,14 +15,19 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
+  fileUpload.single("adminPhoto"), 
+  controller.post
 )
 
 router.put(
   "/", 
+  fileUpload.single("adminPhoto"), 
+  controller.put
 )
 
 router.delete(
   "/:OID", 
+  controller.delete
 )
 
 module.exports = router;  

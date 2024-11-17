@@ -1,27 +1,252 @@
+const AdminsCol = require("../models/users.js");
+const utils = require("../helpers/utils.js");
+const bcrypt = require("bcrypt");
+const userHelper = require("../helpers/userHelper.js");
+const moment = require("moment");
+
 exports.get = async (req, res) => {
+  const queryParams = req.query || {};
+
+  const query = utils.queryBuilder({
+    initialQuery: { deletedAt: null, accessLevel: {$ne: "User"} },
+    queryParams: queryParams,
+  });
+
+  let data;
+  try{
+    data = await utils.getAndPopulate({
+      query: query,
+      col: AdminsCol,
+      offset: queryParams.offset,
+      limit: queryParams.limit
+    });
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
   res.status(200).send({
-    message: "get",
-    data: {}
+    message: "get all active admins",
+    data: data || [],
+    count: data && data.length
   })
-};
+}
+
+exports.getOne = async (req, res) => {
+  const {name, OID} = req.query;
+
+  const query = {deletedAt: null, accessLevel: {$ne: "User"}};
+  // TODO: Add name query
+
+  if (OID) {
+    if (!utils.isOID(OID)) {
+      return res.status(400).send({ error: "Invalid ObjectId" });
+    }
+    query._id = OID;
+  }
+
+  let data;
+  try{
+  data = await utils.getAndPopulate({
+    query: query,
+    col: AdminsCol,
+    offset: queryParams.offset,
+    limit: queryParams.limit
+  });
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  if (!data) {
+    return res.status(404).send({ error: "Admin not found" });
+  }
+
+  res.status(200).send({
+    message: "get admin",
+    data: data
+  })
+}
 
 exports.post = async (req, res) => {
+  console.log("here")
+  let newAdmin = req.body;
+
+  if (!newAdmin.accessLevel) {
+    newAdmin.accessLevel = "Admin"; // default admin access level
+  }
+  newAdmin = new AdminsCol({
+    ...newAdmin,
+    company: newAdmin.company
+  });
+  const uploadedPhotos = req.file;
+
+  // Hash the password
+  const salt = await bcrypt.genSalt(10);
+  console.log(newAdmin)
+  newAdmin.password = await bcrypt.hash(newAdmin.password, salt);
+
+  if (uploadedPhotos) {
+    try{
+      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newAdmin});
+      newAdmin.photos = [savedPhotos._id];
+      console.log("IM HERE")
+      console.log([savedPhotos._id])
+    }
+    catch (err){
+      console.error(err.stack);
+      return res.status(500).send({ error: "Server error" });
+    }
+  }
+
+  let data;
+  try {
+    const duplicate = await userHelper.checkDuplicates(newAdmin);
+    if (duplicate) 
+      throw new Error (`${duplicate} already taken`);
+    console.log("DATA")
+    console.log(newAdmin)
+    console.log("DATA")
+    data = await utils.saveAndPopulate({doc:newAdmin, col:AdminsCol});
+  }
+  catch (err) {
+    console.error(err.stack);
+    if (err.message.includes('already taken')){
+      return res.status(409).send({ error: err.message });
+    }
+    return res.status(500).send({ error: "Server error" });
+  }
+
   res.status(200).send({
-    message: "post",
-    data: {}
+    message: "Admin post",
+    data: data
   })
-};
+}
 
 exports.put = async (req, res) => {
+  let newAdmin = req.body;
+  
+  const uploadedPhotos = req.file;
+
+  const query = { _id: newAdmin.OID, deletedAt: null, accessLevel: {$ne: "User"} }
+
+  // if has password to be set
+  if (newAdmin.password && newAdmin.password.trim().length > 0){
+    if (newAdmin.password !== newAdmin.passwordConfirmation)
+      return res.status(400).send({ error: "Passwords do not match" });
+    
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    newAdmin.password = await bcrypt.hash(newAdmin.password, salt);
+  }
+
+  try{
+    newAdmin = await utils.managePhotosUpdate({
+      col: AdminsCol,
+      query: query,
+      uploadedPhotos: uploadedPhotos,
+      newDoc: newAdmin
+    });
+  } catch(err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  const values = {
+    $set: {
+      ...newAdmin
+    }
+  }
+
+  const options = { new: true };
+  try {
+    console.log("Sdfsdf")
+    console.log(newAdmin)
+    const correctPassword = await userHelper.checkPassword({
+      data: newAdmin,
+      oldPassword: newAdmin.oldPassword
+    })
+
+    if (!correctPassword) 
+      throw new Error ('Incorrect password');
+
+    if ((newAdmin.password === newAdmin.oldPassword) && newAdmin.password.trim().length > 0) 
+      throw new Error("New password cannot be same as old password.");  
+
+    const duplicate = await userHelper.checkDuplicates(newAdmin);
+    if (duplicate) 
+      throw new Error (`${duplicate} already taken`);
+
+    newAdmin = await utils.updateAndPopulate({ query: query, values: values, options: options, col: AdminsCol });
+
+    if (!newAdmin) 
+      throw new Error("Team not found");
+
+  }
+  catch (err) {
+    console.error(err.stack);
+
+    if (err.message.includes('cannot be same')){
+      return res.status(409).send({ error: err.message });
+    }
+
+    if (err.message.includes('already taken')){
+      return res.status(409).send({ error: err.message });
+    }
+
+    if (err.message.includes('Incorrect password')){
+      return res.status(409).send({ error: err.message });
+    }
+
+    if (err.message.includes("not found"))
+      return res.status(404).send({ error: err.message });
+
+    if (err.message.includes("Cast to ObjectId failed"))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
+    return res.status(500).send({ error: "Server error" });
+  }
+
   res.status(200).send({
-    message: "put",
-    data: {}
+    message: "Admin put",
+    data: newAdmin
   })
-};
+}
 
 exports.delete = async (req, res) => {
+  const { OID } = req.params; 
+
+  let adminDoc;
+  try {
+    adminDoc = await AdminsCol.findOneAndUpdate(
+      { 
+        _id: OID, 
+        deletedAt: null,
+        accessLevel: {$ne: "User"}
+      },
+      {
+        $set: {
+          deletedAt: moment().toISOString()
+        }
+    }
+  );
+  console.log(adminDoc)
+  await utils.softDeletePhotos({photos: adminDoc.photos, doc:adminDoc, col:AdminsCol})
+} catch (err){
+    console.error(err.stack);
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  if (!adminDoc) {
+    return res.status(404).send({ error: "Admin not found" });
+  }
+  
   res.status(200).send({
-    message: "get",
-    data: {}
+    message: "Admin deleted",
+    data: {
+      OID: OID
+    }
   })
-};
+}

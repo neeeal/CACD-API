@@ -20,7 +20,8 @@ const photoSchema = mongoose.Schema(
         "featuredPhoto", 
         "userPhoto", 
         "teamPhoto", 
-        "companyPhoto"
+        "companyPhoto",
+        "adminPhoto"
       ]
     },
     metadata: {
