@@ -26,7 +26,7 @@ router.put(
   "/", 
   auth.accessResource,
   auth.authorizeSuperAdmin,
-  fileUpload.single("newCompanyPhoto"), 
+  fileUpload.single("companyPhoto"), 
   controller.put
 )
 

@@ -24,7 +24,7 @@ router.post(
 router.put(
   "/", 
   auth.accessResource,
-  fileUpload.single("newTeamPhoto"), 
+  fileUpload.single("teamPhoto"), 
   company.assignCompany,
   controller.put
 )

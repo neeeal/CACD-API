@@ -78,7 +78,7 @@ exports.post = async (req, res) => {
   const uploadedPhotos = req.file;
 
   // Hash the password
-  const salt = await bcrypt.genSalt(saltRounds);
+  const salt = await bcrypt.genSalt(10);
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
   if (uploadedPhotos) {
@@ -121,16 +121,19 @@ exports.post = async (req, res) => {
 exports.put = async (req, res) => {
   let newUser = req.body;
 
-  if (newUser.password !== newUser.passwordConfirmation)
-    return res.status(400).send({ error: "Passwords do not match" });
+    // check only if change password 
+  if( newUser.password && newUser.password.trim().length > 0){
+    if (newUser.password !== newUser.passwordConfirmation)
+      return res.status(400).send({ error: "Passwords do not match" });
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    newUser.password = await bcrypt.hash(newUser.password, salt);
+  }
   
   const uploadedPhotos = req.file;
 
   const query = { _id: newUser.OID, deletedAt: null }
-
-  // Hash the password
-  const salt = await bcrypt.genSalt(10);
-  newUser.password = await bcrypt.hash(newUser.password, salt);
 
   try{
     newUser = await utils.managePhotosUpdate({
@@ -162,7 +165,7 @@ exports.put = async (req, res) => {
     if (!correctPassword) 
       throw new Error ('Incorrect password');
 
-    if (newUser.password === newUser.oldPassword) 
+    if ((newUser.password === newUser.oldPassword) && newUser.password.trim().length > 0) 
       throw new Error("New password cannot be same as old password.");  
 
     const duplicate = await userHelper.checkDuplicates(newUser);

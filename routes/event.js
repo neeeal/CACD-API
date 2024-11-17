@@ -28,8 +28,8 @@ router.put(
   "/",  
   auth.accessResource,
   fileUpload.fields([
-    { name: "newFeaturedPhoto", maxCount: 1 },
-    { name: "newDefault", maxCount: 99 }
+    { name: "featuredPhoto", maxCount: 1 },
+    { name: "default", maxCount: 99 }
   ]), 
   company.assignCompany,
   controller.put

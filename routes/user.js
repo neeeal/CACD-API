@@ -25,7 +25,7 @@ router.post(
 router.put(
   "/", 
   auth.accessResource,
-  fileUpload.single("newUserPhoto"), 
+  fileUpload.single("userPhoto"), 
   validation.userRegisterAndUpdate, 
   validation.passwordConfirmation, 
   company.assignCompany,
