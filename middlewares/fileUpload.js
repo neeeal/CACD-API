@@ -1,11 +1,8 @@
 const multer = require('multer');
 const multerS3 = require('multer-s3');
-const { S3Client } = require('@aws-sdk/client-s3');
+const s3 = require('../config/s3.js');
 const path = require('path');
 const moment = require('moment');
-
-// Create an S3 instance
-const s3 = new S3Client();
 
 // Configure multer to use S3 storage
 const upload = multer({
@@ -13,11 +10,6 @@ const upload = multer({
         s3: s3,
         acl: 'public-read',
         bucket: process.env.S3_BUCKET_NAME,
-        // metadata: function (req, file, cb) {
-        //     const uniqueSuffix = moment().unix().toString() + '-' + Math.round(Math.random() * 1E9);
-        //     const fileExtension = path.extname(file.originalname).toLowerCase();  // Get the file extension
-        //     cb(null, { fieldName: key }); // Set the full key with extension
-        // },
         key: function(req, file, cb){
             const uniqueSuffix = moment().unix().toString() + '-' + Math.round(Math.random() * 1E9);
             const fileExtension = path.extname(file.originalname).toLowerCase();  // Get the file extension
