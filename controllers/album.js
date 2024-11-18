@@ -89,7 +89,7 @@ exports.put = async (req, res) => {
 
     if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
-      message: "Invalid Object ID"
+      error: "Invalid Object ID"
     }); 
   }
 
@@ -121,9 +121,9 @@ exports.delete = async (req, res) => {
 
     if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
-      message: "Invalid Object ID"
+      error: "Invalid Object ID"
     });
-    
+
     return res.status(500).send({ error: "Server error" });
   }
 

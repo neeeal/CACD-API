@@ -97,7 +97,7 @@ exports.put = async (req, res) => {
 
     // Handle invalid Object ID error
     if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)) {
-      return res.status(400).send({ message: "Invalid Object ID" });
+      return res.status(400).send({ error: "Invalid Object ID" });
     }
 
     // Handle duplicate key error (MongoServerError with code 11000)
@@ -140,7 +140,7 @@ exports.delete = async (req, res) => {
 
     if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
-      message: "Invalid Object ID"
+      error: "Invalid Object ID"
     });
     
     return res.status(500).send({ error: "Server error" });
