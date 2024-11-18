@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const PhotosCol = require("../models/photos.js");
+const RolesCol = require("../models/roles.js");
 const CompaniesCol = require("../models/companies.js");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
@@ -523,55 +524,63 @@ exports.saveAndPopulate = async ({doc, col}) => {
   return data;
 }
 
-exports.updateAndPopulate = async ({query, values, options, col}) => {
+exports.updateAndPopulate = async ({query, values, options, col, populate = true }) => {
   const data = await col.findOneAndUpdate(query, values, options);
+  console.log(data)
   // Initialize an empty array to hold populate values
   let populateValues = [];
 
-  // Add 'photos' population if the collection is not PhotosCol
-  if (col != PhotosCol) {
-    populateValues.push({
-      path: "photos",
-      match: { deletedAt: null },
-      select: "-__v -id"
-    });
-  }
+  if(populate){
+    // Add 'photos' population if the collection is not PhotosCol or RolesCol (roles DOES NOT have photos)
+    if (![PhotosCol, RolesCol].includes(col)) {
+      populateValues.push({
+        path: "photos",
+        match: { deletedAt: null },
+        select: "-__v -id"
+      });
+    }
+  
+    // Add 'companies' population if the collection is not CompaniesCol
+    if (col != CompaniesCol) {
+      populateValues.push({
+        path: "company",
+        match: { deletedAt: null },
+        select: "-__v"
+      });
+    }
 
-  // Add 'companies' population if the collection is not CompaniesCol
-  if (col != CompaniesCol) {
-    populateValues.push({
-      path: "company",
-      match: { deletedAt: null },
-      select: "-__v"
-    });
+    await data.populate(populateValues);
   }
 
   // Populate the document with the values in populateValues array
-  await data.populate(populateValues);
   return data;
 }
 
-exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0 }) => {
+exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = true }) => {
   let queryBuilder = col.find(query)
     .skip(offset * limit) 
     .limit(limit); 
 
   let populateValues = [];
 
-  if (col !== PhotosCol) {
-    populateValues.push({
-      path: "photos",
-      match: { deletedAt: null },
-      select: "-__v -id", 
-    });
-  }
-
-  if (col !== CompaniesCol) {
-    populateValues.push({
-      path: "company", 
-      match: { deletedAt: null },
-      select: "-__v", 
-    });
+  if(populate){
+    // Add 'photos' population if the collection is not PhotosCol or RolesCol (roles DOES NOT have photos)
+    if (![PhotosCol, RolesCol].includes(col)) {
+      populateValues.push({
+        path: "photos",
+        match: { deletedAt: null },
+        select: "-__v -id", 
+      });
+    }
+  
+    // Add 'companies' population if the collection is not CompaniesCol
+    if (col !== CompaniesCol) {
+      populateValues.push({
+        path: "company", 
+        match: { deletedAt: null },
+        select: "-__v", 
+      });
+    }  
   }
 
   let data;

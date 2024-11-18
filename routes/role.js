@@ -3,8 +3,9 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/role.js");
 const validation = require("../middlewares/validation.js");
-const fileUpload = require("../middlewares/fileUpload.js");
+// const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
+const multer = require('multer');
 const company = require("../middlewares/company.js");
 
 router.get(
@@ -14,15 +15,23 @@ router.get(
 
 // router.get("/getOne", controller.getOne)
 router.post(
-  "/", 
+  "/",   
+  auth.accessResource, 
+  multer().none(),   
+  company.assignCompany,
+  controller.post
 )
 
 router.put(
-  "/", 
+  "/",   
+  multer().none(),   
+  company.assignCompany,
+  controller.put
 )
 
 router.delete(
   "/:OID", 
+  controller.delete
 )
 
 module.exports = router;  
