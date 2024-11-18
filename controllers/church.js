@@ -5,13 +5,13 @@ const moment = require("moment");
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 
-  const query = utils.queryBuilder({
-    initialQuery: { deletedAt: null },
-    queryParams: queryParams
-  });
-
   let data;
   try{
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null },
+      queryParams: queryParams
+    });
+
     data = await utils.getAndPopulate({
       query: query,
       col: ChurchesCol,
@@ -20,6 +20,11 @@ exports.get = async (req, res) => {
     })
   } catch (err) {
     console.error(err.stack);
+    
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -149,7 +154,7 @@ console.log("async")
     if (err.message.includes("not found"))
       return res.status(404).send({ error: err.message });
 
-    if (err.message.includes("Cast to ObjectId failed"))
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
       message: "Invalid Object ID"
     });
@@ -194,7 +199,7 @@ console.log("async")
     if (err.message.includes("not found"))
       return res.status(404).send({ error: err.message });
 
-    if (err.message.includes("Cast to ObjectId failed"))
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
       message: "Invalid Object ID"
     });
@@ -226,6 +231,12 @@ exports.delete = async (req, res) => {
   );
   } catch (err){
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -238,39 +249,5 @@ exports.delete = async (req, res) => {
     data: {
       OID: OID
     }
-  })
-}
-
-exports.getOne = async (req, res) => {
-  const {name, OID} = req.query;
-
-  const query = {deletedAt: null};
-  // TODO: Add name query
-
-  if (OID) {
-    if (!utils.isOID(OID)) {
-      return res.status(400).send({ error: "Invalid ObjectId" });
-    }
-    query._id = OID;
-  }
-
-  let data;
-  try{
-    data = await utils.getAndPopulate({
-    query: query,
-    col: ChurchesCol,
-  });
-  } catch (err) {
-    console.error(err.stack);
-    return res.status(500).send({ error: "Server error" });
-  }
-
-  if (!data) {
-    return res.status(404).send({ error: "Church not found" });
-  }
-
-  res.status(200).send({
-    message: "get church",
-    data: data
   })
 }

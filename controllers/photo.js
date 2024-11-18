@@ -6,14 +6,14 @@ const moment = require("moment");
 
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
-
-  const query = utils.queryBuilder({
-    initialQuery: { deletedAt: null },
-    queryParams: queryParams
-  });
   
   let data;
   try {
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null },
+      queryParams: queryParams
+    });
+
     data = await utils.getAndPopulate({
       query: query,
       col: PhotosCol,
@@ -22,6 +22,11 @@ exports.get = async (req, res) => {
     });
   } catch (err) {
     console.error(err.stack);
+    
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -75,7 +80,7 @@ exports.put = async (req, res) => {
     if (err.message.includes("not found"))
       return res.status(404).send({ error: err.message });
 
-    if (err.message.includes("Cast to ObjectId failed"))
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
       message: "Invalid Object ID"
     });
@@ -107,6 +112,12 @@ exports.delete = async (req, res) => {
   );
   } catch (err){
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -120,55 +131,4 @@ exports.delete = async (req, res) => {
       OID: OID
     }
   })
-}
-
-exports.getOne = async (req, res) => {
-  const { name, OID } = req.query;
-
-  const query = { deletedAt: null };
-
-  if (OID) {
-    if (!utils.isOID(OID)) {
-      return res.status(400).send({ error: "Invalid ObjectId" });
-    }
-    query._id = OID;
-  }
-
-  try {
-    const data = await utils.getAndPopulate({
-      query: query,
-      col: PhotosCol,
-    });
-    console.log(data)
-
-    if (!data) {
-      return res.status(404).send({ error: "Photo not found" });
-    }
-
-    // Assuming `data.Photo.path` contains the relative path to the Photo
-    // const absolutePath = path.join(__dirname, '..', data.path); // Adjust path as necessary
-    // const absolutePath = path.join(process.env.IMAGEBASE_URI, data.photo.path); // Adjust path as necessary
-    const absolutePath = data.path; // Adjust path as necessary
-    // console.log(absolutePath);
-
-    // Check if the file exists
-    fs.access(absolutePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        return res.status(404).send({ error: "Photo file not found" });
-      }
-
-      // Send data and Photo path in the response
-      res.status(200).send({
-        message: "Photo retrieved successfully",
-        data: data
-        // {
-        //   ...data, // Include all fields of the data
-        //   photoUrl: utils.pathToURL(absolutePath)
-        // }
-      });
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send({ error: "Server error" });
-  }
 }

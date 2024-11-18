@@ -5,13 +5,13 @@ const moment = require("moment");
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 
-  const query = utils.queryBuilder({
-    initialQuery: { deletedAt: null },
-    queryParams: queryParams,
-  });
-
   let data;
   try{
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null },
+      queryParams: queryParams,
+    });
+    
     data = await utils.getAndPopulate({
       query: query,
       col: RolePermissionsCol,
@@ -20,6 +20,11 @@ exports.get = async (req, res) => {
     });
   } catch (err) {
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -90,7 +95,7 @@ exports.put = async (req, res) => {
     }
 
     // Handle invalid Object ID error
-    if (err.message.includes("Cast to ObjectId failed")) {
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)) {
       return res.status(400).send({ message: "Invalid Object ID" });
     }
 
@@ -130,6 +135,12 @@ exports.delete = async (req, res) => {
   );
   } catch (err){
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
     return res.status(500).send({ error: "Server error" });
   }
 

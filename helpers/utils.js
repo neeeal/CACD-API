@@ -343,16 +343,16 @@ exports.getOldPhotos = async ({col, query}) => {
 exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   // Ca
   let oldPhotos;
-  try{
+  // try{
     oldPhotos = await exports.getOldPhotos({ col: col, query: query });
     console.log("oldPhotos")
     console.log(oldPhotos)
-  }
-  catch (err){
-    console.log("Old Photo Retrieval")
-    console.error(err.stack);
-    return res.status(500).send({ error: "Server error" });
-  }
+  // }
+  // catch (err){
+  //   console.log("Old Photo Retrieval")
+  //   console.error(err.stack);
+  //   return res.status(500).send({ error: "Server error" });
+  // }
 
   if (uploadedPhotos) {
   // If has uploadedPhotos
@@ -425,15 +425,15 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
   // console.log("manageMultiplePhotosUpdate")
 
   let oldPhotos;
-  try{
+  // try{
     if (col)
       oldPhotos = await exports.getOldPhotos({ col: col, query: query });
-  }
-  catch (err){
-    console.log("Old Photo Retrieval")
-    console.error(err.stack);
-    return res.status(500).send({ error: "Server error" });
-  }
+  // }
+  // catch (err){
+  //   console.log("Old Photo Retrieval")
+  //   console.error(err.stack);
+  //   return res.status(500).send({ error: "Server error" });
+  // }
 
   let savedPhotos;
   if (uploadedPhotos && Object.keys(uploadedPhotos).length) {
@@ -646,7 +646,7 @@ exports.queryBuilder = ({initialQuery, queryParams}) => {
 
   if (queryParams.OID) {
     if (!exports.isOID(queryParams.OID)) {
-      return res.status(400).send({ error: "Invalid ObjectId" });
+      throw new Error("Invalid ObjectId");
     }
     query._id = queryParams.OID;
   }

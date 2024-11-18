@@ -7,13 +7,13 @@ const moment = require("moment");
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 
-  const query = utils.queryBuilder({
-    initialQuery: { deletedAt: null, accessLevel: {$ne: "User"} },
-    queryParams: queryParams,
-  });
-
   let data;
   try{
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, accessLevel: {$ne: "User"} },
+      queryParams: queryParams,
+    });
+
     data = await utils.getAndPopulate({
       query: query,
       col: AdminsCol,
@@ -22,6 +22,11 @@ exports.get = async (req, res) => {
     });
   } catch (err) {
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -29,42 +34,6 @@ exports.get = async (req, res) => {
     message: "get all active admins",
     data: data || [],
     count: data && data.length
-  })
-}
-
-exports.getOne = async (req, res) => {
-  const {name, OID} = req.query;
-
-  const query = {deletedAt: null, accessLevel: {$ne: "User"}};
-  // TODO: Add name query
-
-  if (OID) {
-    if (!utils.isOID(OID)) {
-      return res.status(400).send({ error: "Invalid ObjectId" });
-    }
-    query._id = OID;
-  }
-
-  let data;
-  try{
-  data = await utils.getAndPopulate({
-    query: query,
-    col: AdminsCol,
-    offset: queryParams.offset,
-    limit: queryParams.limit
-  });
-  } catch (err) {
-    console.error(err.stack);
-    return res.status(500).send({ error: "Server error" });
-  }
-
-  if (!data) {
-    return res.status(404).send({ error: "Admin not found" });
-  }
-
-  res.status(200).send({
-    message: "get admin",
-    data: data
   })
 }
 
@@ -201,7 +170,7 @@ exports.put = async (req, res) => {
     if (err.message.includes("not found"))
       return res.status(404).send({ error: err.message });
 
-    if (err.message.includes("Cast to ObjectId failed"))
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
       return res.status(404).send({
       message: "Invalid Object ID"
     });
@@ -236,6 +205,12 @@ exports.delete = async (req, res) => {
   await utils.softDeletePhotos({photos: adminDoc.photos, doc:adminDoc, col:AdminsCol})
 } catch (err){
     console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message))
+      return res.status(404).send({
+      message: "Invalid Object ID"
+    });
+    
     return res.status(500).send({ error: "Server error" });
   }
 
