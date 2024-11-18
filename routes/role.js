@@ -31,6 +31,8 @@ router.put(
 
 router.delete(
   "/:OID", 
+  auth.accessResource, 
+  company.assignCompany,
   controller.delete
 )
 

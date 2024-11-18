@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const PhotosCol = require("../models/photos.js");
 const RolesCol = require("../models/roles.js");
+const PermissionsCol = require("../models/permissions.js");
 const CompaniesCol = require("../models/companies.js");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
@@ -532,7 +533,7 @@ exports.updateAndPopulate = async ({query, values, options, col, populate = true
 
   if(populate){
     // Add 'photos' population if the collection is not PhotosCol or RolesCol (roles DOES NOT have photos)
-    if (![PhotosCol, RolesCol].includes(col)) {
+    if (![PhotosCol, RolesCol, PermissionsCol].includes(col)) {
       populateValues.push({
         path: "photos",
         match: { deletedAt: null },
@@ -541,7 +542,7 @@ exports.updateAndPopulate = async ({query, values, options, col, populate = true
     }
   
     // Add 'companies' population if the collection is not CompaniesCol
-    if (col != CompaniesCol) {
+    if (![CompaniesCol].includes(col)) {
       populateValues.push({
         path: "company",
         match: { deletedAt: null },
@@ -565,7 +566,7 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
 
   if(populate){
     // Add 'photos' population if the collection is not PhotosCol or RolesCol (roles DOES NOT have photos)
-    if (![PhotosCol, RolesCol].includes(col)) {
+    if (![PhotosCol, RolesCol, PermissionsCol].includes(col)) {
       populateValues.push({
         path: "photos",
         match: { deletedAt: null },

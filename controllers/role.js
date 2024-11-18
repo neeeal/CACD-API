@@ -1,6 +1,5 @@
 const RolesCol = require("../models/roles.js");
 const utils = require("../helpers/utils.js");
-const bcrypt = require("bcrypt");
 const moment = require("moment");
 
 exports.get = async (req, res) => {
@@ -40,8 +39,27 @@ exports.post = async (req, res) => {
   try{
     newRoleDoc = new RolesCol(newRole);
     const savedDoc = await newRoleDoc.save();
-  } catch(err) {
+  } catch (err) {
     console.error(err.stack);
+
+    // Handle "Permission not found" error
+    if (err.message.includes("not found")) {
+      return res.status(404).send({ error: err.message });
+    }
+
+    // Handle invalid Object ID error
+    if (err.message.includes("Cast to ObjectId failed")) {
+      return res.status(400).send({ message: "Invalid Object ID" });
+    }
+
+    // Handle duplicate key error (MongoServerError with code 11000)
+    if (err.code === 11000) {
+      return res.status(400).send({
+        error: `Duplicate key error. A ROLE with this ${Object.keys(err.keyValue).join(', ')} already exists.`,
+      });
+    }
+
+    // General server error
     return res.status(500).send({ error: "Server error" });
   }
 
@@ -73,16 +91,28 @@ exports.put = async (req, res) => {
     if (!newRole) 
       throw new Error("Role not found");
 
-  } catch(err){
+  } catch (err) {
     console.error(err.stack);
 
-    if (err.message.includes("not found"))
+    // Handle "Permission not found" error
+    if (err.message.includes("not found")) {
       return res.status(404).send({ error: err.message });
+    }
 
-    if (err.message.includes("Cast to ObjectId failed"))
-      return res.status(404).send({
-      message: "Invalid Object ID"
-    }); 
+    // Handle invalid Object ID error
+    if (err.message.includes("Cast to ObjectId failed")) {
+      return res.status(400).send({ message: "Invalid Object ID" });
+    }
+
+    // Handle duplicate key error (MongoServerError with code 11000)
+    if (err.code === 11000) {
+      return res.status(400).send({
+        error: `Duplicate key error. A permission with this ${Object.keys(err.keyValue).join(', ')} already exists.`,
+      });
+    }
+
+    // General server error
+    return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
