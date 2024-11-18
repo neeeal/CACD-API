@@ -219,7 +219,8 @@ exports.forgotPassword = async function(req, res) {
 
   htmlContent = htmlContent
   .replace('{{reset_link}}', resetLink)
-  .replace('{{name}}', existingUser.firstName);
+  .replace('{{name}}', existingUser.firstName)
+  .replace(/{{email}}/g, process.env.MAIL_EMAIL);
   
   var mailOptions = {
     from: process.env.MAIL_EMAIL,
