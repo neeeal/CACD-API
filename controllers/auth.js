@@ -44,24 +44,27 @@ exports.login = async (req, res) => {
     return res.status(500).send({ error: "Server error" });
   }
 
+  // token payload
+  const payload = {
+    userOid: existingUser._id,
+    firstName: existingUser.firstName,
+    lastName: existingUser.lastName,
+    email: existingUser.email,
+    company: existingUser.company,
+    accessLevel: existingUser.accessLevel
+  };
+
   // Assign token
   let accessToken;
   let refreshToken;
   try {
     accessToken = await utils.generateToken({
-      existingUser:{
-        userOid: existingUser._id,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
-        email: existingUser.email,
-        company: existingUser.company,
-        accessLevel: existingUser.accessLevel
-      }
+      existingUser: payload
     });
 
     // Generate refresh token
     refreshToken = await utils.generateToken({
-      existingUser:existingUser, 
+      existingUser:payload, 
       type:'refresh', 
       expiresIn:'7d', 
       secretKey:process.env.SECRET_KEY_REFRESH_TOKEN
@@ -151,15 +154,25 @@ exports.refreshToken = async (req, res) => {
   let newAccessToken;
   try {
     const decoded = jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN);
-    const existingUser = await UsersCol.findOne({_id: decoded.userOid, deletedAt: null}); 
+    const existingUser = await UsersCol.findOne({_id: decoded.userOid, deletedAt: null}).lean(); 
+    
     // Verify the refresh token logic (e.g., checking in database)
     const tokenDoc = await TokensCol.findOne({ token: refreshToken, deletedAt: null}).lean();
 
     if (!tokenDoc)
       throw new Error("Invalid Session");
 
+    //token payload
+    const payload = {
+      userOid: existingUser._id,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      email: existingUser.email,
+      company: existingUser.company,
+      accessLevel: existingUser.accessLevel
+    }
     // Issue a new access token
-    newAccessToken = await utils.generateToken({existingUser:existingUser});
+    newAccessToken = await utils.generateToken({existingUser:payload});
 
   } catch (err) {
     console.error(err.stack);

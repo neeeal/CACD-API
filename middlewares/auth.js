@@ -42,7 +42,8 @@ exports.accessResource = async (req, res, next) => {
 };
 
 exports.authorizeSuperAdmin = async (req, res, next) => {
-  const accessLevel = req.user && req.user.accessLevel;
+  console.log(req.user)
+  const accessLevel = req.user?.accessLevel;
 
   if (accessLevel !== 'Super Admin') {
     return res.status(403).send({ error: "Unauthorized" });
