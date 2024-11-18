@@ -77,9 +77,9 @@ exports.put = async (req, res) => {
   const options = { new: true };
 
   try {
-    newRole = await utils.updateAndPopulate({ query: query, values: values, options: options, col: PermissionsCol });
+    newPermission = await utils.updateAndPopulate({ query: query, values: values, options: options, col: PermissionsCol });
 
-    if (!newRole) 
+    if (!newPermission) 
       throw new Error("Permission not found");
 
   } catch (err) {
@@ -108,7 +108,7 @@ exports.put = async (req, res) => {
 
   res.status(200).send({
     message: "put",
-    data: newRole
+    data: newPermission
   });
 };
 
