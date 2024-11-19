@@ -21,7 +21,9 @@ const photoSchema = mongoose.Schema(
         "userPhoto", 
         "teamPhoto", 
         "companyPhoto",
-        "adminPhoto"
+        "adminPhoto",
+        "paymentPhoto",
+        "donationPhoto"
       ]
     },
     metadata: {
