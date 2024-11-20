@@ -15,7 +15,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.single("teamPhoto"), 
   company.assignCompany,
   controller.post
@@ -23,7 +23,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.single("teamPhoto"), 
   company.assignCompany,
   controller.put
@@ -31,7 +31,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   company.assignCompany,
   controller.delete
 )

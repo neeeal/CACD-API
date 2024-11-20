@@ -14,7 +14,7 @@ router.post(
 
 router.post(
   "/logout", 
-  auth.accessResource, 
+  auth.authorizeAccess(), 
   multer().none(), 
   company.assignCompany,
   controller.logout

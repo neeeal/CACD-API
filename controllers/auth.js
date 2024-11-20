@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
     lastName: existingUser.lastName,
     email: existingUser.email,
     company: existingUser.company,
-    accessLevel: existingUser.accessLevel
+    role: existingUser.role
   };
 
   // Assign token
@@ -169,8 +169,11 @@ exports.refreshToken = async (req, res) => {
       lastName: existingUser.lastName,
       email: existingUser.email,
       company: existingUser.company,
-      accessLevel: existingUser.accessLevel
+      role: existingUser.role
     }
+    console.log('payload')
+    console.log(payload)
+    console.log('payload')
     // Issue a new access token
     newAccessToken = await utils.generateToken({existingUser:payload});
 

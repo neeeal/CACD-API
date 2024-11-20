@@ -24,7 +24,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.single("userPhoto"), 
   validation.userRegisterAndUpdate, 
   validation.passwordConfirmation, 
@@ -34,7 +34,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   company.assignCompany,
   controller.delete
 )

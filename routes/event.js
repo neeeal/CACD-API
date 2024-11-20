@@ -15,7 +15,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/",  
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.fields([
     { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
@@ -26,7 +26,7 @@ router.post(
 
 router.put(
   "/",  
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.fields([
     { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
@@ -37,7 +37,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   company.assignCompany,
   controller.delete
 )

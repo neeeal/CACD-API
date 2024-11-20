@@ -10,7 +10,7 @@ exports.get = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, accessLevel: {$ne: "User"} },
+      initialQuery: { deletedAt: null, role: {$ne: "User"} }, // TODO: fix old user queries
       queryParams: queryParams,
     });
 
@@ -41,8 +41,8 @@ exports.post = async (req, res) => {
   console.log("here")
   let newAdmin = req.body;
 
-  if (!newAdmin.accessLevel) {
-    newAdmin.accessLevel = "Admin"; // default admin access level
+  if (!newAdmin.role) {
+    newAdmin.role = "Admin"; // default admin access level
   }
   newAdmin = new AdminsCol({
     ...newAdmin,
@@ -97,7 +97,7 @@ exports.put = async (req, res) => {
   
   const uploadedPhotos = req.file;
 
-  const query = { _id: newAdmin.OID, deletedAt: null, accessLevel: {$ne: "User"} }
+  const query = { _id: newAdmin.OID, deletedAt: null, role: {$ne: "User"} }
 
   // if has password to be set
   if (newAdmin.password && newAdmin.password.trim().length > 0){
@@ -193,7 +193,7 @@ exports.delete = async (req, res) => {
       { 
         _id: OID, 
         deletedAt: null,
-        accessLevel: {$ne: "User"}
+        role: {$ne: "User"}
       },
       {
         $set: {

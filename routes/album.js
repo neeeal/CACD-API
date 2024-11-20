@@ -16,7 +16,7 @@ router.get(
 
 router.post(
   "/", 
-  auth.accessResource,
+  auth.authorizeAccess("CA1"),
   multer().none(), 
   company.assignCompany,
   controller.post
@@ -24,7 +24,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   multer().none(), 
   company.assignCompany,
   controller.put
@@ -32,14 +32,14 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   company.assignCompany,
   controller.delete
 )
 
 router.post(
   "/manageAlbumPhotos", 
-  auth.accessResource,
+  auth.authorizeAccess(),
   fileUpload.fields([
     // { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }

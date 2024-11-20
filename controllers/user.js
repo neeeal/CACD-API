@@ -3,6 +3,7 @@ const utils = require("../helpers/utils.js");
 const userHelper = require("../helpers/userHelper.js");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
+const RolesCol = require("../models/roles.js");
 
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
@@ -39,11 +40,14 @@ exports.get = async (req, res) => {
 }
 
 exports.post = async (req, res) => {
+  // TODO: modularize getting role ID
+  const role = await RolesCol.findOne({ name: "User", deletedAt: null}).lean();
   console.log("here")
   let newUser = req.body;
   newUser = new UserCol({
     ...newUser,
-    company: newUser.company
+    company: newUser.company,
+    role: role._id
   });
   const uploadedPhotos = req.file;
 

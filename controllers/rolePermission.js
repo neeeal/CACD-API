@@ -1,4 +1,6 @@
 const RolePermissionsCol = require("../models/rolePermissions.js");
+const PermissionsCol = require("../models/permissions.js");
+const RolesCol = require("../models/roles.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
@@ -37,6 +39,24 @@ exports.get = async (req, res) => {
 
 exports.post = async (req, res) => {
   let newRolePermission = req.body;
+
+  if (newRolePermission.newRole){ // TODO: Modularize role and permission creation
+    const newRole = new RolesCol({
+      name: newRolePermission.newRole,
+      company: newRolePermission.company
+    })
+    await newRole.save();
+    newRolePermission.role = newRole._id;
+  }
+
+  if (newRolePermission.newPermission){ // TODO: Modularize role and permission creation
+    const newPermission = new PermissionsCol({
+      name: newRolePermission.newPermission,
+      company: newRolePermission.company
+    })
+    await newPermission.save();
+    newRolePermission.permission = newPermission._id;
+  }
 
   console.log(newRolePermission);
 

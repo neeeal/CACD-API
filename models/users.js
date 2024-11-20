@@ -36,10 +36,10 @@ const userSchema = new mongoose.Schema(
       ref: "photos",
       default: [],
     },
-    accessLevel: {
-      type: String,
-      default: 'User',
-      enum: ['User' ,'Admin', 'Super Admin'],
+    role: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "roles",
+      required: true,
     },
     deletedAt: {
       type: Date,

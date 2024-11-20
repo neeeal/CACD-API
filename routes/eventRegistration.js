@@ -16,7 +16,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  // auth.accessResource, 
+  // auth.authorizeAccess(), 
   fileUpload.single("paymentPhoto"),   
   company.assignCompany,
   controller.post
@@ -24,7 +24,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.accessResource, 
+  auth.authorizeAccess(), 
   fileUpload.single("paymentPhoto"),     
   company.assignCompany,
   controller.put
