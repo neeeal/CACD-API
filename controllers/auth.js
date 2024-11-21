@@ -194,7 +194,6 @@ exports.refreshToken = async (req, res) => {
   })
 };
 
-// TODO: add node mailer and token
 exports.forgotPassword = async function(req, res) {
   const user = req.body;
 
@@ -262,7 +261,6 @@ exports.forgotPassword = async function(req, res) {
   });
 };
 
-// TODO: delete token if success
 exports.resetPassword = async function(req, res) {
   const { token } = req.query;
   console.log(token)

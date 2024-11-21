@@ -8,6 +8,8 @@ const company = require("../middlewares/company.js");
 const multer = require('multer');
 const auth = require("../middlewares/auth.js");
 
+// TODO: separate GET routes for single, all-in-company, and all resources for all routes
+
 router.get(
   "/", 
   controller.get

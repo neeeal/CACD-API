@@ -9,6 +9,10 @@ const jwt = require("jsonwebtoken");
 const path = require('path');
 const fs = require('fs');
 
+/*
+  TODO: Modularize utils. create other files for like functions.
+*/
+
 exports.isDuplicateKeyError = (errorMessage) => {
   const regex = /dup key: \{ (\w+):/;
   const match = errorMessage.match(regex);
@@ -634,6 +638,8 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
 };
 
 exports.queryBuilder =  ({initialQuery, queryParams}) => {
+
+  // TODO: improve query builder to handle multiple queries for in-company and all resource GET requests
   const query = initialQuery;
   
   if (queryParams.company) {

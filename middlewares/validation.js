@@ -1,6 +1,8 @@
 /*
   User Validation
 */
+
+// TODO: add validation for important routes and required fields
 exports.passwordConfirmation = async (req, res, next) => {
   const { password, passwordConfirmation } = req.body;
   if (password!==passwordConfirmation) {
