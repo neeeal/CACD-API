@@ -88,6 +88,10 @@ exports.post = async (req, res) => {
       return res.status(400).send({ error: err.message });
     }
 
+    if (err.message.includes("does not exist. Please create a")){
+      return res.status(404).send({ error: err.message });
+    }
+
     // General server error response
     return res.status(500).send({ error: "Server error" });
   }

@@ -20,9 +20,9 @@ exports.savePermission = async ({permissionData}) =>{
 
 exports.manageSaveRole = async ({roleData, returnIdOnly = false}) =>{
   const existingRole = await RolesCol.findOne({
-    name: roleData?.name,
-    description: roleData?.description,
-    deletedAt: null 
+    _id: roleData.OID,
+    deletedAt: null,
+    company: roleData.company
   })
   .lean();
 
@@ -30,17 +30,19 @@ exports.manageSaveRole = async ({roleData, returnIdOnly = false}) =>{
     return existingRole;
   }
 
-  console.log(roleData)
+  throw new Error("Role does not exist. Please create a new role first.")
 
-  const newRole = await exports.saveRole({roleData});
-  return returnIdOnly ? newRole._id : newRole;
+  // console.log(roleData)
+
+  // const newRole = await exports.saveRole({roleData});
+  // return returnIdOnly ? newRole._id : newRole;
 }
 
 exports.manageSavePermission = async ({permissionData, returnIdOnly = false}) =>{
   const existingPermission = await PermissionsCol.findOne({
-    name: permissionData?.name,
-    description: permissionData?.description,
-    deletedAt: null
+    _id: permissionData?.OID,
+    deletedAt: null,
+    company: permissionData.company
   })
   .lean();
 
@@ -48,8 +50,10 @@ exports.manageSavePermission = async ({permissionData, returnIdOnly = false}) =>
     return existingPermission;
   }
 
-  const newPermission = await exports.savePermission({permissionData});
-  return returnIdOnly ? newPermission._id : newPermission;
+  throw new Error("Permission does not exist. Please create a new permission first.")
+
+  // const newPermission = await exports.savePermission({permissionData});
+  // return returnIdOnly ? newPermission._id : newPermission;
 }
 
 exports.deleteRole = async ({OID, returnIdOnly = false}) =>{
@@ -97,24 +101,24 @@ exports.saveMultipleRolePermissions = async ({ rolePermissionData, returnIdOnly 
   // Fetch roles and permissions by name
   const roles = await RolesCol.find({
     deletedAt: null, 
-    name: { $in: rolePermissionData.role },
+    _id: { $in: rolePermissionData.role },
     company: rolePermissionData.company
   });
 
   const permissions = await PermissionsCol.find({
     deletedAt: null, 
-    name: { $in: rolePermissionData.permission },
+    _id: { $in: rolePermissionData.permission },
     company: rolePermissionData.company
   });
 
   // Map roles and permissions to their IDs for easier lookup
   const roleMap = roles.reduce((acc, role) => {
-    acc[role.name] = role;
+    acc[role._id] = role;
     return acc;
   }, {});
 
   const permissionMap = permissions.reduce((acc, permission) => {
-    acc[permission.name] = permission;
+    acc[permission._id] = permission;
     return acc;
   }, {});
 
