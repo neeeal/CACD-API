@@ -50,7 +50,7 @@ exports.login = async (req, res) => {
     firstName: existingUser.firstName,
     lastName: existingUser.lastName,
     email: existingUser.email,
-    company: existingUser.company,
+    company: existingUser.company._id,
     role: existingUser.role
   };
 
