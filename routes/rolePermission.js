@@ -22,6 +22,15 @@ router.post(
   controller.post
 )
 
+router.post(
+  "/manageRolePermissions", 
+  auth.authorizeAccess(), 
+  multer().none(),   
+  company.assignCompany,
+  controller.manageRolePermissions
+)
+
+
 router.put(
   "/", 
   auth.authorizeAccess(), 

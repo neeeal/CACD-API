@@ -1,4 +1,5 @@
 const PermissionsCol = require("../models/permissions.js");
+const rolePermissionHelper = require("../helpers/rolePermissionHelper.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
@@ -42,8 +43,7 @@ exports.post = async (req, res) => {
 
   let newPermissionDoc;
   try {
-    newPermissionDoc = new PermissionsCol(newPermission);
-    const savedDoc = await newPermissionDoc.save();
+    newPermissionDoc = await rolePermissionHelper.savePermission({permissionData: newPermission});
   } catch (err) {
     console.error(err.stack);
 
@@ -124,17 +124,7 @@ exports.delete = async (req, res) => {
 
   let newPermission;
   try {
-    newPermission = await PermissionsCol.findOneAndUpdate(
-      { 
-        _id: OID, 
-        deletedAt: null
-      },
-      {
-        $set: {
-          deletedAt: moment().toISOString()
-        }
-    }
-  );
+    newPermission = await rolePermissionHelper.deletePermission({OID: OID});
   } catch (err){
     console.error(err.stack);
 

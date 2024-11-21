@@ -1,7 +1,6 @@
 const RolePermissionsCol = require("../models/rolePermissions.js");
-const PermissionsCol = require("../models/permissions.js");
-const RolesCol = require("../models/roles.js");
 const utils = require("../helpers/utils.js");
+const rolePermissionHelper = require("../helpers/rolePermissionHelper.js");
 const moment = require("moment");
 
 exports.get = async (req, res) => {
@@ -38,30 +37,41 @@ exports.get = async (req, res) => {
 };
 
 exports.post = async (req, res) => {
-  let newRolePermission = req.body;
-
-  if (newRolePermission.newRole){ // TODO: Modularize role and permission creation
-    const newRole = new RolesCol({
-      name: newRolePermission.newRole,
-      company: newRolePermission.company
-    })
-    await newRole.save();
-    newRolePermission.role = newRole._id;
-  }
-
-  if (newRolePermission.newPermission){ // TODO: Modularize role and permission creation
-    const newPermission = new PermissionsCol({
-      name: newRolePermission.newPermission,
-      company: newRolePermission.company
-    })
-    await newPermission.save();
-    newRolePermission.permission = newPermission._id;
-  }
-
-  console.log(newRolePermission);
+  const newRolePermission = req.body;
 
   let newRolePermissionDoc;
   try {
+    const role = await rolePermissionHelper.manageSaveRole({
+      roleData: {
+        ...newRolePermission.role,
+        company: newRolePermission.company
+      }
+    });
+  
+    const permission = await rolePermissionHelper.manageSavePermission({
+      permissionData: {
+        ...newRolePermission.permission,
+        company: newRolePermission.company,
+      }
+    });
+
+    const name = rolePermissionHelper.formatRolePermissionName({
+      role: role, 
+      permission: permission, 
+    });
+  
+    newRolePermission.name = name;
+    newRolePermission.role = role._id;
+    newRolePermission.permission = permission._id;
+    
+    console.log(newRolePermission);
+
+    const existingRolePermissions = await rolePermissionHelper.checkExistingRolePermissions({
+      company: newRolePermission.company, 
+      roles: [role], 
+      permissions:[permission]
+    });
+
     newRolePermissionDoc = new RolePermissionsCol(newRolePermission);
     const savedDoc = await newRolePermissionDoc.save();
   } catch (err) {
@@ -72,6 +82,10 @@ exports.post = async (req, res) => {
       return res.status(400).send({
         error: "Duplicate key error. A role permission with this name already exists.",
       });
+    }
+
+    if (err.message.includes("role-permission combinations already exist")){
+      return res.status(400).send({ error: err.message });
     }
 
     // General server error response
@@ -173,3 +187,52 @@ exports.delete = async (req, res) => {
     data: newRolePermission
   })
 };
+
+exports.manageRolePermissions = async (req, res) => {
+  /* 
+    Batch add and delete role permissions
+    can only use existing roles and existing permissions
+    to add new roles and new permissions, please use the 
+    respective routes for each or the rolepermission post request
+  */
+
+  const rolePermissions = req.body;
+  const add = rolePermissions.add;
+  const remove = rolePermissions.remove;
+
+  if (!add &&!remove) {
+    return res.status(400).send({ error: "No role permissions to add or remove" });
+  }
+
+  let newDoc;
+  if (add) {
+    try{
+      newDoc = await rolePermissionHelper.saveMultipleRolePermissions({rolePermissionData: {...add, company: rolePermissions.company}});
+    } catch(err){
+      console.error(err.stack);
+
+      if (err.message.includes("role-permission combinations already exist")){
+        return res.status(400).send({ error: err.message });
+      }
+
+      return res.status(500).send({ error: "Server error" });
+    }
+  } else if (remove){
+    try{
+      newDoc = await rolePermissionHelper.deleteMultipleRolePermissions({rolePermissionData: {remove: [...remove], company: rolePermissions.company}});
+    } catch(err){
+      console.error(err.stack);
+
+      return res.status(500).send({ error: "Server error" });
+    }
+  }
+
+  if(!newDoc){
+    return res.status(404).send({ error: "No role permissions to add or remove"});
+  }
+
+  res.status(200).send({
+    message: "manage role permissions",
+    data: newDoc
+  });
+}

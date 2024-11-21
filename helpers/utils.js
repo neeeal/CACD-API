@@ -633,7 +633,7 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
   return data;
 };
 
-exports.queryBuilder = ({initialQuery, queryParams}) => {
+exports.queryBuilder =  ({initialQuery, queryParams}) => {
   const query = initialQuery;
   
   if (queryParams.company) {
@@ -650,6 +650,11 @@ exports.queryBuilder = ({initialQuery, queryParams}) => {
     }
     query._id = queryParams.OID;
   }
+
+  // if (queryParams.role) {
+  //   const roleDoc = await RolesCol.findOne({})
+  //   query.role = queryParams.OID;
+  // }
 
   return query;
 }

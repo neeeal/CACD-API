@@ -1,5 +1,6 @@
 const RolesCol = require("../models/roles.js");
 const utils = require("../helpers/utils.js");
+const rolePermissionHelper = require("../helpers/rolePermissionHelper.js");
 const moment = require("moment");
 
 exports.get = async (req, res) => {
@@ -42,8 +43,7 @@ exports.post = async (req, res) => {
 
   let newRoleDoc;
   try{
-    newRoleDoc = new RolesCol(newRole);
-    const savedDoc = await newRoleDoc.save();
+    newRoleDoc = await rolePermissionHelper.saveRole({roleData: newRole});
   } catch (err) {
     console.error(err.stack);
 
@@ -132,17 +132,7 @@ exports.delete = async (req, res) => {
 
   let newRole;
   try {
-    newRole = await RolesCol.findOneAndUpdate(
-      { 
-        _id: OID, 
-        deletedAt: null
-      },
-      {
-        $set: {
-          deletedAt: moment().toISOString()
-        }
-    }
-  );
+    newRole = await rolePermissionHelper.deleteRole({OID: OID});
   } catch (err){
     console.error(err.stack);
 
