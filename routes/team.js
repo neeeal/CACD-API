@@ -13,7 +13,7 @@ router.get(
 )
 
 router.get(
-  "/:OID",
+  "/:teamOid/company/:companyOid",
   controller.getOne
 )
 // router.get("/getOne", controller.getOne)

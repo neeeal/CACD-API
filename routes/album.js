@@ -17,7 +17,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 
 router.get(
-  "/:OID",
+  "/:albumOid/company/:companyOid",
   controller.getOne
 )
 

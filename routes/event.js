@@ -13,7 +13,7 @@ router.get(
 )
 
 router.get(
-  "/:OID",
+  "/:eventOid/company/:companyOid",
   controller.getOne
 )
 

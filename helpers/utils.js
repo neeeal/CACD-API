@@ -637,7 +637,7 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
   return data;
 };
 
-exports.queryBuilder =  ({initialQuery, queryParams}) => {
+exports.queryBuilder =  ({initialQuery, queryParams = {}}) => {
 
   // TODO: improve query builder to handle multiple queries for in-company and all resource GET requests
   const query = initialQuery;

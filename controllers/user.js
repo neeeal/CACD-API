@@ -41,15 +41,11 @@ exports.get = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
-  const queryParams = req.query || {};
-  const { OID } = req.params;
+  const params = req.params;
 
   let data;
   try{
-    const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, _id: OID },
-      queryParams: { company: queryParams?.company }
-    });
+    const query = { deletedAt: null, _id: params.userOid, company: params.companyOid };
 
     data = await utils.getAndPopulate({
       query: query,

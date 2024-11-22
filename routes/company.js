@@ -14,7 +14,7 @@ router.get(
 )
 
 router.get(
-  "/:OID",
+  "/:companyOid",
   controller.getOne
 )
 

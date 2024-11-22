@@ -14,7 +14,7 @@ router.get(
 )
 
 router.get(
-  "/:OID",
+  "/:permissionOid/company/:companyOid",
   controller.getOne
 )
 // router.get("/getOne", controller.getOne)
