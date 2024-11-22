@@ -16,6 +16,11 @@ router.get(
 )
 // router.get("/getOne", controller.getOne)
 
+router.get(
+  "/:OID",
+  controller.getOne
+)
+
 router.post(
   "/", 
   auth.authorizeAccess("CA1"),

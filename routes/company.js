@@ -13,6 +13,11 @@ router.get(
   controller.get
 )
 
+router.get(
+  "/:OID",
+  controller.getOne
+)
+
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
