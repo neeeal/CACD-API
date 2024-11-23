@@ -5,10 +5,11 @@ const controller = require("../controllers/company.js");
 const validation = require("../middlewares/validation.js");
 const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
+const authCodes = require("../config/authCodes.js");
 
 router.get(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.company.read),
   auth.authorizeSuperAdmin,
   controller.get
 )
@@ -21,7 +22,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.company.create),
   auth.authorizeSuperAdmin,
   fileUpload.single("companyPhoto"), 
   controller.post
@@ -29,7 +30,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.company.update),
   auth.authorizeSuperAdmin,
   fileUpload.single("companyPhoto"), 
   controller.put
@@ -37,7 +38,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.company.delete),
   auth.authorizeSuperAdmin,
   controller.delete
 )

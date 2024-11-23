@@ -7,11 +7,13 @@ const fileUpload = require("../middlewares/fileUpload.js");
 const company = require("../middlewares/company.js");
 const multer = require('multer');
 const auth = require("../middlewares/auth.js");
+const authCodes = require("../config/authCodes.js");
 
 // TODO: separate GET routes for single, all-in-company, and all resources for all routes
 // TODO: change update routes to use paramd OID
 router.get(
   "/", 
+  auth.authorizeAccess(authCodes.album.read),
   controller.get
 )
 // router.get("/getOne", controller.getOne)
@@ -23,7 +25,7 @@ router.get(
 
 router.post(
   "/", 
-  auth.authorizeAccess("CA1"),
+  auth.authorizeAccess(authCodes.album.create),
   multer().none(), 
   company.assignCompany,
   controller.post
@@ -31,7 +33,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.album.update),
   multer().none(), 
   company.assignCompany,
   controller.put
@@ -39,14 +41,14 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.album.delete),
   company.assignCompany,
   controller.delete
 )
 
 router.post(
   "/manageAlbumPhotos", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.album.manageAlbumPhotos),
   fileUpload.fields([
     // { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }

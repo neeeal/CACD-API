@@ -5,6 +5,7 @@ const controller = require("../controllers/auth.js");
 const company = require("../middlewares/company.js");
 const auth = require("../middlewares/auth.js");
 const multer = require('multer');
+const authCodes = require("../config/authCodes.js");
 
 router.post(
   "/login", 

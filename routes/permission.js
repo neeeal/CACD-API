@@ -7,9 +7,11 @@ const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
 const multer = require('multer');
+const authCodes = require("../config/authCodes.js");
 
 router.get(
   "/", 
+  auth.authorizeAccess(authCodes.permission.read),
   controller.get
 )
 
@@ -20,7 +22,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  auth.authorizeAccess(), 
+  auth.authorizeAccess(authCodes.permission.create), 
   multer().none(),   
   company.assignCompany,
   controller.post
@@ -28,7 +30,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.authorizeAccess(), 
+  auth.authorizeAccess(authCodes.permission.update), 
   multer().none(),   
   company.assignCompany,
   controller.put
@@ -36,6 +38,7 @@ router.put(
 
 router.delete(
   "/:OID", 
+  auth.authorizeAccess(authCodes.permission.delete), 
   controller.delete
 )
 

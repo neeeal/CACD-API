@@ -7,9 +7,11 @@ const validation = require("../middlewares/validation.js");
 const auth = require("../middlewares/auth.js");
 const multer = require('multer');
 const company = require("../middlewares/company.js");
+const authCodes = require("../config/authCodes.js");
 
 router.get(
   "/", 
+  auth.authorizeAccess(authCodes.role.read), 
   controller.get
 )
 
@@ -20,7 +22,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/",   
-  auth.authorizeAccess(), 
+  auth.authorizeAccess(authCodes.role.create), 
   multer().none(),   
   company.assignCompany,
   controller.post
@@ -28,6 +30,7 @@ router.post(
 
 router.put(
   "/",   
+  auth.authorizeAccess(authCodes.role.update), 
   multer().none(),   
   company.assignCompany,
   controller.put
@@ -35,7 +38,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.authorizeAccess(), 
+  auth.authorizeAccess(authCodes.role.delete), 
   company.assignCompany,
   controller.delete
 )

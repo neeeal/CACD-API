@@ -5,9 +5,11 @@ const controller = require("../controllers/church.js");
 const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
+const authCodes = require("../config/authCodes.js");
 
 router.get(
   "/", 
+  auth.authorizeAccess(authCodes.church.read),
   controller.get
 )
 
@@ -19,7 +21,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.church.create),
   fileUpload.fields([
     { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
@@ -30,7 +32,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.church.update),
   fileUpload.fields([
     { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
@@ -41,7 +43,7 @@ router.put(
 
 router.delete(
   "/:OID",
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.church.delete),
   company.assignCompany,
   controller.delete
 )

@@ -6,9 +6,11 @@ const controller = require("../controllers/photo.js");
 const validation = require("../middlewares/validation.js");
 const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
+const authCodes = require("../config/authCodes.js");
 
 router.get(
   "/", 
+  auth.authorizeAccess(authCodes.photo.read), 
   controller.get
 )
 
@@ -19,7 +21,7 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.photo.create),
   fileUpload.single("default"), 
   company.assignCompany,
   controller.post
@@ -27,7 +29,7 @@ router.post(
 
 router.put(
   "/", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.photo.update),
   fileUpload.fields([
     // { name: "featuredPhoto", maxCount: 1 },
     { name: "default", maxCount: 99 }
@@ -38,7 +40,7 @@ router.put(
 
 router.delete(
   "/:OID", 
-  auth.authorizeAccess(),
+  auth.authorizeAccess(authCodes.photo.delete),
   company.assignCompany,
   controller.delete
 )
