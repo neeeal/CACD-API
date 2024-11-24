@@ -15,8 +15,13 @@ router.get(
 )
 
 router.get(
-  "/:eventOid/company/:companyOid",
+  "/:eventOid/byCompany/:companyOid",
   controller.getOne
+)
+
+router.get(
+  "/byCompany/:companyOid", 
+  controller.getByCompany
 )
 
 // router.get("/getOne", controller.getOne)

@@ -15,9 +15,15 @@ router.get(
 )
 
 router.get(
-  "/:photoOid/company/:companyOid",
+  "/:photoOid/byCompany/:companyOid",
   controller.getOne
 )
+
+router.get(
+  "/byCompany/:companyOid", 
+  controller.getByCompany
+)
+
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 

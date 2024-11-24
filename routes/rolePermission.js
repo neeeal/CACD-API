@@ -16,9 +16,16 @@ router.get(
 )
 
 router.get(
-  "/:rolePermissionOid/company/:companyOid",
+  "/:rolePermissionOid/byCompany/:companyOid",
   controller.getOne
 )
+
+router.get(
+  "/byCompany", 
+  auth.authorizeAccess(authCodes.rolePermission.readByCompany),
+  controller.getByCompany
+)
+
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 
@@ -35,7 +42,6 @@ router.post(
   company.assignCompany,
   controller.manageRolePermissions
 )
-
 
 router.put(
   "/", 

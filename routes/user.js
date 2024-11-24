@@ -15,10 +15,17 @@ router.get(
 )
 
 router.get(
-  "/:userOid/company/:companyOid",
+  "/:userOid/byCompany/:companyOid",
   auth.authorizeAccess(authCodes.user.readOne),
   controller.getOne
 )
+
+router.get(
+  "/byCompany", 
+  auth.authorizeAccess(authCodes.user.readByCompany),
+  controller.getByCompany
+)
+
 // router.get("/getOne", controller.getOne)
 router.post(
   "/", 

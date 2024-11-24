@@ -14,8 +14,13 @@ router.get(
 )
 
 router.get(
-  "/:churchOid/company/:companyOid",
+  "/:churchOid/byCompany/:companyOid",
   controller.getOne
+)
+
+router.get(
+  "/byCompany/:companyOid", 
+  controller.getByCompany
 )
 
 // router.get("/getOne", controller.getOne)

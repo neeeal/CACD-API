@@ -39,10 +39,11 @@ exports.get = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   const params = req.params;
+  const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.adminOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.adminOid, company: user.companyOid };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -61,6 +62,36 @@ exports.getOne = async (req, res) => {
 
   res.status(200).send({
     message: "admin get",
+    data: data?.[0] || [],
+    count: data && data.length 
+  })
+}
+
+exports.getByCompany = async (req, res) => {
+  // TODO: add middleware for query company validation (consider)
+  const params = req.params;
+
+  let data;
+  try{
+    const query = { deletedAt: null, company: params.companyOid };
+
+    data = await utils.getAndPopulate({
+      query: query,
+      col: AdminsCol,
+    });
+    
+  } catch (err) {
+    console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  res.status(200).send({
+    message: "User get",
     data: data?.[0] || [],
     count: data && data.length 
   })

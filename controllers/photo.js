@@ -66,6 +66,36 @@ exports.getOne = async (req, res) => {
   })
 }
 
+exports.getByCompany = async (req, res) => {
+  // TODO: add middleware for query company validation (consider)
+  const params = req.params;
+
+  let data;
+  try{
+    const query = { deletedAt: null, company: params.companyOid };
+
+    data = await utils.getAndPopulate({
+      query: query,
+      col: PhotosCol,
+    });
+    
+  } catch (err) {
+    console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  res.status(200).send({
+    message: "User get",
+    data: data?.[0] || [],
+    count: data && data.length 
+  })
+}
+
 exports.post = async (req, res) => {
   const details = req.body;
   const uploadedPhotos = req.file;
