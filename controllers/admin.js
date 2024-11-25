@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const userHelper = require("../helpers/userHelper.js");
 const moment = require("moment");
 
+// TODO: consider separating business logic in controllers, create services folder
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 

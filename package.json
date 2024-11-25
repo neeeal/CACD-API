@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon App.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed:permissions": "node db/seeds/permission.js",
+    "seed:roles": "node db/seeds/role.js",
+    "seed:rolePermissions": "node db/seeds/rolePermission.js"
   },
   "repository": {
     "type": "git",

@@ -13,6 +13,8 @@ const fs = require('fs');
   TODO: Modularize utils. create other files for like functions.
 */
 
+// TODO: remove deleted at, created at, and other non-relevant fields when populating
+
 exports.isDuplicateKeyError = (errorMessage) => {
   const regex = /dup key: \{ (\w+):/;
   const match = errorMessage.match(regex);
