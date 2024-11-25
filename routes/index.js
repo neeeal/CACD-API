@@ -3,6 +3,12 @@ const router = express.Router();
 
 // Use the routes
 const initRoutes = (app) => {
+  // Route logging middleware
+  router.use((req, res, next) => {
+    console.log(`[ROUTE]: ${req.method} ${req.originalUrl}`);
+    next();
+  });
+
   router.use("/user", require("./user.js"));
   router.use("/auth", require("./auth.js"));
   router.use("/church", require("./church.js"));
