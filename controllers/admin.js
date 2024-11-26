@@ -2,18 +2,20 @@ const AdminsCol = require("../models/users.js");
 const utils = require("../helpers/utils.js");
 const bcrypt = require("bcrypt");
 const userHelper = require("../helpers/userHelper.js");
+const rolePermissionHelper = require("../helpers/rolePermissionHelper.js");
 const moment = require("moment");
 const RolesCol = require("../models/roles.js");
 
 // TODO: consider separating business logic in controllers, create services folder
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
+  const { companyOid } = req.user;
 
   let data;
   try{
-    const userRole = await RolesCol.findOne({ name: "user" }).lean(); 
+    const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, companyOid: companyOid}); 
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, role: {$ne: userRole._id} }, // TODO: fix old user queries
+      initialQuery: { deletedAt: null, role: {$ne: role} }, // TODO: fix old user queries
       queryParams: queryParams,
     });
 
@@ -109,13 +111,17 @@ exports.getByCompany = async (req, res) => {
 exports.post = async (req, res) => {
   console.log("here")
   let newAdmin = req.body;
+  const company = newAdmin.company;
 
   if (!newAdmin.role) {
-    newAdmin.role = "Admin"; // default admin access level
+    newAdmin.role = "moderator"; // default moderator access level
   }
+
+  newAdmin.role = await rolePermissionHelper.getRoleByName({name: newAdmin.role, returnIdOnly: true, companyOid: company})
+
   newAdmin = new AdminsCol({
     ...newAdmin,
-    company: newAdmin.companyOid
+    company: company
   });
   const uploadedPhotos = req.file;
 
@@ -163,11 +169,15 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newAdmin = req.body;
+  const { companyOid } = req.user;
   
   const uploadedPhotos = req.file;
 
-  // TODO: fix role query handling and add means to assign admin roles
-  const query = { _id: newAdmin.OID, deletedAt: null, role: {$ne: "User"} }
+  const query = { 
+    _id: newAdmin.OID, 
+    deletedAt: null, 
+    company: companyOid 
+  };
 
   // if has password to be set
   if (newAdmin.password && newAdmin.password.trim().length > 0){
@@ -256,6 +266,7 @@ exports.put = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { OID } = req.params; 
+  const { companyOid } = req.user;
 
   let adminDoc;
   try {
@@ -263,7 +274,7 @@ exports.delete = async (req, res) => {
       { 
         _id: OID, 
         deletedAt: null,
-        role: {$ne: "User"}
+        company: companyOid
       },
       {
         $set: {

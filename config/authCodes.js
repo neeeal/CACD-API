@@ -1,5 +1,4 @@
 const authCodes = {
-  // TODO: add automated code generation
   admin: {
     create: "CAD",
     read: "RAD",

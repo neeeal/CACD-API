@@ -235,3 +235,11 @@ exports.manageUpdatePermission = async({permissionData, returnIdOnly = false}) =
 
   return returnIdOnly? updatedPermission._id : updatedPermission;
 }
+
+exports.getRoleByName = async({name, returnIdOnly = false, companyOid}) => {
+  console.log(name, companyOid)
+  const userRole = await RolesCol.findOne({ name: name, deletedAt: null, company: companyOid }).lean(); 
+  console.log(userRole)
+
+  return returnIdOnly ? userRole._id : userRole;
+}

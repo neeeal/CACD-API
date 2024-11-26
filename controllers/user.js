@@ -106,13 +106,13 @@ exports.getByCompany = async (req, res) => {
 
 exports.post = async (req, res) => {
   // TODO: modularize getting role ID
-  const role = await RolesCol.findOne({ name: "User", deletedAt: null}).lean();
+  const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, companyOid: companyOid}); 
   console.log("here")
   let newUser = req.body;
   newUser = new UserCol({
     ...newUser,
     company: newUser.companyOid,
-    role: role._id
+    role: role
   });
   const uploadedPhotos = req.file;
 
