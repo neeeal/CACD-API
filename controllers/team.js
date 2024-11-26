@@ -68,11 +68,15 @@ exports.getOne = async (req, res) => {
 
 exports.getByCompany = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
+  const queryParams = req.query || {};
   const params = req.params;
 
   let data;
   try{
-    const query = { deletedAt: null, company: params.companyOid };
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, company: params.companyOid },
+      queryParams: queryParams,
+    });
 
     data = await utils.getAndPopulate({
       query: query,
@@ -91,7 +95,7 @@ exports.getByCompany = async (req, res) => {
 
   res.status(200).send({
     message: "User get",
-    data: data?.[0] || [],
+    data: data || [],
     count: data && data.length 
   })
 }
@@ -121,6 +125,7 @@ exports.post = async (req, res) => {
   let data;
   try{
     const newTeamDoc = new TeamsCol(values);
+    console.log(newTeamDoc)
     data = await utils.saveAndPopulate({doc:newTeamDoc, col:TeamsCol});
   }
   catch (err){

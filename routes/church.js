@@ -8,9 +8,8 @@ const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
 
 router.get(
-  "/", 
-  auth.authorizeAccess(authCodes.church.read),
-  controller.get
+  "/byCompany/:companyOid", 
+  controller.getByCompany
 )
 
 router.get(
@@ -19,8 +18,9 @@ router.get(
 )
 
 router.get(
-  "/byCompany/:companyOid", 
-  controller.getByCompany
+  "/", 
+  auth.authorizeAccess(authCodes.church.read),
+  controller.get
 )
 
 // router.get("/getOne", controller.getOne)

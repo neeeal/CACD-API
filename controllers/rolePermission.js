@@ -38,10 +38,11 @@ exports.get = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   const params = req.params;
+  const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.rolePermissionOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.rolePermissionOid, company: user.companyOid };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -67,12 +68,15 @@ exports.getOne = async (req, res) => {
 
 exports.getByCompany = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
-  const params = req.params;
+  const queryParams = req.query || {};
   const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, company: user.companyOid };
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, company: user.companyOid },
+      queryParams: queryParams,
+    });
 
     data = await utils.getAndPopulate({
       query: query,
@@ -89,9 +93,11 @@ exports.getByCompany = async (req, res) => {
     return res.status(500).send({ error: "Server error" });
   }
 
+  console.log(data.length )
+
   res.status(200).send({
     message: "User get",
-    data: data?.[0] || [],
+    data: data || [],
     count: data && data.length 
   })
 }
@@ -104,14 +110,14 @@ exports.post = async (req, res) => {
     const role = await rolePermissionHelper.manageSaveRole({
       roleData: {
         ...newRolePermission.role,
-        company: newRolePermission.company
+        company: newRolePermission.companyOid
       }
     });
   
     const permission = await rolePermissionHelper.manageSavePermission({
       permissionData: {
         ...newRolePermission.permission,
-        company: newRolePermission.company,
+        company: newRolePermission.companyOid,
       }
     });
 
@@ -127,7 +133,7 @@ exports.post = async (req, res) => {
     console.log(newRolePermission);
 
     const existingRolePermissions = await rolePermissionHelper.checkExistingRolePermissions({
-      company: newRolePermission.company, 
+      company: newRolePermission.companyOid, 
       roles: [role], 
       permissions:[permission]
     });
@@ -271,7 +277,7 @@ exports.manageRolePermissions = async (req, res) => {
   let newDoc;
   if (add) {
     try{
-      newDoc = await rolePermissionHelper.saveMultipleRolePermissions({rolePermissionData: {...add, company: rolePermissions.company}});
+      newDoc = await rolePermissionHelper.saveMultipleRolePermissions({rolePermissionData: {...add, company: rolePermissions.companyOid}});
     } catch(err){
       console.error(err.stack);
 
@@ -283,7 +289,7 @@ exports.manageRolePermissions = async (req, res) => {
     }
   } else if (remove){
     try{
-      newDoc = await rolePermissionHelper.deleteMultipleRolePermissions({rolePermissionData: {remove: [...remove], company: rolePermissions.company}});
+      newDoc = await rolePermissionHelper.deleteMultipleRolePermissions({rolePermissionData: {remove: [...remove], company: rolePermissions.companyOid}});
     } catch(err){
       console.error(err.stack);
 

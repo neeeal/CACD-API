@@ -50,7 +50,7 @@ exports.login = async (req, res) => {
     firstName: existingUser.firstName,
     lastName: existingUser.lastName,
     email: existingUser.email,
-    company: existingUser.company._id,
+    companyOid: existingUser.company._id,
     role: existingUser.role
   };
 
@@ -168,7 +168,7 @@ exports.refreshToken = async (req, res) => {
       firstName: existingUser.firstName,
       lastName: existingUser.lastName,
       email: existingUser.email,
-      company: existingUser.company,
+      companyOid: existingUser.company,
       role: existingUser.role
     }
     console.log('payload')

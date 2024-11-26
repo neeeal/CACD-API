@@ -9,21 +9,21 @@ const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
 
 router.get(
-  "/", 
-  auth.authorizeAccess(authCodes.user.read),
-  controller.get
+  "/byCompany", 
+  auth.authorizeAccess(authCodes.user.readByCompany),
+  controller.getByCompany
 )
 
 router.get(
-  "/:userOid/byCompany/:companyOid",
+  "/:userOid",
   auth.authorizeAccess(authCodes.user.readOne),
   controller.getOne
 )
 
 router.get(
-  "/byCompany", 
-  auth.authorizeAccess(authCodes.user.readByCompany),
-  controller.getByCompany
+  "/", 
+  auth.authorizeAccess(authCodes.user.read),
+  controller.get
 )
 
 // router.get("/getOne", controller.getOne)

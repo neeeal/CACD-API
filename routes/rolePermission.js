@@ -10,20 +10,21 @@ const multer = require('multer');
 const authCodes = require("../config/authCodes.js");
 
 router.get(
-  "/", 
-  auth.authorizeAccess(authCodes.rolePermission.read),
-  controller.get
+  "/byCompany", 
+  auth.authorizeAccess(authCodes.rolePermission.readByCompany),
+  controller.getByCompany
 )
 
 router.get(
-  "/:rolePermissionOid/byCompany/:companyOid",
+  "/:rolePermissionOid",
+  auth.authorizeAccess(authCodes.rolePermission.readOne),
   controller.getOne
 )
 
 router.get(
-  "/byCompany", 
-  auth.authorizeAccess(authCodes.rolePermission.readByCompany),
-  controller.getByCompany
+  "/", 
+  auth.authorizeAccess(authCodes.rolePermission.read),
+  controller.get
 )
 
 // router.get("/getOne", controller.getOne)

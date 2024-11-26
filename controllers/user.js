@@ -42,10 +42,11 @@ exports.get = async (req, res) => {
 exports.getOne = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
   const params = req.params;
+  const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.userOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.userOid, company: user.companyOid };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -64,19 +65,22 @@ exports.getOne = async (req, res) => {
 
   res.status(200).send({
     message: "User get",
-    data: data?.[0] || [],
+    data: data || [],
     count: data && data.length 
   })
 }
 
 exports.getByCompany = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
-  const params = req.params;
+  const queryParams = req.query || {};
   const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, company: user.companyOid };
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, company: user.companyOid },
+      queryParams: queryParams,
+    });
 
     data = await utils.getAndPopulate({
       query: query,
@@ -107,7 +111,7 @@ exports.post = async (req, res) => {
   let newUser = req.body;
   newUser = new UserCol({
     ...newUser,
-    company: newUser.company,
+    company: newUser.companyOid,
     role: role._id
   });
   const uploadedPhotos = req.file;

@@ -8,15 +8,15 @@ const auth = require("../middlewares/auth.js");
 const authCodes = require("../config/authCodes.js");
 
 router.get(
+  "/:companyOid",
+  controller.getOne
+)
+
+router.get(
   "/", 
   auth.authorizeAccess(authCodes.company.read),
   auth.authorizeSuperAdmin,
   controller.get
-)
-
-router.get(
-  "/:companyOid",
-  controller.getOne
 )
 
 // router.get("/getOne", controller.getOne)

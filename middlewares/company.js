@@ -5,7 +5,7 @@ const moment = require("moment");
 exports.assignCompany = async (req, res, next) => {
   console.log(req.user)
   try{
-    req.body.company = (req.user && req.user.company) || null;
+    req.body.company = (req.user?.companyOid) || null;
   } catch(err){
     console.error(err.stack);
     return res.status(500).send({

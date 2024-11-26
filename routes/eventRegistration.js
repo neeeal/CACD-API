@@ -10,25 +10,26 @@ const multer = require('multer');
 const authCodes = require("../config/authCodes.js");
 
 router.get(
+  "/byCompany", 
+  auth.authorizeAccess(authCodes.eventRegistration.readByCompany),
+  controller.getByCompany
+)
+
+router.get(
+  "/:eventRegistrationOid",
+  auth.authorizeAccess(authCodes.eventRegistration.readOne),
+  controller.getOne
+)
+
+router.get(
   "/", 
   auth.authorizeAccess(authCodes.eventRegistration.read), 
   controller.get
 )
 
-router.get(
-  "/:eventRegistrationOid/byCompany/:companyOid",
-  controller.getOne
-)
-
-router.get(
-  "/byCompany/:companyOid", 
-  auth.authorizeAccess(authCodes.eventRegistration.readByCompany),
-  controller.getByCompany
-)
-
 // router.get("/getOne", controller.getOne)
 router.post(
-  "/", 
+  "", 
   fileUpload.single("paymentPhoto"),   
   company.assignCompany,
   controller.post

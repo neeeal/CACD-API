@@ -11,12 +11,11 @@ const authCodes = require("../config/authCodes.js");
 
 // TODO: separate GET routes for single, all-in-company, and all resources for all routes
 // TODO: change update routes to use paramd OID
+
 router.get(
-  "/", 
-  auth.authorizeAccess(authCodes.album.read),
-  controller.get
+  "/byCompany/:companyOid", 
+  controller.getByCompany
 )
-// router.get("/getOne", controller.getOne)
 
 router.get(
   "/:albumOid/byCompany/:companyOid",
@@ -24,8 +23,9 @@ router.get(
 )
 
 router.get(
-  "/byCompany/:companyOid", 
-  controller.getByCompany
+  "/", 
+  auth.authorizeAccess(authCodes.album.read),
+  controller.get
 )
 
 router.post(

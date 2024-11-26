@@ -37,10 +37,11 @@ exports.get = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   const params = req.params;
+  const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.eventRegistrationOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.eventRegistrationOid, company: user.companyOid };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -59,19 +60,22 @@ exports.getOne = async (req, res) => {
 
   res.status(200).send({
     message: "EventRegistrations get",
-    data: data?.[0] || [],
+    data: data || [],
     count: data && data.length 
   })
 }
 
 exports.getByCompany = async (req, res) => {
   // TODO: add middleware for query company validation (consider)
-  const params = req.params;
+  const queryParams = req.query || {};
   const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, company: user.companyOid };
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, company: user.companyOid },
+      queryParams: queryParams,
+    });
 
     data = await utils.getAndPopulate({
       query: query,

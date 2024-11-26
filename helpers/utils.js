@@ -644,8 +644,8 @@ exports.queryBuilder =  ({initialQuery, queryParams = {}}) => {
   // TODO: improve query builder to handle multiple queries for in-company and all resource GET requests
   const query = initialQuery;
   
-  if (queryParams.company) {
-    query.company = queryParams.company;
+  if (queryParams.companyOid) {
+    query.company = queryParams.companyOid;
   }
   
   if (queryParams.tags) {

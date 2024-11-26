@@ -48,13 +48,14 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
         const query = {
           role: decoded.role, 
           permission: permissionOid._id,
-          company: decoded.company,
+          company: decoded.companyOid,
           deletedAt: null,
         };
 
         console.log(query)
   
         const rolePermissions = await RolePermissionsCol.findOne(query);
+
   
         if (!rolePermissions ) {
           throw new Error("User does not have permission. Unauthorized.")
@@ -78,7 +79,6 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
       ...decoded
     };
 
-    req.body.company = decoded.company;
     // Proceed to the next middleware or controller
     next();
   };

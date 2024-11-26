@@ -22,7 +22,7 @@ exports.manageSaveRole = async ({roleData, returnIdOnly = false}) =>{
   const existingRole = await RolesCol.findOne({
     _id: roleData.OID,
     deletedAt: null,
-    company: roleData.company
+    company: roleData.companyOid
   })
   .lean();
 
@@ -42,7 +42,7 @@ exports.manageSavePermission = async ({permissionData, returnIdOnly = false}) =>
   const existingPermission = await PermissionsCol.findOne({
     _id: permissionData?.OID,
     deletedAt: null,
-    company: permissionData.company
+    company: permissionData.companyOid
   })
   .lean();
 
@@ -89,7 +89,7 @@ exports.deleteMultipleRolePermissions = async ({rolePermissionData, returnIdOnly
   const deletedDocuments = await RolePermissionsCol.updateMany(
     {
       _id: { $in: rolePermissionData.remove },
-      company: rolePermissionData.company,
+      company: rolePermissionData.companyOid,
       deletedAt: null
     },
     { deletedAt: moment() }
@@ -102,13 +102,13 @@ exports.saveMultipleRolePermissions = async ({ rolePermissionData, returnIdOnly 
   const roles = await RolesCol.find({
     deletedAt: null, 
     _id: { $in: rolePermissionData.role },
-    company: rolePermissionData.company
+    company: rolePermissionData.companyOid
   });
 
   const permissions = await PermissionsCol.find({
     deletedAt: null, 
     _id: { $in: rolePermissionData.permission },
-    company: rolePermissionData.company
+    company: rolePermissionData.companyOid
   });
 
   // Map roles and permissions to their IDs for easier lookup
@@ -122,7 +122,7 @@ exports.saveMultipleRolePermissions = async ({ rolePermissionData, returnIdOnly 
     return acc;
   }, {});
 
-  const existingRolePermissions = await exports.checkExistingRolePermissions({company: rolePermissionData.company, roles: roles, permissions:permissions});
+  const existingRolePermissions = await exports.checkExistingRolePermissions({companyOid: rolePermissionData.companyOid, roles: roles, permissions:permissions});
 
   // Create role-permission documents
   const rolePermissionDocuments = rolePermissionData.role.map((roleName, idx) => {
@@ -136,7 +136,7 @@ exports.saveMultipleRolePermissions = async ({ rolePermissionData, returnIdOnly 
     const permission = permissionMap[permissionName];
 
     const values = {
-      company: rolePermissionData.company,
+      company: rolePermissionData.companyOid,
       role: role._id,
       permission: permission._id,
       name: exports.formatRolePermissionName({ role, permission })
@@ -194,7 +194,7 @@ exports.updateRole = async ({permissionData}) => {
     {
       $set: {
         name: permissionData.name,
-        company: permissionData.company
+        company: permissionData.companyOid
       }
     },
     { new: true }
@@ -208,7 +208,7 @@ exports.updatePermission = async ({permissionData}) => {
     {
       $set: {
         name: permissionData.name,
-        company: permissionData.company
+        company: permissionData.companyOid
       }
     },
     { new: true }

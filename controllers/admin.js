@@ -3,6 +3,7 @@ const utils = require("../helpers/utils.js");
 const bcrypt = require("bcrypt");
 const userHelper = require("../helpers/userHelper.js");
 const moment = require("moment");
+const RolesCol = require("../models/roles.js");
 
 // TODO: consider separating business logic in controllers, create services folder
 exports.get = async (req, res) => {
@@ -10,8 +11,9 @@ exports.get = async (req, res) => {
 
   let data;
   try{
+    const userRole = await RolesCol.findOne({ name: "user" }).lean(); 
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, role: {$ne: "User"} }, // TODO: fix old user queries
+      initialQuery: { deletedAt: null, role: {$ne: userRole._id} }, // TODO: fix old user queries
       queryParams: queryParams,
     });
 
@@ -69,13 +71,19 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-  // TODO: add middleware for query company validation (consider)
-  const params = req.params;
+    console.log("hereherehereherehereherehereherehere")
+    // TODO: add middleware for query company validation (consider)
+  const queryParams = req.query || {};
+  const user = req.user;
 
   let data;
   try{
-    const query = { deletedAt: null, company: params.companyOid };
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null, company: user.companyOid },
+      queryParams: queryParams,
+    });
 
+    // TODO: add argument on get and populate to choose fields to populate
     data = await utils.getAndPopulate({
       query: query,
       col: AdminsCol,
@@ -93,7 +101,7 @@ exports.getByCompany = async (req, res) => {
 
   res.status(200).send({
     message: "User get",
-    data: data?.[0] || [],
+    data: data || [],
     count: data && data.length 
   })
 }
@@ -107,7 +115,7 @@ exports.post = async (req, res) => {
   }
   newAdmin = new AdminsCol({
     ...newAdmin,
-    company: newAdmin.company
+    company: newAdmin.companyOid
   });
   const uploadedPhotos = req.file;
 
@@ -158,6 +166,7 @@ exports.put = async (req, res) => {
   
   const uploadedPhotos = req.file;
 
+  // TODO: fix role query handling and add means to assign admin roles
   const query = { _id: newAdmin.OID, deletedAt: null, role: {$ne: "User"} }
 
   // if has password to be set
