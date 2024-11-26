@@ -16,7 +16,7 @@ router.get(
 )
 
 router.get(
-  "/:eventRegistrationOid",
+  "/:eventRegistration",
   auth.authorizeAccess(authCodes.eventRegistration.readOne),
   controller.getOne
 )

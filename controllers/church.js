@@ -40,7 +40,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.churchOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.church, company: params.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -72,7 +72,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: params.companyOid },
+      initialQuery: { deletedAt: null, company: params.company },
       queryParams: queryParams,
     });
 
@@ -135,7 +135,7 @@ exports.post = async (req, res) => {
     contacts: newChurch.contacts,
     // featuredPhoto: newChurch.photo || null,
     photos: newChurch.photos || [],
-    company: req.user.companyOid
+    company: req.user.company
   };
 
   let data;

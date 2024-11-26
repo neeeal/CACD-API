@@ -46,7 +46,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.userOid, company: user.companyOid };
+    const query = { deletedAt: null, _id: params.user, company: user.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -78,7 +78,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: user.companyOid },
+      initialQuery: { deletedAt: null, company: user.company },
       queryParams: queryParams,
     });
 
@@ -106,12 +106,12 @@ exports.getByCompany = async (req, res) => {
 
 exports.post = async (req, res) => {
   // TODO: modularize getting role ID
-  const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, companyOid: companyOid}); 
+  const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: company}); 
   console.log("here")
   let newUser = req.body;
   newUser = new UserCol({
     ...newUser,
-    company: newUser.companyOid,
+    company: newUser.company,
     role: role
   });
   const uploadedPhotos = req.file;

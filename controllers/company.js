@@ -41,7 +41,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.companyOid };
+    const query = { deletedAt: null, _id: params.company };
 
     data = await utils.getAndPopulate({
       query: query,

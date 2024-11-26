@@ -41,14 +41,14 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
         requiredRolePermission // TODO: Remove this after adding proper permissions
       ){
         console.log({ deletedAt: null, name: requiredRolePermission})
-        const permissionOid = await PermissionsCol.findOne({ deletedAt: null, name: requiredRolePermission}).lean();
+        const permission = await PermissionsCol.findOne({ deletedAt: null, name: requiredRolePermission}).lean();
 
         console.log(decoded)
 
         const query = {
           role: decoded.role, 
-          permission: permissionOid._id,
-          company: decoded.companyOid,
+          permission: permission._id,
+          company: decoded.company,
           deletedAt: null,
         };
 

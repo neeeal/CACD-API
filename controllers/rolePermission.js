@@ -42,7 +42,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.rolePermissionOid, company: user.companyOid };
+    const query = { deletedAt: null, _id: params.rolePermission, company: user.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -74,7 +74,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: user.companyOid },
+      initialQuery: { deletedAt: null, company: user.company },
       queryParams: queryParams,
     });
 
@@ -110,14 +110,14 @@ exports.post = async (req, res) => {
     const role = await rolePermissionHelper.manageSaveRole({
       roleData: {
         ...newRolePermission.role,
-        company: newRolePermission.companyOid
+        company: newRolePermission.company
       }
     });
   
     const permission = await rolePermissionHelper.manageSavePermission({
       permissionData: {
         ...newRolePermission.permission,
-        company: newRolePermission.companyOid,
+        company: newRolePermission.company,
       }
     });
 
@@ -133,7 +133,7 @@ exports.post = async (req, res) => {
     console.log(newRolePermission);
 
     const existingRolePermissions = await rolePermissionHelper.checkExistingRolePermissions({
-      company: newRolePermission.companyOid, 
+      company: newRolePermission.company, 
       roles: [role], 
       permissions:[permission]
     });
@@ -277,7 +277,7 @@ exports.manageRolePermissions = async (req, res) => {
   let newDoc;
   if (add) {
     try{
-      newDoc = await rolePermissionHelper.saveMultipleRolePermissions({rolePermissionData: {...add, company: rolePermissions.companyOid}});
+      newDoc = await rolePermissionHelper.saveMultipleRolePermissions({rolePermissionData: {...add, company: rolePermissions.company}});
     } catch(err){
       console.error(err.stack);
 
@@ -289,7 +289,7 @@ exports.manageRolePermissions = async (req, res) => {
     }
   } else if (remove){
     try{
-      newDoc = await rolePermissionHelper.deleteMultipleRolePermissions({rolePermissionData: {remove: [...remove], company: rolePermissions.companyOid}});
+      newDoc = await rolePermissionHelper.deleteMultipleRolePermissions({rolePermissionData: {remove: [...remove], company: rolePermissions.company}});
     } catch(err){
       console.error(err.stack);
 

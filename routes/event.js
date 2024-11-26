@@ -9,12 +9,12 @@ const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
 
 router.get(
-  "/byCompany/:companyOid", 
+  "/byCompany/:company", 
   controller.getByCompany
 )
 
 router.get(
-  "/:eventOid/byCompany/:companyOid",
+  "/:event/byCompany/:company",
   controller.getOne
 )
 

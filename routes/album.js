@@ -13,12 +13,12 @@ const authCodes = require("../config/authCodes.js");
 // TODO: change update routes to use paramd OID
 
 router.get(
-  "/byCompany/:companyOid", 
+  "/byCompany/:company", 
   controller.getByCompany
 )
 
 router.get(
-  "/:albumOid/byCompany/:companyOid",
+  "/:album/byCompany/:company",
   controller.getOne
 )
 

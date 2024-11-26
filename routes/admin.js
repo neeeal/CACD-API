@@ -15,7 +15,7 @@ router.get(
 )
 
 router.get(
-  "/:adminOid", 
+  "/:admin", 
   auth.authorizeAccess(authCodes.admin.readOne),
   controller.getOne
 )

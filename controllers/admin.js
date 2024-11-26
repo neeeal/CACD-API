@@ -9,11 +9,11 @@ const RolesCol = require("../models/roles.js");
 // TODO: consider separating business logic in controllers, create services folder
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
-  const { companyOid } = req.user;
+  const { company } = req.user;
 
   let data;
   try{
-    const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, companyOid: companyOid}); 
+    const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: company}); 
     const query = utils.queryBuilder({
       initialQuery: { deletedAt: null, role: {$ne: role} }, // TODO: fix old user queries
       queryParams: queryParams,
@@ -48,7 +48,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.adminOid, company: user.companyOid };
+    const query = { deletedAt: null, _id: params.admin, company: user.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -81,7 +81,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: user.companyOid },
+      initialQuery: { deletedAt: null, company: user.company },
       queryParams: queryParams,
     });
 
@@ -117,7 +117,7 @@ exports.post = async (req, res) => {
     newAdmin.role = "moderator"; // default moderator access level
   }
 
-  newAdmin.role = await rolePermissionHelper.getRoleByName({name: newAdmin.role, returnIdOnly: true, companyOid: company})
+  newAdmin.role = await rolePermissionHelper.getRoleByName({name: newAdmin.role, returnIdOnly: true, company: company})
 
   newAdmin = new AdminsCol({
     ...newAdmin,
@@ -169,14 +169,14 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newAdmin = req.body;
-  const { companyOid } = req.user;
+  const { company } = req.user;
   
   const uploadedPhotos = req.file;
 
   const query = { 
     _id: newAdmin.OID, 
     deletedAt: null, 
-    company: companyOid 
+    company: company 
   };
 
   // if has password to be set
@@ -266,7 +266,7 @@ exports.put = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { OID } = req.params; 
-  const { companyOid } = req.user;
+  const { company } = req.user;
 
   let adminDoc;
   try {
@@ -274,7 +274,7 @@ exports.delete = async (req, res) => {
       { 
         _id: OID, 
         deletedAt: null,
-        company: companyOid
+        company: company
       },
       {
         $set: {

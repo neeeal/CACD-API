@@ -8,7 +8,7 @@ const auth = require("../middlewares/auth.js");
 const authCodes = require("../config/authCodes.js");
 
 router.get(
-  "/:companyOid",
+  "/:company",
   controller.getOne
 )
 

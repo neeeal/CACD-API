@@ -40,7 +40,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.eventOid, company: params.companyOid };
+    const query = { deletedAt: null, _id: params.event, company: params.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -72,7 +72,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: params.companyOid },
+      initialQuery: { deletedAt: null, company: params.company },
       queryParams: queryParams,
     });
 

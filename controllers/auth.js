@@ -46,11 +46,11 @@ exports.login = async (req, res) => {
 
   // token payload
   const payload = {
-    userOid: existingUser._id,
+    user: existingUser._id,
     firstName: existingUser.firstName,
     lastName: existingUser.lastName,
     email: existingUser.email,
-    companyOid: existingUser.company._id,
+    company: existingUser.company._id,
     role: existingUser.role
   };
 
@@ -154,7 +154,7 @@ exports.refreshToken = async (req, res) => {
   let newAccessToken;
   try {
     const decoded = jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN);
-    const existingUser = await UsersCol.findOne({_id: decoded.userOid, deletedAt: null}).lean(); 
+    const existingUser = await UsersCol.findOne({_id: decoded.user, deletedAt: null}).lean(); 
     
     // Verify the refresh token logic (e.g., checking in database)
     const tokenDoc = await TokensCol.findOne({ token: refreshToken, deletedAt: null}).lean();
@@ -164,11 +164,11 @@ exports.refreshToken = async (req, res) => {
 
     //token payload
     const payload = {
-      userOid: existingUser._id,
+      user: existingUser._id,
       firstName: existingUser.firstName,
       lastName: existingUser.lastName,
       email: existingUser.email,
-      companyOid: existingUser.company,
+      company: existingUser.company,
       role: existingUser.role
     }
     console.log('payload')
@@ -302,7 +302,7 @@ exports.resetPassword = async function(req, res) {
   try{
     newUser = await UsersCol.findOneAndUpdate(
       {
-        _id: decoded.userOid,
+        _id: decoded.user,
         deletedAt: null
       },
       {

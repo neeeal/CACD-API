@@ -16,7 +16,7 @@ router.get(
 )
 
 router.get(
-  "/:permissionOid",
+  "/:permission",
   auth.authorizeAccess(authCodes.permission.readOne),
   controller.getOne
 )

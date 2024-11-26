@@ -42,7 +42,7 @@ exports.getOne = async (req, res) => {
 
   let data;
   try{
-    const query = { deletedAt: null, _id: params.roleOid, company: user.companyOid };
+    const query = { deletedAt: null, _id: params.role, company: user.company };
 
     data = await utils.getAndPopulate({
       query: query,
@@ -74,7 +74,7 @@ exports.getByCompany = async (req, res) => {
   let data;
   try{
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, company: user.companyOid },
+      initialQuery: { deletedAt: null, company: user.company },
       queryParams: queryParams,
     });
 
