@@ -15,7 +15,7 @@ exports.get = async (req, res) => {
   try{
     const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: company}); 
     const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null, role: {$ne: role} }, // TODO: fix old user queries
+      initialQuery: { deletedAt: null, role: {$ne: role} },
       queryParams: queryParams,
     });
 
@@ -73,8 +73,6 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-    console.log("hereherehereherehereherehereherehere")
-    // TODO: add middleware for query company validation (consider)
   const queryParams = req.query || {};
   const user = req.user;
 

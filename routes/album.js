@@ -9,7 +9,6 @@ const multer = require('multer');
 const auth = require("../middlewares/auth.js");
 const authCodes = require("../config/authCodes.js");
 
-// TODO: separate GET routes for single, all-in-company, and all resources for all routes
 // TODO: change update routes to use paramd OID
 
 router.get(

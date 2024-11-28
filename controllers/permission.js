@@ -67,7 +67,7 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-  // TODO: add middleware for query company validation (consider)
+  
   const queryParams = req.query || {};
   const user = req.user;
 

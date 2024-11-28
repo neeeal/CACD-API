@@ -40,7 +40,7 @@ exports.get = async (req, res) => {
 }
 
 exports.getOne = async (req, res) => {
-  // TODO: add middleware for query company validation (consider)
+  
   const params = req.params;
   const user = req.user;
 
@@ -71,7 +71,7 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-  // TODO: add middleware for query company validation (consider)
+  
   const queryParams = req.query || {};
   const user = req.user;
 
@@ -105,7 +105,6 @@ exports.getByCompany = async (req, res) => {
 }
 
 exports.post = async (req, res) => {
-  // TODO: modularize getting role ID
   const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: company}); 
   console.log("here")
   let newUser = req.body;

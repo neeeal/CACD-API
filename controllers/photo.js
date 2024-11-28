@@ -4,6 +4,7 @@ const PhotosCol = require("../models/photos.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
+// TODO: add retrieval handling for photos only files/ exclude pdf
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
   
@@ -67,7 +68,7 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-  // TODO: add middleware for query company validation (consider)
+  
   const queryParams = req.query || {};
   const params = req.params;
 
