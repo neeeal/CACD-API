@@ -2,6 +2,7 @@ const EventRegistrationsCol = require("../models/eventRegistrations.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
+// TODO: add unique eventRegistrationID
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 

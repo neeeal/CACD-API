@@ -14,7 +14,7 @@ const eventRegistrationSchema = mongoose.Schema(
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "companies",
-      default: null,
+      required: true 
     },
     photos: { // Explicitly defined photos field within the object
       type: [mongoose.Schema.Types.ObjectId],

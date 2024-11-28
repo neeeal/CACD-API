@@ -31,7 +31,7 @@ const teamSchema = mongoose.Schema(
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "companies",
-      default: null,
+      required: true 
     },
   },
   {

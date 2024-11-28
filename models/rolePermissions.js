@@ -17,7 +17,7 @@ const rolePermissionSchema = mongoose.Schema(
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "companies",
-      required: true,
+      required: true 
     },
     permission: {
       type: mongoose.Schema.Types.ObjectId,
