@@ -3,12 +3,13 @@ const PhotosCol = require("../models/photos.js");
 const RolesCol = require("../models/roles.js");
 const PermissionsCol = require("../models/permissions.js");
 const RolePermissionsCol = require("../models/rolePermissions.js");
+const ContactsCol = require("../models/contacts.js");
 const CompaniesCol = require("../models/companies.js");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const path = require('path');
 const fs = require('fs');
-
+const uuid = require('uuid');
 /*
   TODO: Modularize utils. create other files for like functions.
 */
@@ -28,6 +29,10 @@ exports.isOID = (OID) => {
 // exports.stringToOID = (string) => {
 //   return mongoose.Types.ObjectId.createFromHexString(string);
 // }
+
+exports.generateUUID = () => {
+  return uuid.v4();
+}
 
 exports.pathToURL = ({metadata, path}) => {
   console.log('metadata')
@@ -161,6 +166,7 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
     caption: details.caption || null,
     // eventOID: details.eventOID || [],
     album: details.album || null,
+    company: details.company
     // photoInfo: photo,
   }
   
@@ -170,7 +176,7 @@ exports.savePhotos = async ({uploadedPhotos, details}) => {
   return newPhotoDoc;
 }
 
-exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
+exports.saveMultiplePhotos = async({uploadedPhotos, details}) => {
   if (!uploadedPhotos || Object.keys(uploadedPhotos).length === 0) {
     console.log("No photos to upload");
     return null;
@@ -182,6 +188,7 @@ exports.saveMultiplePhotos = async({uploadedPhotos, doc}) => {
       const values = {
           metadata: {...uploadedPhotos},
           title: exports.removeExtension(uploadedPhotos.originalname),
+          company: details.company
           // title: details[idx].title || exports.removeExtension(uploadedPhotos.originalname),
           // caption: details[idx].caption|| null,
           // album: details.album || null,
@@ -509,7 +516,7 @@ exports.saveAndPopulate = async ({doc, col}) => {
   let populateValues = [];
 
   // Add 'photos' population if the collection is not PhotosCol
-  if (col != PhotosCol) {
+  if (![PhotosCol].includes(col)) {
     populateValues.push({
       path: "photos",
       match: { deletedAt: null },
@@ -657,6 +664,10 @@ exports.queryBuilder =  ({initialQuery, queryParams = {}}) => {
       throw new Error("Invalid ObjectId");
     }
     query._id = queryParams.OID;
+  }
+
+  if (queryParams.contactId) {
+    query.contactId = queryParams.contactId;
   }
 
   // if (queryParams.role) {

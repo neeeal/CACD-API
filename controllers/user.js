@@ -1,6 +1,7 @@
 const UserCol = require("../models/users.js");
 const utils = require("../helpers/utils.js");
 const userHelper = require("../helpers/userHelper.js");
+const rolePermissionHelper = require("../helpers/rolePermissionHelper.js");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 const RolesCol = require("../models/roles.js");
@@ -105,9 +106,9 @@ exports.getByCompany = async (req, res) => {
 }
 
 exports.post = async (req, res) => {
-  const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: company}); 
   console.log("here")
   let newUser = req.body;
+  const role = await rolePermissionHelper.getRoleByName({name: "user", returnIdOnly: true, company: newUser.company}); 
   newUser = new UserCol({
     ...newUser,
     company: newUser.company,

@@ -37,6 +37,14 @@ const authCodes = {
     delete: "DCO",
     readOne: "ONE_RCO",
   },
+  contact: {
+    create: "CCON",
+    read: "RCON",
+    update: "UCON",
+    delete: "DCON",
+    readByCompany: "BYCOMPANY_RCON",
+    readOne: "ONE_RCON",
+  },
   event: {
     create: "CE",
     read: "RE",

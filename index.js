@@ -52,6 +52,7 @@ app.get('/api', (req, res) => {
 app.use((err, req, res, next) => {
     // Check for Multer-specific errors
     if (err instanceof multer.MulterError) {
+        console.log(err.stack);
         // Handle different Multer errors
         if (err.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).send({ error: 'File size is too large!' });

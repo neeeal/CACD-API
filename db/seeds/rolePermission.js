@@ -31,6 +31,7 @@ const rolePermissionsMapping = {
     ...Object.values(authCodes.rolePermission),
     ...Object.values(authCodes.team),
     ...Object.values(authCodes.user),
+    ...Object.values(authCodes.contact),
   ],
 
   // admin gets all permissions except company-related and .read permissions
@@ -47,20 +48,21 @@ const rolePermissionsMapping = {
     ...Object.values(authCodes.rolePermission),
     ...Object.values(authCodes.team),
     ...Object.values(authCodes.user),
+    ...Object.values(authCodes.contact),
   ]
   .filter(code => !code.endsWith("CO")) // Exclude company-related permissions
   .filter(code => !code.startsWith("R")), // Exclude .read permissions
 
   // editor gets permissions for album, church, event, event registration, photo, and team (excluding .read permissions)
   editor: [
-    ...filterPermissions(["AL", "CH", "E", "ER", "PH", "T"], true), // Exclude .read permissions
+    ...filterPermissions(["AL", "CH", "E", "ER", "PH", "T", "CON"], true), // Exclude .read permissions
     authCodes.admin.update,
     authCodes.admin.readOne,
   ],
 
   // moderator gets permissions for album, event, and photo (excluding .read permissions)
   moderator: [
-    ...filterPermissions(["AL", "E", "PH"], true), // Exclude .read permissions
+    ...filterPermissions(["AL", "E", "PH", "CON"], true), // Exclude .read permissions
     authCodes.admin.update,
     authCodes.admin.readOne,
   ],

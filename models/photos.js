@@ -23,7 +23,8 @@ const photoSchema = mongoose.Schema(
         "companyPhoto",
         "adminPhoto",
         "paymentPhoto",
-        "donationPhoto"
+        "donationPhoto",
+        "contactFile"
       ]
     },
     metadata: {
@@ -47,7 +48,7 @@ const photoSchema = mongoose.Schema(
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "companies",
-      default: null,
+      required: true 
     },
   },
   {
