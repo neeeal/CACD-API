@@ -87,6 +87,8 @@ exports.getByCompany = async (req, res) => {
     data = await utils.getAndPopulate({
       query: query,
       col: AdminsCol,
+      offset: queryParams.offset,
+      limit: queryParams.limit
     });
     
   } catch (err) {
