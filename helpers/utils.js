@@ -182,27 +182,30 @@ exports.saveMultiplePhotos = async({uploadedPhotos, details}) => {
     return null;
   }
 
+  console.log(uploadedPhotos)
+
   const allOIDS = await Promise.all(
-    Object.keys(uploadedPhotos).map(async (fieldname) => {
-      const photoDocuments = uploadedPhotos[fieldname].map((uploadedPhotos, idx) => {
+    uploadedPhotos.map(async (uploadedPhoto, idx) => {
       const values = {
-          metadata: {...uploadedPhotos},
-          title: exports.removeExtension(uploadedPhotos.originalname),
-          company: details.company
-          // title: details[idx].title || exports.removeExtension(uploadedPhotos.originalname),
-          // caption: details[idx].caption|| null,
-          // album: details.album || null,
-          // eventOID: details[idx].eventOID || null,
-          // photoInfo: photo,
-        }
-
-        return new PhotosCol(values);
-      });
-
-      const savedPhotos = await PhotosCol.insertMany(photoDocuments);
-      return savedPhotos.map((doc) => doc._id);
+        metadata: { ...uploadedPhoto },
+        title: exports.removeExtension(uploadedPhoto.originalname),
+        company: details.company
+        // Additional fields like caption, album, eventOID, etc. can be added if needed
+      };
+  
+      // Create a new photo document
+      const photoDocument = new PhotosCol(values);
+  
+      // Save the photo document to the database
+      const savedPhoto = await photoDocument.save();
+  
+      // Return the saved document's ID
+      return savedPhoto._id;
     })
-  )
+  );
+  
+  console.log(allOIDS); // All processed photo IDs
+  
 
   const insertedOIDS = allOIDS.flat();
 
@@ -399,7 +402,7 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
 }
 
 exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
-  const savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:doc});
+  const savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:doc});
 
   const query = {
     _id: doc.OID,
@@ -433,10 +436,6 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
 }
 
 exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
-  // console.log("manageMultiplePhotosUpdate")
-  // console.log(newDoc)
-  // console.log("manageMultiplePhotosUpdate")
-
   let oldPhotos;
   // try{
     if (col)
@@ -450,15 +449,16 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
 
   let savedPhotos;
   if (uploadedPhotos && Object.keys(uploadedPhotos).length) {
-      Object.keys(uploadedPhotos).forEach(fieldName => {
-        uploadedPhotos[fieldName].map(photo => {
+      uploadedPhotos.map(photo => {
+        // Process each photo object
+        Object.keys(photo).forEach(fieldName => {
           photo[fieldName] = 
-          photo.fieldname.includes("new") ?
-            photo.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-            photo.fieldname;
-
-            return photo;
-        })
+            photo[fieldName].includes("new") ?
+              photo[fieldName].replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+              photo[fieldName];
+        });
+      
+        return photo;
       });
 
       if (oldPhotos && oldPhotos.length) {
@@ -469,8 +469,10 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
       } else {
         // create new photo doc
         console.log("manageMultiplePhotosUpdate save")
-        savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc});
+        savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
+        console.log('oldPhotos')
         console.log(oldPhotos)
+        console.log('oldPhotos')
         if (newDoc) 
           newDoc.photos = savedPhotos;
       }

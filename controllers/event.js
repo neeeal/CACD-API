@@ -121,7 +121,7 @@ exports.post = async (req, res) => {
   if (uploadedPhotos) {
     try{
       console.log("events post save")
-      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newEvent});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
       console.log(savedPhotos)
       newEvent.photos = savedPhotos; //savedPhotos.map((photo) => photo._id);
     }

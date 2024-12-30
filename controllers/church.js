@@ -120,7 +120,7 @@ exports.post = async (req, res) => {
 
   if (uploadedPhotos) {
     try{
-      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newChurch});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
       newChurch.photos = savedPhotos;
     }
     catch (err){

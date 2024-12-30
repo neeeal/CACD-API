@@ -1,6 +1,7 @@
 // user.js
 const express = require("express");
 const fileUpload = require("../middlewares/fileUpload.js");
+const newFileUpload = require("../middlewares/newFileUpload.js");
 const router = express.Router();
 const controller = require("../controllers/photo.js");
 const validation = require("../middlewares/validation.js");
@@ -28,19 +29,21 @@ router.get(
 router.post(
   "/", 
   auth.authorizeAccess(authCodes.photo.create),
-  fileUpload.single("default"), 
+  // fileUpload.single("default"), 
   company.assignCompany,
+  newFileUpload,
   controller.post
 )
 
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.photo.update),
-  fileUpload.fields([
-    // { name: "featuredPhoto", maxCount: 1 },
-    { name: "default", maxCount: 99 }
-  ]), 
+  // fileUpload.fields([
+  //   // { name: "featuredPhoto", maxCount: 1 },
+  //   { name: "default", maxCount: 99 }
+  // ]), 
   company.assignCompany,
+  newFileUpload,
   controller.put
 )
 

@@ -105,7 +105,7 @@ exports.getByCompany = async (req, res) => {
 
 exports.post = async (req, res) => {
   const details = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
   
   if (!uploadedPhotos) {
     return res.status(404).json({ message: 'No file uploaded' });
@@ -113,7 +113,7 @@ exports.post = async (req, res) => {
 
   let data; 
   try{
-    data = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:details});
+    data = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:details});
   }
   catch (err){
     console.error(err.stack);
@@ -128,7 +128,6 @@ exports.post = async (req, res) => {
 exports.put = async (req, res) => {
   const details = req.body;
   const uploadedPhotos = req.files;
-  console.log(uploadedPhotos)
 
   let data;
   try{

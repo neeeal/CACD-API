@@ -21,8 +21,9 @@ app.use(cors(corsOptions));
 
 // Serve static files from the "public" directory
 app.use('/uploads/photos', express.static(path.join(__dirname, 'public/uploads/photos')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Adjust body size limits for JSON and URL-encoded payloads
+app.use(express.json({ limit: '50mb' })); // Set limit for JSON payload
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Set limit for URL-encoded payload
 
 initRoutes(app);
 

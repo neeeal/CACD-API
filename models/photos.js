@@ -13,7 +13,7 @@ const photoSchema = mongoose.Schema(
     },
     fieldname: {
       type: String,
-      // required: true
+      required: true,
       default: "default",
       enum: [
         "default", 
