@@ -67,11 +67,11 @@ exports.getOne = async (req, res) => {
 
 exports.post = async (req, res) => {
   let newCompany = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   console.log(uploadedPhotos)
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newCompany});
       newCompany.photos = savedPhotos._id;
@@ -98,7 +98,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newCompany = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   const query = {
     _id: newCompany.OID,

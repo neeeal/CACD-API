@@ -104,11 +104,11 @@ exports.getByCompany = async (req, res) => {
 
 exports.post = async (req, res) => {
   const newTeam = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   console.log(uploadedPhotos)
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newTeam});
       newTeam.photos = savedPhotos._id;
@@ -144,7 +144,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newTeam = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   const query = {
     _id: newTeam.OID,

@@ -370,7 +370,7 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   //   return res.status(500).send({ error: "Server error" });
   // }
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
   // If has uploadedPhotos
     uploadedPhotos.fieldname = 
     uploadedPhotos.fieldname.includes("new") ?

@@ -30,7 +30,6 @@ router.get(
 router.post(
   "/", 
   auth.authorizeAccess(authCodes.album.create),
-  multer().none(), 
   company.assignCompany,
   controller.post
 )
@@ -38,7 +37,6 @@ router.post(
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.album.update),
-  multer().none(), 
   company.assignCompany,
   controller.put
 )

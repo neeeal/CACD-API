@@ -31,7 +31,6 @@ router.get(
 router.post(
   "/", 
   auth.authorizeAccess(authCodes.permission.create), 
-  multer().none(),   
   company.assignCompany,
   controller.post
 )
@@ -39,7 +38,6 @@ router.post(
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.permission.update), 
-  multer().none(),   
   company.assignCompany,
   controller.put
 )

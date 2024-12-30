@@ -123,14 +123,14 @@ exports.post = async (req, res) => {
     ...newAdmin,
     company: company
   });
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   // Hash the password
   const salt = await bcrypt.genSalt(10);
   console.log(newAdmin)
   newAdmin.password = await bcrypt.hash(newAdmin.password, salt);
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newAdmin});
       newAdmin.photos = [savedPhotos._id];
@@ -171,7 +171,7 @@ exports.put = async (req, res) => {
   let newAdmin = req.body;
   const { company } = req.user;
   
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   const query = { 
     _id: newAdmin.OID, 

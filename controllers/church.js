@@ -107,7 +107,7 @@ exports.post = async (req, res) => {
   const uploadedPhotos = req.files;
 
   console.log(uploadedPhotos)
-  // if (uploadedPhotos) {
+  // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
   //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
   //     newChurch.photo = savedPhotos._id;
@@ -118,7 +118,7 @@ exports.post = async (req, res) => {
   //   }
   // }
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
       newChurch.photos = savedPhotos;
@@ -175,7 +175,7 @@ exports.put = async (req, res) => {
 console.log("async")
 console.log(uploadedPhotos)
 console.log("async")
-  // if (uploadedPhotos) {
+  // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
   //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
   //     newChurch.photo = savedPhotos._id;
@@ -186,7 +186,7 @@ console.log("async")
   //   }
   // }
 
-  // if (uploadedPhotos) {
+  // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
   //     const savedPhotos = await utils.updatePhoto({uploadedPhotos:uploadedPhotos, details:newChurch});
   //     newChurch.photos = newChurch.photossavedPhotos.map((photo) => photo._id);
@@ -200,7 +200,7 @@ console.log("async")
   try{
     // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
     //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
-    // } else if (uploadedPhotos) {
+    // } else if (uploadedPhotos && uploadedPhotos.length) {
     //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
     // }
     newChurch = await utils.manageMultiplePhotosUpdate({

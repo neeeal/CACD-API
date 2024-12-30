@@ -9,34 +9,29 @@ const authCodes = require("../config/authCodes.js");
 
 router.post(
   "/login", 
-  multer().none(), 
   controller.login
 )
 
 router.post(
   "/logout", 
   auth.authorizeAccess(), 
-  multer().none(), 
   company.assignCompany,
   controller.logout
 )
 
 router.post(
   "/refresh", 
-  multer().none(), 
   company.assignCompany,
   controller.refreshToken
 );
 
 router.post(
   "/forgotPassword", 
-  multer().none(), 
   controller.forgotPassword
 )
 
 router.put(
   "/resetPassword", 
-  multer().none(), 
   controller.resetPassword
 )
 

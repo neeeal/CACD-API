@@ -110,7 +110,7 @@ exports.post = async (req, res) => {
 
   console.log(uploadedPhotos)
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newContact});
       newContact.photos = savedPhotos;
@@ -149,7 +149,7 @@ exports.post = async (req, res) => {
 
 exports.put = async (req, res) => {
   let newContact = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   const query = {
     _id: newContact.OID,

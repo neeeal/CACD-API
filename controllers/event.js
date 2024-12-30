@@ -107,7 +107,7 @@ exports.post = async (req, res) => {
   // const uploadedPhotos = photoFields.featuredPhoto[0];
   const uploadedPhotos = photoFields;
 
-  // if (uploadedPhotos) {
+  // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
   //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
   //     newEvent.featuredPhoto = savedPhotos._id;
@@ -118,7 +118,7 @@ exports.post = async (req, res) => {
   //   }
   // }
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       console.log("events post save")
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
@@ -197,7 +197,7 @@ exports.put = async (req, res) => {
   try{
     // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
     //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
-    // } else if (uploadedPhotos) {
+    // } else if (uploadedPhotos && uploadedPhotos.length) {
     //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
     // }
     newEvent = await utils.updateAndPopulate({ query: query, values: values, options: options, col: EventsCol });

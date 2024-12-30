@@ -104,11 +104,11 @@ exports.getByCompany = async (req, res) => {
 
 exports.post = async (req, res) => {
   let newEventRegistration = req.body;
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   console.log(uploadedPhotos)
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEventRegistration});
       newEventRegistration.photos = savedPhotos._id;

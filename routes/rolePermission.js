@@ -31,7 +31,6 @@ router.get(
 router.post(
   "/", 
   auth.authorizeAccess(authCodes.rolePermission.create), 
-  multer().none(),   
   company.assignCompany,
   controller.post
 )
@@ -39,7 +38,6 @@ router.post(
 router.post(
   "/manageRolePermissions", 
   auth.authorizeAccess(authCodes.rolePermission.manageRolePermissions), 
-  multer().none(),   
   company.assignCompany,
   controller.manageRolePermissions
 )
@@ -47,7 +45,6 @@ router.post(
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.rolePermission.update), 
-  multer().none(),   
   company.assignCompany,
   controller.put
 )

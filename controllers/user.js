@@ -116,13 +116,13 @@ exports.post = async (req, res) => {
     company: newUser.company,
     role: role
   });
-  const uploadedPhotos = req.file;
+  const uploadedPhotos = req.files;
 
   // Hash the password
   const salt = await bcrypt.genSalt(10);
   newUser.password = await bcrypt.hash(newUser.password, salt);
 
-  if (uploadedPhotos) {
+  if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newUser});
       newUser.photos = [savedPhotos._id];
