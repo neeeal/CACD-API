@@ -10,14 +10,12 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const corsOptions = {
+app.use(cors({
     origin: '*',
-    methods: [],
-    allowedHeaders: [],
-    exposedHeaders: [],
-    credentials: true
-};
-app.use(cors(corsOptions));
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*'
+}));
 
 // Serve static files from the "public" directory
 app.use('/uploads/photos', express.static(path.join(__dirname, 'public/uploads/photos')));
