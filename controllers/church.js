@@ -109,7 +109,7 @@ exports.post = async (req, res) => {
   console.log(uploadedPhotos)
   // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
   //     newChurch.photo = savedPhotos._id;
   //   }
   //   catch (err){
@@ -177,7 +177,7 @@ console.log(uploadedPhotos)
 console.log("async")
   // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
+  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newChurch});
   //     newChurch.photo = savedPhotos._id;
   //   }
   //   catch (err){

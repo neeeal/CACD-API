@@ -24,11 +24,24 @@ const eventSchema = mongoose.Schema(
       ref: "churches",
       required: true,
     },
-    status: {
-      type: String,
+    // status: {
+    //   type: String,
+    //   required: true,
+    //   default: "Active",
+    //   enum: ["Active", "TBA", "Cancelled", "Ongoing", "Finished"]
+    // },
+    acceptingRegistrations:{
+      type: Boolean,
       required: true,
-      default: "Active",
-      enum: ["Active", "TBA", "Cancelled"]
+    },
+    tickets:{
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "tickets",
+      default: [],
+    },
+    slots:{
+      type: Number,
+      required: true,
     },
     tags: {
       type: [String],
@@ -40,10 +53,10 @@ const eventSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    registerLink: {
-      type: String,
-      required: true,
-    },
+    // registerLink: {
+    //   type: String,
+    //   required: true,
+    // },
     deletedAt: {
       type: Date,
       default: null

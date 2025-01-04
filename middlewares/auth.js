@@ -84,13 +84,17 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
   };
 }
 
-exports.authorizeSuperAdmin = async (req, res, next) => {
-  console.log(req.user)
-  const role = req.user?.role;
+exports.authorizeSuperAdmin = async (requiredRolePermission = null) => {
+  return async (req, res, next) => {
+    console.log(req.user)
 
-  if (role !== 'Super Admin') {
-    return res.status(403).send({ error: "Unauthorized" });
+    const permission = await PermissionsCol.findOne({ deletedAt: null, name: requiredRolePermission}).lean();
+    const role = req.user?.role;
+
+    if (role !== '') {
+      return res.status(403).send({ error: "Unauthorized" });
+    }
+
+    next();
   }
-
-  next();
 };

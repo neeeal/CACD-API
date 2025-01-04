@@ -8,6 +8,7 @@ const company = require("../middlewares/company.js");
 const multer = require('multer');
 const auth = require("../middlewares/auth.js");
 const authCodes = require("../config/authCodes.js");
+const newFileUpload = require("../middlewares/newFileUpload.js");
 
 // TODO: change update routes to use paramd OID
 
@@ -51,11 +52,12 @@ router.delete(
 router.post(
   "/manageAlbumPhotos", 
   auth.authorizeAccess(authCodes.album.manageAlbumPhotos),
-  fileUpload.fields([
-    // { name: "featuredPhoto", maxCount: 1 },
-    { name: "default", maxCount: 99 }
-  ]), 
+  // fileUpload.fields([
+  //   // { name: "featuredPhoto", maxCount: 1 },
+  //   { name: "default", maxCount: 99 }
+  // ]), 
   company.assignCompany,
+  newFileUpload,
   controller.manageAlbumPhotos
 )
 

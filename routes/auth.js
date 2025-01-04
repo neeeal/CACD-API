@@ -21,7 +21,7 @@ router.post(
 
 router.post(
   "/refresh", 
-  company.assignCompany,
+  // company.assignCompany,
   controller.refreshToken
 );
 

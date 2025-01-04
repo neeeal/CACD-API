@@ -6,6 +6,7 @@ const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
+const newFileUpload = require("../middlewares/newFileUpload.js");
 
 router.get(
   "/byCompany/:company", 
@@ -27,10 +28,7 @@ router.get(
 router.post(
   "/", 
   auth.authorizeAccess(authCodes.church.create),
-  fileUpload.fields([
-    { name: "featuredPhoto", maxCount: 1 },
-    { name: "default", maxCount: 99 }
-  ]), 
+  newFileUpload,
   company.assignCompany,
   controller.post
 )
@@ -38,10 +36,7 @@ router.post(
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.church.update),
-  fileUpload.fields([
-    { name: "featuredPhoto", maxCount: 1 },
-    { name: "default", maxCount: 99 }
-  ]), 
+  newFileUpload,
   company.assignCompany,
   controller.put
 )

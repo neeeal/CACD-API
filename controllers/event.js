@@ -109,7 +109,7 @@ exports.post = async (req, res) => {
 
   // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
   //     newEvent.featuredPhoto = savedPhotos._id;
   //   }
   //   catch (err){
@@ -149,7 +149,7 @@ exports.post = async (req, res) => {
   try{
     // let photo;
     // if(uploadedPhotos) 
-    //   photo = await utils.savePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
+    //   photo = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
 
     // if (photo)
     //   values.featuredPhoto = photo._id;

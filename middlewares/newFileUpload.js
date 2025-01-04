@@ -83,7 +83,7 @@ const handleBase64Upload = async (req, res, next) => {
           const results = [];
 
           for (const file of files) {
-              const { base64String, originalname } = file;
+              const { base64String, originalname, fieldname } = file;
   
               if (!base64String || !originalname) {
                   continue; // Skip invalid files
@@ -97,7 +97,8 @@ const handleBase64Upload = async (req, res, next) => {
               results.push({
                 ...result,
                 originalname,
-                mimeType
+                mimeType,
+                fieldname
               });
           }
   
