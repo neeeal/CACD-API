@@ -117,6 +117,14 @@ exports.post = async (req, res) => {
   //     return res.status(500).send({ error: "Server error" });
   //   }
   // }
+  console.log(newEvent);
+
+  for (const ticket in newEvent.tickets){
+    ticket.ticketId = utils.generateUUID()
+  }
+  console.log('newEvent');
+
+  console.log(newEvent);
 
   if (uploadedPhotos && uploadedPhotos.length) {
     try{

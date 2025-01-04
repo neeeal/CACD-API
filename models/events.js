@@ -34,20 +34,38 @@ const eventSchema = mongoose.Schema(
       type: Boolean,
       required: true,
     },
-    tickets:{
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "tickets",
-      default: [],
-    },
+    tickets:[{
+        // ticketId:{
+        //   type: String,
+        //   required: true,
+        // },
+        name:{
+          type: String,
+          default: "Free",
+        },
+        price:{
+          type: Number,
+          required: true,
+        },
+        pax:{
+          type: Number,
+          default: 1
+        },
+        deletedAt: {
+          type: Date,
+          default: null,
+        }
+    }],
     slots:{
       type: Number,
       required: true,
     },
     tags: {
       type: [String],
-      required: true,
+      default: []
+      // required: true,
       // default: null,
-      enum: ["Men", "Women", "Youth", "National", "Leaders"]
+      // enum: ["Men", "Women", "Youth", "National", "Leaders"]
     },
     location: {
       type: String,

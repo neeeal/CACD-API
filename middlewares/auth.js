@@ -56,6 +56,7 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
   
         const rolePermissions = await RolePermissionsCol.findOne(query);
 
+        console.log(rolePermissions)
   
         if (!rolePermissions ) {
           throw new Error("User does not have permission. Unauthorized.")
@@ -78,6 +79,10 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
     req.user = {
       ...decoded
     };
+
+    console.log('decoded')
+    console.log(decoded)
+    console.log('decoded')
 
     // Proceed to the next middleware or controller
     next();

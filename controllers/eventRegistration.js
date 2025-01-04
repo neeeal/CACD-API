@@ -1,4 +1,5 @@
 const EventRegistrationsCol = require("../models/eventRegistrations.js");
+const EventsCol = require("../models/events.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
 
@@ -67,7 +68,6 @@ exports.getOne = async (req, res) => {
 }
 
 exports.getByCompany = async (req, res) => {
-  
   const queryParams = req.query || {};
   const user = req.user;
 
@@ -97,7 +97,7 @@ exports.getByCompany = async (req, res) => {
 
   res.status(200).send({
     message: "User get",
-    data: data?.[0] || [],
+    data: data,
     count: data && data.length 
   })
 }
@@ -129,6 +129,13 @@ exports.post = async (req, res) => {
   try {
     newEventRegistrationDoc = new EventRegistrationsCol(values);
     const savedDoc = await newEventRegistrationDoc.save();
+
+    const event = EventsCol.updateOne({
+      _id: newEventRegistration.event
+    }).lean()
+
+
+
   } catch (err) {
     console.error(err.stack);
 

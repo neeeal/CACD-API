@@ -10,6 +10,8 @@ const jwt = require("jsonwebtoken");
 const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
+const EventRegistrationsCol = require("../models/eventRegistrations.js");
+
 /*
   TODO: Modularize utils. create other files for like functions.
 */
@@ -629,6 +631,14 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
         select: "-__v"
       });
     }
+
+    if (col == EventRegistrationsCol){
+      populateValues.push({
+        path: "ticket",
+        match: { deletedAt: null },
+        select: "-__v"
+      });
+    }
   }
 
   let data;
@@ -647,6 +657,8 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
   //   console.error("Error executing query and populate:", err);
   //   throw new Error("Error fetching and populating data");
   // }
+
+  console.log(data)
 
   return data;
 };

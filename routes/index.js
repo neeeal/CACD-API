@@ -23,7 +23,8 @@ const initRoutes = (app) => {
   router.use("/permission", require("./permission.js"));
   router.use("/rolePermission", require("./rolePermission.js"));
   // TODO: add action monitoring route for each action done by user. study how to monitor user actions
-  router.use("/contact", require("./contact.js")); // Add contact route here
+  router.use("/contact", require("./contact.js")); 
+  // router.use("/ticket", require("./ticket.js")); 
   return app.use("/api", router);
 };
 

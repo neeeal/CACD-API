@@ -36,13 +36,12 @@ async function uploadBase64ToS3(base64String, fileName, mimeType) {
     try {
         // Decode the Base64 string to a file
         const buffer = Buffer.from(base64String.replace(/^data:.*?;base64,/, ''), 'base64');
-        fs.writeFileSync(tempFilePath, buffer);
 
         // Upload the file to S3
         const s3Params = {
             Bucket: bucketName,
             Key: key,
-            Body: fs.createReadStream(tempFilePath),
+            Body: buffer,
             ContentType: mimeType,
             ACL: 'public-read',
         };
@@ -52,15 +51,10 @@ async function uploadBase64ToS3(base64String, fileName, mimeType) {
 
         // Construct the file URL
         const fileUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-        return { Location: fileUrl };
+        return { location: fileUrl };
     } catch (err) {
         console.error('Error uploading to S3:', err);
         throw err;
-    } finally {
-        // Clean up temporary file
-        if (fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
-        }
     }
 }
 
@@ -71,45 +65,32 @@ const handleBase64Upload = async (req, res, next) => {
     try {
         const files = req.body.files;
 
-        console.log('files')
-        console.log(files)
-        console.log('files')
-
         if (!files || !Array.isArray(files) || files.length === 0) {
-            console.log('No files provided for upload' );
-            req.files = []
-        } else{
+            req.files = [];
+        } else {
+            const results = [];
 
-          const results = [];
+            for (const file of files) {
+                const { base64String, originalname, fieldname } = file;
 
-          for (const file of files) {
-              const { base64String, originalname, fieldname } = file;
-  
-              if (!base64String || !originalname) {
-                  continue; // Skip invalid files
-              }
-  
-              // Extract MIME type from Base64 string
-              const mimeType = extractFileType(base64String);
-  
-              // Upload the file to S3
-              const result = await uploadBase64ToS3(base64String, originalname, mimeType);
-              results.push({
-                ...result,
-                originalname,
-                mimeType,
-                fieldname
-              });
-          }
-  
-          req.files = results;
-  
-          console.log('results')
-          console.log(results)
-          console.log('results')
-  
-          console.log('All files uploaded successfully');
-          delete req.body.files;
+                if (!base64String || !originalname) {
+                    continue; // Skip invalid files
+                }
+
+                // Extract MIME type from Base64 string
+                const mimeType = extractFileType(base64String);
+
+                // Upload the file to S3
+                const result = await uploadBase64ToS3(base64String, originalname, mimeType);
+                results.push({
+                    ...result,
+                    originalname,
+                    mimeType,
+                    fieldname
+                });
+            }
+
+            req.files = results;
         }
 
         next();

@@ -44,7 +44,7 @@ const updateUsersWithNewRoles = async (users, newRoles) => {
       console.log(roleNameToIdMap[user.role.name])
       user.role = roleNameToIdMap[user.role.name]; // Assign new role ID
       await user.save(); // Save the user with the new role
-      console.log(`Updated user ${user._id} with new role ${user.role}`);
+      console.log(`Updated user ${user.firstName} ${user.lastName} with new role ${user.role}`);
     }
   }
   console.log("Users updated with new roles!");
