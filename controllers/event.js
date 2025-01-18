@@ -236,6 +236,10 @@ exports.put = async (req, res) => {
       newDoc: newEvent
     });
 
+    console.log("FINISHED")
+    console.log(data)
+    console.log("FINISHED")
+
     // console.log(query)
     // console.log(values)
     // console.log(data)

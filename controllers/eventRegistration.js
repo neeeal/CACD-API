@@ -111,7 +111,7 @@ exports.post = async (req, res) => {
   if (uploadedPhotos && uploadedPhotos.length) {
     try{
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEventRegistration});
-      newEventRegistration.photos = savedPhotos._id;
+      newEventRegistration.photos = savedPhotos;
     }
     catch (err){
       console.error(err.stack);

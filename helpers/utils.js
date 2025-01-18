@@ -353,7 +353,7 @@ exports.getOldPhotos = async ({col, query}) => {
     // console.log(oldPhotos)
     // console.log("OLD")
 
-    return oldPhotos.photos;
+    return oldPhotos?.photos;
 }
 
 exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
@@ -405,7 +405,7 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
   const savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:doc});
 
   const query = {
-    _id: doc.OID,
+    _id: doc.OID || doc._id,
     deletedAt: null
   };
 
@@ -428,9 +428,9 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
 
   const newDoc = await col.findOneAndUpdate(query, values, options);
 
-  // console.log("updateMultiplePhotos");
-  // console.log(newDoc);
-  // console.log("updateMultiplePhotos");
+  console.log("updateMultiplePhotos");
+  console.log(newDoc);
+  console.log("updateMultiplePhotos");
 
   return newDoc;
 }
@@ -465,14 +465,13 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
         // Update existing photo doc
         console.log("manageMultiplePhotosUpdate update")
         newDoc.photos = oldPhotos._id;
-        savedPhotos = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
+        newDoc = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
+        console.log('UPDATE OLD')
       } else {
         // create new photo doc
         console.log("manageMultiplePhotosUpdate save")
         savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-        console.log('oldPhotos')
-        console.log(oldPhotos)
-        console.log('oldPhotos')
+        console.log('CREATE NEW')
         if (newDoc) 
           newDoc.photos = savedPhotos;
       }

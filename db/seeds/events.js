@@ -42,7 +42,7 @@ Maecenas justo sapien, porttitor eu tempor in, mollis a odio. Suspendisse vitae 
       ],
       slots: 100 + i * 5, // Incremental slots
       tags: getRandomTags(),
-      location: `123 Ipsum Avenue ${i}, Dolor Sit Amet, City ${i}`,
+      location: `168 Pablo Dela Cruz, Novaliches, Quezon City, Metro Manila`,
       company: companyId,
       files: [
         {
