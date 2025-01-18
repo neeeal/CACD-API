@@ -24,26 +24,57 @@ const eventSchema = mongoose.Schema(
       ref: "churches",
       required: true,
     },
-    status: {
-      type: String,
+    // status: {
+    //   type: String,
+    //   required: true,
+    //   default: "Active",
+    //   enum: ["Active", "TBA", "Cancelled", "Ongoing", "Finished"]
+    // },
+    acceptingRegistrations:{
+      type: Boolean,
       required: true,
-      default: "Active",
-      enum: ["Active", "TBA", "Cancelled"]
+    },
+    tickets:[{
+        // ticketId:{
+        //   type: String,
+        //   required: true,
+        // },
+        name:{
+          type: String,
+          default: "Free",
+        },
+        price:{
+          type: Number,
+          required: true,
+        },
+        pax:{
+          type: Number,
+          default: 1
+        },
+        deletedAt: {
+          type: Date,
+          default: null,
+        }
+    }],
+    slots:{
+      type: Number,
+      required: true,
     },
     tags: {
       type: [String],
-      required: true,
+      default: []
+      // required: true,
       // default: null,
-      enum: ["Men", "Women", "Youth", "National", "Leaders"]
+      // enum: ["Men", "Women", "Youth", "National", "Leaders"]
     },
     location: {
       type: String,
       required: true,
     },
-    registerLink: {
-      type: String,
-      required: true,
-    },
+    // registerLink: {
+    //   type: String,
+    //   required: true,
+    // },
     deletedAt: {
       type: Date,
       default: null

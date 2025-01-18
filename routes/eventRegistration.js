@@ -8,6 +8,7 @@ const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
 const multer = require('multer');
 const authCodes = require("../config/authCodes.js");
+const newFileUpload = require("../middlewares/newFileUpload.js");
 
 router.get(
   "/byCompany", 
@@ -30,7 +31,9 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "", 
-  fileUpload.single("paymentPhoto"),   
+  // fileUpload.single("paymentPhoto"),   
+  auth.authorizeAccess(authCodes.eventRegistration.create), 
+  newFileUpload,
   company.assignCompany,
   controller.post
 )
@@ -38,7 +41,8 @@ router.post(
 router.put(
   "/", 
   auth.authorizeAccess(authCodes.eventRegistration.update), 
-  fileUpload.single("paymentPhoto"),     
+  // fileUpload.single("paymentPhoto"),  
+  newFileUpload,   
   company.assignCompany,
   controller.put
 )

@@ -56,6 +56,7 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
   
         const rolePermissions = await RolePermissionsCol.findOne(query);
 
+        console.log(rolePermissions)
   
         if (!rolePermissions ) {
           throw new Error("User does not have permission. Unauthorized.")
@@ -79,18 +80,26 @@ exports.authorizeAccess = (requiredRolePermission = null) => {
       ...decoded
     };
 
+    console.log('decoded')
+    console.log(decoded)
+    console.log('decoded')
+
     // Proceed to the next middleware or controller
     next();
   };
 }
 
-exports.authorizeSuperAdmin = async (req, res, next) => {
-  console.log(req.user)
-  const role = req.user?.role;
+exports.authorizeSuperAdmin = async (requiredRolePermission = null) => {
+  return async (req, res, next) => {
+    console.log(req.user)
 
-  if (role !== 'Super Admin') {
-    return res.status(403).send({ error: "Unauthorized" });
+    const permission = await PermissionsCol.findOne({ deletedAt: null, name: requiredRolePermission}).lean();
+    const role = req.user?.role;
+
+    if (role !== '') {
+      return res.status(403).send({ error: "Unauthorized" });
+    }
+
+    next();
   }
-
-  next();
 };

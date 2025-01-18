@@ -7,6 +7,7 @@ const fileUpload = require("../middlewares/fileUpload.js");
 const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
+const newFileUpload = require("../middlewares/newFileUpload.js");
 
 router.get(
   "/byCompany", 
@@ -29,19 +30,21 @@ router.get(
 // router.get("/getOne", controller.getOne)
 router.post(
   "/:company", 
-  fileUpload.fields([
-    { name: "contactPhotos", maxCount: 10 }, // upload up to 10 files
-  ]), 
+  // fileUpload.fields([
+  //   { name: "contactPhotos", maxCount: 10 }, // upload up to 10 files
+  // ]), 
+  newFileUpload,
   company.assignCompany,
   controller.post
 )
 
 router.put(
-  "/", 
-  auth.authorizeAccess(authCodes.contact.update),
-  fileUpload.fields([
-    { name: "contactPhotos", maxCount: 10 }, // upload up to 10 files
-  ]), 
+  "/:company", 
+  // auth.authorizeAccess(authCodes.contact.update),
+  // fileUpload.fields([
+  //   { name: "contactPhotos", maxCount: 10 }, // upload up to 10 files
+  // ]), 
+  newFileUpload,
   company.assignCompany,
   controller.put
 )

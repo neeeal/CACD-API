@@ -4,39 +4,82 @@ const utils = require("../helpers/utils.js");
 const moment = require("moment");
 const Album = require("../models/albums.js");
 
+const getAlbumPhotos = async ( {company, album} ) => {
+  const query = {
+    company: company,
+    album: album,
+    deletedAt: null
+  }
+
+  const albumPhotos = await PhotosCol.find(query).sort({ deletedAt: -1 });
+
+  return albumPhotos;
+}
+
+/**
+ * Maps photos to their corresponding albums.
+ * @param {Array} albums - Array of album documents.
+ * @returns {Promise<Array>} - Albums with their photos populated.
+ */
+const mapPhotosToAlbums = async (albums) => {
+  if (!albums || albums.length === 0) {
+      return albums;
+  }
+
+  const albumPhotoPromises = albums.map(async (album) => {
+      const albumPhotos = await getAlbumPhotos({
+          company: album.company,
+          album: album._id, // Match photos by album ID
+      });
+
+      // Add the photos to the album object
+      return {
+          ...album.toObject(),
+          photos: albumPhotos,
+      };
+  });
+
+  // Resolve all album-photo mappings
+  return Promise.all(albumPhotoPromises);
+};
 
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
 
   let data;
-  try{
-    const query = utils.queryBuilder({
-      initialQuery: { deletedAt: null },
-      queryParams: queryParams
-    });
+  try {
+      // Build the query for albums
+      const query = utils.queryBuilder({
+          initialQuery: { deletedAt: null },
+          queryParams: queryParams,
+      });
 
-    data = await utils.getAndPopulate({
-      query: query,
-      col: AlbumsCol,
-      offset: queryParams.offset,
-      limit: queryParams.limit
-    })
+      // Fetch albums with pagination
+      data = await utils.getAndPopulate({
+          query: query,
+          col: AlbumsCol,
+          offset: queryParams.offset,
+          limit: queryParams.limit,
+      });
+
+      // Map photos to albums
+      data = await mapPhotosToAlbums(data);
   } catch (err) {
-    console.error(err.stack);
+      console.error(err.stack);
 
-    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
-      return res.status(404).send({ error: "Invalid ObjectId" });
-    }
+      if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)) {
+          return res.status(404).send({ error: "Invalid ObjectId" });
+      }
 
-    return res.status(500).send({ error: "Server error" });
+      return res.status(500).send({ error: "Server error" });
   }
 
   res.status(200).send({
-    message: "church get",
-    data: data || [],
-    count: data && data.length 
-  })
-}
+      message: "Church get",
+      data: data || [],
+      count: data && data.length,
+  });
+};
 
 exports.getOne = async (req, res) => {
   const params = req.params;
@@ -50,6 +93,9 @@ exports.getOne = async (req, res) => {
       col: AlbumsCol,
     });
     
+    // Map photos to albums
+    data = await mapPhotosToAlbums(data);
+
   } catch (err) {
     console.error(err.stack);
 
@@ -85,7 +131,10 @@ exports.getByCompany = async (req, res) => {
       offset: queryParams.offset,
       limit: queryParams.limit
     });
-    
+
+    // Map photos to albums
+    data = await mapPhotosToAlbums(data);
+
   } catch (err) {
     console.error(err.stack);
 
@@ -214,6 +263,7 @@ exports.manageAlbumPhotos = async (req, res) => {
       _id: {$in: newDoc.add || []},
       deletedAt: null
     };
+
 
     const addValues = {
         album: newDoc.OID

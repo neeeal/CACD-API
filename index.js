@@ -10,12 +10,19 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
-    origin: '*',
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: '*'
-}));
+app.use(
+    cors({
+      // origin: [
+      //   "http://localhost:*",
+      //   "https://document-maker-git-development-intelliseven.vercel.app"
+      // ],
+      origin: function (origin, callback) {
+        return callback(null, true);
+      },
+      optionsSuccessStatus: 200,
+      credentials: true,
+    }),
+  );
 
 // Serve static files from the "public" directory
 app.use('/uploads/photos', express.static(path.join(__dirname, 'public/uploads/photos')));

@@ -109,7 +109,7 @@ exports.post = async (req, res) => {
 
   // if (uploadedPhotos && uploadedPhotos.length) {
   //   try{
-  //     const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
+  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
   //     newEvent.featuredPhoto = savedPhotos._id;
   //   }
   //   catch (err){
@@ -117,6 +117,14 @@ exports.post = async (req, res) => {
   //     return res.status(500).send({ error: "Server error" });
   //   }
   // }
+  console.log(newEvent);
+
+  for (const ticket in newEvent.tickets){
+    ticket.ticketId = utils.generateUUID()
+  }
+  console.log('newEvent');
+
+  console.log(newEvent);
 
   if (uploadedPhotos && uploadedPhotos.length) {
     try{
@@ -149,7 +157,7 @@ exports.post = async (req, res) => {
   try{
     // let photo;
     // if(uploadedPhotos) 
-    //   photo = await utils.savePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
+    //   photo = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
 
     // if (photo)
     //   values.featuredPhoto = photo._id;
@@ -227,6 +235,10 @@ exports.put = async (req, res) => {
       uploadedPhotos: uploadedPhotos,
       newDoc: newEvent
     });
+
+    console.log("FINISHED")
+    console.log(data)
+    console.log("FINISHED")
 
     // console.log(query)
     // console.log(values)

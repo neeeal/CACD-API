@@ -9,7 +9,8 @@
     "start": "node index.js",
     "seed:permissions": "node db/seeds/permission.js",
     "seed:roles": "node db/seeds/role.js",
-    "seed:rolePermissions": "node db/seeds/rolePermission.js"
+    "seed:rolePermissions": "node db/seeds/rolePermission.js",
+    "seed:events": "node db/seeds/events.js"
   },
   "repository": {
     "type": "git",

@@ -10,6 +10,8 @@ const jwt = require("jsonwebtoken");
 const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
+const EventRegistrationsCol = require("../models/eventRegistrations.js");
+
 /*
   TODO: Modularize utils. create other files for like functions.
 */
@@ -182,8 +184,6 @@ exports.saveMultiplePhotos = async({uploadedPhotos, details}) => {
     return null;
   }
 
-  console.log(uploadedPhotos)
-
   const allOIDS = await Promise.all(
     uploadedPhotos.map(async (uploadedPhoto, idx) => {
       const values = {
@@ -192,7 +192,7 @@ exports.saveMultiplePhotos = async({uploadedPhotos, details}) => {
         company: details.company
         // Additional fields like caption, album, eventOID, etc. can be added if needed
       };
-  
+      console.log(values)
       // Create a new photo document
       const photoDocument = new PhotosCol(values);
   
@@ -353,7 +353,7 @@ exports.getOldPhotos = async ({col, query}) => {
     // console.log(oldPhotos)
     // console.log("OLD")
 
-    return oldPhotos.photos;
+    return oldPhotos?.photos;
 }
 
 exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
@@ -361,43 +361,43 @@ exports.managePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}) => {
   let oldPhotos;
   // try{
     oldPhotos = await exports.getOldPhotos({ col: col, query: query });
-    console.log("oldPhotos")
-    console.log(oldPhotos)
   // }
   // catch (err){
   //   console.log("Old Photo Retrieval")
   //   console.error(err.stack);
   //   return res.status(500).send({ error: "Server error" });
   // }
+  upload = uploadedPhotos.length && uploadedPhotos[0];
 
   if (uploadedPhotos && uploadedPhotos.length) {
+
   // If has uploadedPhotos
-    uploadedPhotos.fieldname = 
-    uploadedPhotos.fieldname.includes("new") ?
-      uploadedPhotos.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-      uploadedPhotos.fieldname;
-    
+    upload.fieldname = 
+    upload.fieldname.includes("new") ?
+      upload.fieldname.replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+      upload.fieldname;
+
     let savedPhotos;
     if (oldPhotos && oldPhotos.length){
       // Update existing photo doc
       console.log("managePhotosUpdate update")
       newDoc.photos = oldPhotos;
-      savedPhotos = await exports.updatePhoto({uploadedPhotos:uploadedPhotos, details:newDoc});
+      savedPhotos = await exports.updatePhoto({uploadedPhotos:upload, details:newDoc});
       console.log(savedPhotos)
     } else {
       // create new photo doc
       console.log("managePhotosUpdate save")
-      savedPhotos = await exports.savePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
+      savedPhotos = await exports.savePhotos({uploadedPhotos:upload, details:newDoc});
       console.log(savedPhotos)
       newDoc.photos = [savedPhotos._id];
     }
-  } else if (!uploadedPhotos && newDoc.deletePhoto && oldPhotos){
+  } else if (!upload && newDoc.deletePhoto && oldPhotos){
     // no new uploaded photo and deletePhoto is true and has old photo
     // hard delete
     console.log("managePhotosUpdate hard delete");
     await exports.softDeletePhotos({photos: oldPhotos, col: col, doc: newDoc});
   }
-
+console.log(!upload && newDoc.deletePhoto && oldPhotos)
   return newDoc;
 }
 
@@ -405,7 +405,7 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
   const savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:doc});
 
   const query = {
-    _id: doc.OID,
+    _id: doc.OID || doc._id,
     deletedAt: null
   };
 
@@ -428,9 +428,9 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
 
   const newDoc = await col.findOneAndUpdate(query, values, options);
 
-  // console.log("updateMultiplePhotos");
-  // console.log(newDoc);
-  // console.log("updateMultiplePhotos");
+  console.log("updateMultiplePhotos");
+  console.log(newDoc);
+  console.log("updateMultiplePhotos");
 
   return newDoc;
 }
@@ -465,14 +465,13 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
         // Update existing photo doc
         console.log("manageMultiplePhotosUpdate update")
         newDoc.photos = oldPhotos._id;
-        savedPhotos = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
+        newDoc = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
+        console.log('UPDATE OLD')
       } else {
         // create new photo doc
         console.log("manageMultiplePhotosUpdate save")
         savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-        console.log('oldPhotos')
-        console.log(oldPhotos)
-        console.log('oldPhotos')
+        console.log('CREATE NEW')
         if (newDoc) 
           newDoc.photos = savedPhotos;
       }
@@ -543,7 +542,12 @@ exports.saveAndPopulate = async ({doc, col}) => {
 
 exports.updateAndPopulate = async ({query, values, options, col, populate = true }) => {
   const data = await col.findOneAndUpdate(query, values, options);
+  console.log('data')
   console.log(data)
+  if(!data){
+    return null;
+  }
+  console.log('data')
   // Initialize an empty array to hold populate values
   let populateValues = [];
 
@@ -626,6 +630,14 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
         select: "-__v"
       });
     }
+
+    if (col == EventRegistrationsCol){
+      populateValues.push({
+        path: "ticket",
+        match: { deletedAt: null },
+        select: "-__v"
+      });
+    }
   }
 
   let data;
@@ -644,6 +656,8 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
   //   console.error("Error executing query and populate:", err);
   //   throw new Error("Error fetching and populating data");
   // }
+
+  console.log(data)
 
   return data;
 };

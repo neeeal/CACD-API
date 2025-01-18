@@ -18,7 +18,12 @@ const tokenSchema = new mongoose.Schema(
     expiresAt: { 
       type: Date,
       required: true
-    }
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "companies",
+      default: null,
+    },
   },
   {
     timestamps: true,

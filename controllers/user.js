@@ -124,7 +124,7 @@ exports.post = async (req, res) => {
 
   if (uploadedPhotos && uploadedPhotos.length) {
     try{
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newUser});
+      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newUser});
       newUser.photos = [savedPhotos._id];
       console.log("IM HERE")
       console.log([savedPhotos._id])

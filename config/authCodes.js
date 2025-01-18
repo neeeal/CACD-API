@@ -110,6 +110,14 @@ const authCodes = {
     readByCompany: "BYCOMPANY_RU",
     readOne: "ONE_RU",
   },
+  // ticket: {
+  //   create: "CTI",
+  //   read: "RTI",
+  //   update: "UTI",
+  //   delete: "DTI",
+  //   readByCompany: "BYCOMPANY_RTI",
+  //   readOne: "ONE_RTI",
+  // },
 };
 
 module.exports = authCodes;

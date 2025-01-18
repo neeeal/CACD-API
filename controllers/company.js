@@ -71,16 +71,16 @@ exports.post = async (req, res) => {
 
   console.log(uploadedPhotos)
 
-  if (uploadedPhotos && uploadedPhotos.length) {
-    try{
-      const savedPhotos = await utils.savePhotos({uploadedPhotos:uploadedPhotos, details:newCompany});
-      newCompany.photos = savedPhotos._id;
-    }
-    catch (err){
-      console.error(err.stack);
-      return res.status(500).send({ error: "Server error" });
-    }
-  }
+  // if (uploadedPhotos && uploadedPhotos.length) {
+  //   try{
+  //     const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newCompany});
+  //     newCompany.photos = savedPhotos._id;
+  //   }
+  //   catch (err){
+  //     console.error(err.stack);
+  //     return res.status(500).send({ error: "Server error" });
+  //   }
+  // }
 
   try{
     newCompany = new CompaniesCol(newCompany);
@@ -99,6 +99,7 @@ exports.post = async (req, res) => {
 exports.put = async (req, res) => {
   let newCompany = req.body;
   const uploadedPhotos = req.files;
+  newCompany.company = newCompany.OID
 
   const query = {
     _id: newCompany.OID,
