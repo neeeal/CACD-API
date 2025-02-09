@@ -308,3 +308,38 @@ exports.delete = async (req, res) => {
     }
   })
 }
+
+exports.getFeatured = async (req, res) => {
+  let data;
+  try{
+    data = await EventsCol.find(
+      {
+        deletedAt: null,
+        tags: { $in: ["Featured"]},
+        dateEnd: {$gte: Date()}
+      }
+    )
+    .sort({dateEnd: 1})
+    .skip(req.query?.offset || 0)
+    .limit(req.query?.limit || 1)
+    .select("-deletedAt -__v -tickets.deletedAt")
+    .populate({
+      path: 'photos',
+      select: 'title caption album metadata.location createdAt updatedAt',
+      options: { limit: 1 }
+    });
+
+    console.log(moment().toISOString())
+  }
+  catch (err){
+    console.error(err.stack);
+
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  res.status(200).send({
+    message: "Featured events",
+    data: data || [],
+    count: data.length
+  })
+}

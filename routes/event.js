@@ -10,6 +10,11 @@ const authCodes = require("../config/authCodes.js");
 const newFileUpload = require("../middlewares/newFileUpload.js");
 
 router.get(
+  "/featured/byCompany/:company", 
+  controller.getFeatured
+)
+
+router.get(
   "/byCompany/:company", 
   controller.getByCompany
 )
