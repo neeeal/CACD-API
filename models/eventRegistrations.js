@@ -25,12 +25,10 @@ const eventRegistrationSchema = mongoose.Schema(
           type: mongoose.Schema.Types.Mixed,
           default: {},
         },
-        event:{
-          tickets:[{
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-          }]
-        }
+    tickets:[{
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    }]
   },
   {
     timestamps: true,
