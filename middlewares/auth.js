@@ -6,10 +6,12 @@ const SECRET_KEY_ACCESS_TOKEN = process.env.SECRET_KEY_ACCESS_TOKEN;
 
 exports.authorizeAccess = (requiredRolePermission = null) => {
   return async (req, res, next) => {
-    const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
+    let token = req.headers.authorization && req.headers.authorization.split(" ")[1];
   
     if (!token) {
-      return res.status(401).send({ error: "Access token required" });
+      // return res.status(401).send({ error: "Access token required" });
+      console.log("No access token");
+      token = process.env.GUEST_TOKEN
     }
   
     // Verify the provided token
