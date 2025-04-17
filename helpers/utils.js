@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
 const EventRegistrationsCol = require("../models/eventRegistrations.js");
+const EventsCol = require("../models/events.js");
 
 /*
   TODO: Modularize utils. create other files for like functions.
@@ -636,6 +637,14 @@ exports.getAndPopulate = async ({ query, col, offset = 0, limit = 0, populate = 
         path: "ticket",
         match: { deletedAt: null },
         select: "-__v"
+      });
+    }
+
+    if (col == EventsCol){
+      populateValues.push({
+        path: "hostChurchOID",
+        match: { deletedAt: null },
+        select: "name"
       });
     }
   }
