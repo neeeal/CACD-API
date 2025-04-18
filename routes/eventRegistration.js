@@ -44,7 +44,7 @@ router.put(
   // fileUpload.single("paymentPhoto"),  
   // newFileUpload,   
   company.assignCompany,
-  controller.put
+  controller.status
 )
 
 router.put(

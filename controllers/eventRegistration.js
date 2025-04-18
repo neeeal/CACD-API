@@ -1,7 +1,12 @@
 const EventRegistrationsCol = require("../models/eventRegistrations.js");
 const EventsCol = require("../models/events.js");
+const PhotosCol = require("../models/photos.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
+
+const fs = require('fs').promises;
+const path = require('path');
+const transporter = require("../config/mailer.js");
 
 // TODO: add unique eventRegistrationID
 exports.get = async (req, res) => {
@@ -106,48 +111,102 @@ exports.post = async (req, res) => {
   let newEventRegistration = req.body;
   const uploadedPhotos = req.files;
 
-  console.log(uploadedPhotos)
-
   if (uploadedPhotos && uploadedPhotos.length) {
-    try{
-      const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEventRegistration});
+    try {
+      const savedPhotos = await utils.saveMultiplePhotos({ uploadedPhotos, details: newEventRegistration });
       newEventRegistration.photos = savedPhotos;
-    }
-    catch (err){
-      console.error(err.stack);
+    } catch (err) {
       return res.status(500).send({ error: "Server error" });
     }
   }
 
-  const values = {
-    ...newEventRegistration,
+  let newEventRegistrationDoc, eventDetails;
+  try {
+    newEventRegistrationDoc = new EventRegistrationsCol(newEventRegistration);
+    const savedDoc = await newEventRegistrationDoc.save();
+    eventDetails = await EventsCol.findOneAndUpdate({ _id: newEventRegistration.event }, { $inc: { slots: -1 }}); // just a side call for now
+  } catch (err) {
+    if (err.name === 'MongoServerError' && err.code === 11000) {
+      return res.status(400).send({ error: "Duplicate key error." });
+    }
+    return res.status(500).send({ error: "Server error" });
   }
 
-  console.log(values);
-  console.log(req.body);
-  let newEventRegistrationDoc;
+  // Send confirmation email
   try {
-    newEventRegistrationDoc = new EventRegistrationsCol(values);
-    const savedDoc = await newEventRegistrationDoc.save();
+    // Read the HTML template
+    let htmlContent = await fs.readFile(
+      path.join(__dirname, '../html/eventRegistrationConfirmation.html'), 
+      'utf8'
+    );
 
-    const event = EventsCol.updateOne({
-      _id: newEventRegistration.event
-    }).lean()
+    // Replace placeholders in the template
+    htmlContent = htmlContent
+      .replace('{{name}}', newEventRegistration.registrantInfo.name || 'Valued Participant')
+      .replace(/{{email}}/g, process.env.MAIL_EMAIL)
+      .replace('{{event_name}}', eventDetails.name || 'the event');
 
+    // Configure email options
+    console.log(newEventRegistration)
+    const mailOptions = {
+      from: process.env.MAIL_EMAIL,
+      to: newEventRegistration.registrantInfo.email,
+      subject: 'Event Registration Received',
+      html: htmlContent
+    };
 
-
+    // Send the email
+    await transporter.sendMail(mailOptions);
   } catch (err) {
-    console.error(err.stack);
+    console.error('Error sending confirmation email:', err);
+    // We're not returning an error to the client here since the registration was successful
+    // But we log it for debugging purposes
+  }
 
-    // Check if the error is a duplicate key error
-    if (err.name === 'MongoServerError' && err.code === 11000) {
-      return res.status(400).send({
-        error: "Duplicate key error. A Event registration with this name already exists.",
-      });
-    }
 
-    // General server error response
-    return res.status(500).send({ error: "Server error" });
+  // Send notification email to support team
+  try {
+    // Read the HTML template for support notification
+    let supportHtmlContent = await fs.readFile(
+      path.join(__dirname, '../html/supportNotification.html'), 
+      'utf8'
+    );
+    
+    // Generate HTML table for registration details
+    const registrationDetails = generateRegistrationDetailsHTML(newEventRegistration);
+    
+    // Generate HTML table for event details
+    const eventDetailsHTML = generateEventDetailsHTML(eventDetails);
+    
+    // Generate HTML for photos
+    const photosHTML = await generatePhotosHTML(newEventRegistration.photos);
+    
+    // Replace placeholders in the template
+    supportHtmlContent = supportHtmlContent
+      .replace('{{event_name}}', eventDetails.name || 'Unnamed Event')
+      .replace('{{registrant_name}}', newEventRegistration.registrantInfo.name || 'Unnamed Registrant')
+      .replace('{{registrant_email}}', newEventRegistration.registrantInfo.email || 'No email provided')
+      .replace('{{registration_date}}', new Date().toLocaleString())
+      .replace('{{registration_details}}', registrationDetails)
+      .replace('{{event_details}}', eventDetailsHTML)
+      .replace('{{photos}}', photosHTML);
+    
+    // Send notification email to support using nodemailer with Amazon SES
+    const mailOptions = {
+      from: process.env.MAIL_EMAIL,
+      to: process.env.MAIL_EMAIL,
+      subject: `New Event Registration - ${eventDetails.name || 'Unnamed Event'}`,
+      html: supportHtmlContent
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+    
+    console.log('Support notification email sent successfully');
+  } catch (err) {
+    console.error('Error sending support notification email:', err);
+    // We're not returning an error to the client here since the registration was successful
+    // But we log it for debugging purposes
   }
 
   res.status(200).send({
@@ -155,6 +214,148 @@ exports.post = async (req, res) => {
     data: newEventRegistrationDoc
   });
 };
+
+
+// Helper function to generate HTML table for registration details
+function generateRegistrationDetailsHTML(registration) {
+  if (!registration || !registration.registrantInfo) {
+    return '<p>No registration details available</p>';
+  }
+  
+  let html = '<table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%;">';
+  
+  // Add table header
+  html += '<tr style="background-color: #f2f2f2;"><th colspan="2">Registration Information</th></tr>';
+  
+  // Process registrantInfo data
+  for (const [key, value] of Object.entries(registration.registrantInfo)) {
+    if (value && key !== 'photos' && key !== 'company') {
+      html += `<tr><td><strong>${formatFieldName(key)}</strong></td><td>${value}</td></tr>`;
+    }
+  }
+  
+  // Add any additional registration details not in registrantInfo
+  for (const [key, value] of Object.entries(registration)) {
+    if (
+      value &&
+      typeof value !== 'object' &&
+      key !== 'event' &&
+      key !== 'photos' &&
+      key !== 'registrantInfo' &&
+      key !== '_id' &&
+      key !== 'company'
+    ) {
+      html += `<tr><td><strong>${formatFieldName(key)}</strong></td><td>${value}</td></tr>`;
+    }
+  }
+
+  html += '</table>';
+  return html;
+}
+
+
+// Helper function to generate HTML table for event details
+function generateEventDetailsHTML(event) {
+  if (!event) {
+    return '<p>No event details available</p>';
+  }
+  
+  let html = '<table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%;">';
+  
+  // Add table header
+  html += '<tr style="background-color: #f2f2f2;"><th colspan="2">Event Information</th></tr>';
+  
+  // Process event data
+  const fieldsToShow = ['name', 'date', 'time', 'venue', 'description', 'price', 'slots'];
+  
+  for (const field of fieldsToShow) {
+    if (event[field] !== undefined) {
+      let displayValue = event[field];
+      // Format date if it's a date field
+      if (field === 'date' && event[field] instanceof Date) {
+        displayValue = event[field].toLocaleDateString();
+      }
+      html += `<tr><td><strong>${formatFieldName(field)}</strong></td><td>${displayValue}</td></tr>`;
+    }
+  }
+  
+  html += '</table>';
+  return html;
+}
+
+async function generatePhotosHTML(photos) {
+  if (!photos || !photos.length) {
+    return '<p>No photos attached</p>';
+  }
+
+  const photoLinks = [];
+
+  for (const photoId of photos) {
+    try {
+      const photoDoc = await PhotosCol.findOne({ _id: photoId }).lean();
+      if (photoDoc?.metadata?.location) {
+        photoLinks.push(photoDoc.metadata.location);
+      }
+    } catch (err) {
+      console.log(`Failed to retrieve photo with ID ${photoId}:`, err);
+    }
+  }
+
+  if (!photoLinks.length) {
+    return '<p>No valid photo URLs found</p>';
+  }
+
+  let html = '<h3>Attached Photos </h3><ul>';
+  photoLinks.forEach((url, index) => {
+    html += `<li><a href="${url}" target="_blank">${url}</a></li>`;
+  });
+  html += '</ul>';
+
+  return html;
+}
+
+
+// Helper function to format field names (convert camelCase to Title Case with spaces)
+function formatFieldName(name) {
+  return name
+    .replace(/([A-Z])/g, ' $1') // Insert a space before all capital letters
+    .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
+    .trim(); // Remove any leading/trailing spaces
+}
+// TODO: add unique eventRegistrationID
+exports.get = async (req, res) => {
+  const queryParams = req.query || {};
+
+  let data;
+  try{
+    const query = utils.queryBuilder({
+      initialQuery: { deletedAt: null },
+      queryParams: queryParams,
+    });
+
+    data = await utils.getAndPopulate({
+      query: query,
+      col: EventRegistrationsCol,
+      offset: queryParams.offset,
+      limit: queryParams.limit
+    });
+  } catch (err) {
+    console.error(err.stack);
+
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)){
+      return res.status(404).send({ error: "Invalid ObjectId" });
+    }
+
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  res.status(200).send({
+    message: "get all active event registrations",
+    data: data || [],
+    count: data && data.length
+  })
+};
+
 
 
 exports.put = async (req, res) => {
@@ -209,7 +410,7 @@ exports.put = async (req, res) => {
   });
 };
 
-exports.put = async (req, res) => {
+exports.status = async (req, res) => {
   let newEventRegistration = req.body;
 
   const query = {
