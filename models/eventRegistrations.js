@@ -28,7 +28,12 @@ const eventRegistrationSchema = mongoose.Schema(
     tickets:[{
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-    }]
+    }],
+    status:{
+      type: String,
+      default: "Pending",
+      enum: ["Pending", "Rejected", "Confirmed"]
+    }
   },
   {
     timestamps: true,

@@ -209,6 +209,57 @@ exports.put = async (req, res) => {
   });
 };
 
+exports.put = async (req, res) => {
+  let newEventRegistration = req.body;
+
+  const query = {
+    _id: newEventRegistration.OID,
+    deletedAt: null
+  };
+
+  const values = {
+    $set: {
+      status:newEventRegistration.status
+    }
+  };
+
+  const options = { new: true };
+
+  try {
+    newEventRegistration = await utils.updateAndPopulate({ query: query, values: values, options: options, col: EventRegistrationsCol });
+
+    if (!newEventRegistration) 
+      throw new Error("Event registration not found");
+
+  } catch (err) {
+    console.error(err.stack);
+
+    // Handle "Event registration not found" error
+    if (err.message.includes("not found")) {
+      return res.status(404).send({ error: err.message });
+    }
+
+    // Handle invalid Object ID error
+    if (/Invalid ObjectId|Cast to ObjectId failed/.test(err.message)) {
+      return res.status(400).send({ error: "Invalid Object ID" });
+    }
+
+    // Handle duplicate key error (MongoServerError with code 11000)
+    if (err.code === 11000) {
+      return res.status(400).send({
+        error: `Duplicate key error. A Event registration with this ${Object.keys(err.keyValue).join(', ')} already exists.`,
+      });
+    }
+
+    // General server error
+    return res.status(500).send({ error: "Server error" });
+  }
+
+  res.status(200).send({
+    message: "put",
+    data: newEventRegistration
+  });
+};
 
 exports.delete = async (req, res) => {
   
