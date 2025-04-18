@@ -32,10 +32,19 @@ router.get(
 router.post(
   "", 
   // fileUpload.single("paymentPhoto"),   
-  auth.authorizeAccess(authCodes.eventRegistration.create), 
+  auth.authorizeAccess(null, true), 
   newFileUpload,
   company.assignCompany,
   controller.post
+)
+
+router.put(
+  "/statusChange", 
+  auth.authorizeAccess(authCodes.eventRegistration.update), 
+  // fileUpload.single("paymentPhoto"),  
+  // newFileUpload,   
+  company.assignCompany,
+  controller.status
 )
 
 router.put(
