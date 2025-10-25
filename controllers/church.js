@@ -1,3 +1,18 @@
+// GET: /names/byCompany/:company
+exports.getNamesByCompany = async (req, res) => {
+  const params = req.params;
+  try {
+    const churches = await ChurchesCol.find({ deletedAt: null, company: params.company }).select('_id name');
+    res.status(200).send({
+      message: 'church names get',
+      data: churches || [],
+      count: churches.length
+    });
+  } catch (err) {
+    console.error(err.stack);
+    return res.status(500).send({ error: 'Server error' });
+  }
+};
 const ChurchesCol = require("../models/churches.js");
 const utils = require("../helpers/utils.js");
 const moment = require("moment");
