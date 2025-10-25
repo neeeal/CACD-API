@@ -1,7 +1,3 @@
-router.get(
-  '/names/byCompany/:company',
-  controller.getNamesByCompany
-)
 // user.js
 const express = require("express");
 const router = express.Router();
@@ -11,6 +7,11 @@ const auth = require("../middlewares/auth.js");
 const company = require("../middlewares/company.js");
 const authCodes = require("../config/authCodes.js");
 const newFileUpload = require("../middlewares/newFileUpload.js");
+
+router.get(
+  '/names/byCompany/:company',
+  controller.getNamesByCompany
+)
 
 router.get(
   "/byCompany/:company", 
