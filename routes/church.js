@@ -1,3 +1,7 @@
+router.get(
+  '/names/byCompany/:company',
+  controller.getNamesByCompany
+)
 // user.js
 const express = require("express");
 const router = express.Router();
