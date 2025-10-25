@@ -1,3 +1,7 @@
+const ChurchesCol = require("../models/churches.js");
+const utils = require("../helpers/utils.js");
+const moment = require("moment");
+
 // GET: /names/byCompany/:company
 exports.getNamesByCompany = async (req, res) => {
   const params = req.params;
@@ -13,9 +17,6 @@ exports.getNamesByCompany = async (req, res) => {
     return res.status(500).send({ error: 'Server error' });
   }
 };
-const ChurchesCol = require("../models/churches.js");
-const utils = require("../helpers/utils.js");
-const moment = require("moment");
 
 exports.get = async (req, res) => {
   const queryParams = req.query || {};
