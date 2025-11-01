@@ -131,7 +131,8 @@ exports.post = async (req, res) => {
       console.log("events post save")
       const savedPhotos = await utils.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newEvent});
       console.log(savedPhotos)
-      newEvent.photos = savedPhotos; //savedPhotos.map((photo) => photo._id);
+      // Only keep the first uploaded photo for an event
+      newEvent.photos = Array.isArray(savedPhotos) ? savedPhotos.slice(0,1) : [savedPhotos];
     }
     catch (err){
       console.error(err.stack);
@@ -203,11 +204,12 @@ exports.put = async (req, res) => {
   }
 
   try{
-    // if (newEvent.deleteMulPhotos && Array.isArray(newEvent.deleteMulPhotos)){
-    //   newEvent = await utils.SoftDeleteMultiplePhotos({doc: newEvent, col: EventsCol});
-    // } else if (uploadedPhotos && uploadedPhotos.length) {
-    //   newEvent = await utils.saveMultiplePhotos({uploadedPhotos: uploadedPhotos, details: newEvent});
-    // }
+    // If new photos are uploaded, clear photos on the $set so the later photo management
+    // will replace them entirely (avoid push/append behavior)
+    if (uploadedPhotos && uploadedPhotos.length) {
+      values.$set.photos = []
+    }
+    // previous logic for managing uploaded photos moved to manageMultiplePhotosUpdate
     newEvent = await utils.updateAndPopulate({ query: query, values: values, options: options, col: EventsCol });
 
     if (!newEvent) 

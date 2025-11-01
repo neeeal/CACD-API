@@ -414,8 +414,12 @@ exports.updateMultiplePhotos = async ({uploadedPhotos, col, doc}) => {
   console.log(savedPhotos)
   console.log("savedPhotos")
 
+  // Replace the photos array entirely with the new saved photos
+  // Replace the photos array entirely with the new saved photos.
+  // Enforce single-photo per doc: keep only the first saved photo.
+  const photosToSet = Array.isArray(savedPhotos) ? savedPhotos.slice(0,1) : [savedPhotos]
   const values = {
-      $push: { photos: [...savedPhotos] }
+    $set: { photos: [...photosToSet] }
   };
 
   const options = { 
@@ -450,31 +454,36 @@ exports.manageMultiplePhotosUpdate = async ({col, query, uploadedPhotos, newDoc}
 
   let savedPhotos;
   if (uploadedPhotos && Object.keys(uploadedPhotos).length) {
-      uploadedPhotos.map(photo => {
-        // Process each photo object
+      // Normalize field names on uploaded photos if needed
+      uploadedPhotos = uploadedPhotos.map(photo => {
         Object.keys(photo).forEach(fieldName => {
-          photo[fieldName] = 
-            photo[fieldName].includes("new") ?
-              photo[fieldName].replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
-              photo[fieldName];
+          photo[fieldName] = photo[fieldName].includes("new") ?
+            photo[fieldName].replace(/^new/, "").replace(/^./, (char) => char.toLowerCase()) :
+            photo[fieldName];
         });
-      
         return photo;
       });
 
+  // Save new photos
+  savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
+
+      // If there are old photos, soft-delete them before replacing
       if (oldPhotos && oldPhotos.length) {
-        // Update existing photo doc
-        console.log("manageMultiplePhotosUpdate update")
-        newDoc.photos = oldPhotos._id;
-        newDoc = await exports.updateMultiplePhotos({uploadedPhotos:uploadedPhotos, doc:newDoc, col: col});
-        console.log('UPDATE OLD')
-      } else {
-        // create new photo doc
-        console.log("manageMultiplePhotosUpdate save")
-        savedPhotos = await exports.saveMultiplePhotos({uploadedPhotos:uploadedPhotos, details:newDoc});
-        console.log('CREATE NEW')
-        if (newDoc) 
-          newDoc.photos = savedPhotos;
+        try {
+          const oldPhotoIds = Array.isArray(oldPhotos) ? oldPhotos.map(p => p._id || p) : [oldPhotos._id || oldPhotos];
+          await exports.softDeletePhotos({ photos: oldPhotoIds, col: col, doc: newDoc });
+        } catch (err) {
+          console.warn('Failed to soft delete old photos', err);
+        }
+      }
+
+      // Replace the photos array on the document with the newly saved photos
+      if (newDoc) {
+        const queryReplace = { _id: newDoc.OID || newDoc._id, deletedAt: null };
+        const photosToSet = Array.isArray(savedPhotos) ? savedPhotos.slice(0,1) : [savedPhotos]
+        const valuesReplace = { $set: { photos: photosToSet } };
+        const options = { new: true };
+        newDoc = await col.findOneAndUpdate(queryReplace, valuesReplace, options);
       }
   } else if (newDoc.deleteMulPhotos && newDoc.deleteMulPhotos.length){
     // delete old photos from given oid
